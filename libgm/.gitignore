@@ -1,0 +1,20 @@
+Makefile
+cmake_install.cmake
+compile_commands.json
+*.o
+CMakeFiles
+CMakeScripts
+CTestTestfile.cmake
+CMakeCache.txt
+*.bit
+*.cfg
+*.so
+*.dll
+*.a
+install_manifest.txt
+*~
+generated/
+.vscode/
+# Linux
+gmunpack
+gmpack
