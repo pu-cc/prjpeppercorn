@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 project(libgatemate)
+
+cmake_policy(SET CMP0167 NEW)
 
 option(BUILD_SHARED "Build shared GateMate library" OFF)
 option(STATIC_BUILD "Create static build of GateMate tools" ON)
