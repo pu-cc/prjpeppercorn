@@ -1,4 +1,5 @@
 #include "Bitstream.hpp"
+#include "Chip.hpp"
 #include "version.hpp"
 #include <iostream>
 #include <boost/program_options.hpp>
@@ -61,6 +62,15 @@ help:
     }
 
     string textcfg((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
-
+    Chip c;
+    Bitstream b = Bitstream::serialise_chip(c);
+    if (vm.count("bit")) {
+        ofstream bit_file(vm["bit"].as<string>(), ios::binary);
+        if (!bit_file) {
+            cerr << "Failed to open output file" << endl;
+            return 1;
+        }
+        b.write_bit(bit_file);
+    }     
     return 0;
 }

@@ -73,7 +73,7 @@ public:
         crc16 = (crc16 >> 8) ^ crc_table_x25[(crc16 & 0xFF) ^ val];
     }
 
-    uint16_t finalise_crc16() {
+    uint16_t get_crc16() {
         return crc16 ^ 0xFFFF;
     }
 
@@ -102,14 +102,21 @@ public:
         return val;
     }
 
-    // Read a big endian uint16 from the bitstream and update CRC
+    // Read a little endian uint16 from the bitstream and update CRC
     uint16_t get_uint16() {
         uint8_t tmp[2];
         get_bytes(tmp, 2);
         return (tmp[0] << 8UL) | (tmp[1]);
     }
 
-    // CRC is in little endian order
+    // Read a little endian uint32 from the bitstream and update CRC
+    uint32_t get_uint32() {
+        uint8_t tmp[4];
+        get_bytes(tmp, 4);
+        return (tmp[0] << 24UL) | (tmp[1] << 16UL) | (tmp[2] << 8UL) | (tmp[3]);
+    }
+
+    // CRC is in big endian order
     uint16_t get_crc() {
         uint8_t tmp[2];
         get_bytes(tmp, 2);
@@ -157,8 +164,16 @@ public:
         for (size_t i = 0; i < count; i++) get_byte();
     }
 
-    // Write a big endian uint16_t into the bitstream
+    // Write a little endian uint16_t into the bitstream
     void write_uint16(uint16_t val) {
+        write_byte(uint8_t((val >> 8UL) & 0xFF));
+        write_byte(uint8_t(val & 0xFF));
+    }
+
+    // Write a little endian uint32_t into the bitstream
+    void write_uint32(uint32_t val) {
+        write_byte(uint8_t((val >> 24UL) & 0xFF));
+        write_byte(uint8_t((val >> 16UL) & 0xFF));
         write_byte(uint8_t((val >> 8UL) & 0xFF));
         write_byte(uint8_t(val & 0xFF));
     }
@@ -171,7 +186,7 @@ public:
     // Check the calculated CRC16 against an actual CRC16, expected in the next 2 bytes
     void check_crc16() {
         uint8_t crc_bytes[2];
-        uint16_t actual_crc = crc16.finalise_crc16();
+        uint16_t actual_crc = crc16.get_crc16();
         get_bytes(crc_bytes, 2);
         // cerr << hex << int(crc_bytes[0]) << " " << int(crc_bytes[1]) << endl;
         uint16_t exp_crc = (crc_bytes[0] << 8) | crc_bytes[1];
@@ -183,12 +198,11 @@ public:
         crc16.reset_crc16();
     }
 
-    // Insert the calculated CRC16 into the bitstream, and then reset it
+    // Insert the calculated CRC16 into the bitstream
     void insert_crc16() {
-        uint16_t actual_crc = crc16.finalise_crc16();
-        write_byte(uint8_t((actual_crc >> 8) & 0xFF));
+        uint16_t actual_crc = crc16.get_crc16();
         write_byte(uint8_t((actual_crc) & 0xFF));
-        crc16.reset_crc16();
+        write_byte(uint8_t((actual_crc>>8) & 0xFF));
     }
 
     bool is_end() {
@@ -198,11 +212,97 @@ public:
     const vector<uint8_t> &get() {
         return data;
     };
+
+    void write_nops(size_t count) {
+        for (size_t i = 0; i < count; i++) write_byte(0);
+    }
+
+    // Writing commands
+    void write_header(uint8_t cmd, uint16_t len)
+    {
+        crc16.reset_crc16();
+        write_byte(cmd);
+        if (len == CMD_FRAM)
+            write_uint16(len);
+        else
+            write_byte(len & 0xff);
+        insert_crc16();        
+    }
+
+    void write_cmd_path(uint8_t data)
+    {
+        write_header(CMD_PATH, 1);
+        write_byte(data);
+        insert_crc16();
+        write_nops(4);
+        write_byte(0x33);
+        write_nops(4);
+    }
+
+    void write_cmd_spll(uint8_t data)
+    {
+        write_header(CMD_SPLL, 1);
+        write_byte(data);
+        insert_crc16();
+    }
+
+    void write_cmd_wait_pll(uint8_t data)
+    {
+        write_header(CMD_WAIT_PLL, 1);
+        write_byte(data);
+        insert_crc16();
+    }
+
+    void write_cmd_cfgrst(uint8_t data)
+    {
+        write_header(CMD_CFGRST, 1);
+        write_byte(data);
+        insert_crc16();
+    }
+
+    void write_cmd_slave_mode(uint8_t data)
+    {
+        write_header(CMD_SLAVE_MODE, 1);
+        write_byte(data);
+        insert_crc16();
+        write_nops(3);
+    }
+
+    void write_cmd_d2d(uint8_t data)
+    {
+        write_header(CMD_D2D, 1);
+        write_byte(data);
+        insert_crc16();
+    }
+
+    void write_cmd_rxrys(uint8_t x_ram_sel, uint8_t y_ram_sel)
+    {
+        write_header(CMD_RXRYS, 2);
+        write_byte(x_ram_sel);
+        write_byte(y_ram_sel);
+        insert_crc16();
+    }
+
+    void write_cmd_lxlys(uint8_t x_sel, uint8_t y_sel)
+    {
+        write_header(CMD_LXLYS, 2);
+        write_byte(x_sel);
+        write_byte(y_sel);
+        insert_crc16();
+    }
+
+    void write_cmd_aclcu(uint16_t data)
+    {
+        write_header(CMD_LXLYS, 2);
+        write_uint16(data);
+        insert_crc16();
+    }
+
 };
 
 void check_crc(BitstreamReadWriter &rd) 
 {
-    uint16_t actual_crc = rd.crc16.finalise_crc16();
+    uint16_t actual_crc = rd.crc16.get_crc16();
     uint16_t exp_crc = rd.get_crc(); // crc 
     if (actual_crc != exp_crc) {
         ostringstream err;
@@ -426,7 +526,10 @@ Chip Bitstream::deserialise_chip()
 }
 
 Bitstream Bitstream::serialise_chip(const Chip &/*chip*/) {
-    return Bitstream({});
+    BitstreamReadWriter wr;
+    wr.write_cmd_path(0x10);
+    //wr.write_cmd_spll(0x01);
+    return Bitstream(wr.get());
 }
 
 void Bitstream::write_bit(std::ostream &out)
@@ -446,7 +549,7 @@ BitstreamParseError::BitstreamParseError(const std::string &desc, size_t offset)
 
 const char *BitstreamParseError::what() const noexcept
 {
-    std::ostringstream ss;
+    std::ostringstream ss;            
     ss << "Bitstream Parse Error: ";
     ss << desc;
     if (offset != -1)
