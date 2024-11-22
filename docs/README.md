@@ -1,4 +1,4 @@
-GateMate Architecture Documentation
+Project Peppercorn Documentation
 ===================================
 
 Setting up environment
