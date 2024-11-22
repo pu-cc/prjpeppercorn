@@ -93,38 +93,282 @@ CMD_CFGRST
 -----------
 Resets all configuration latches to value of a byte from payload.
 
+CMD_ACLCU
+----------
+
+Defines start address for following block memory init data.
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Byte
+     - Description
+   * - 0
+     - addr[ 7:0]
+   * - 1
+     - addr[15:8]
+
+CMD_FRAM
+---------
+
+Payload contains up to 5120 bytes of RAM content. Start address must be previously defined by **CMD_ACLCU** command.
+And RAM block must be selected with **CMD_RXRYS** or **CMD_DRXP** command.
+
 CMD_PLL
+--------
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Byte
+     - Description
+   * - 0
+     - PLL Config data 0
+   * - 1
+     - PLL Config data 1
+   * - 2
+     - PLL Config data 2
+   * - 3
+     - PLL Config data 3
+   * - 4
+     - PLL Config data 4
+   * - 5
+     - PLL Config data 5
+   * - 6
+     - PLL Config data 6
+   * - 7
+     - PLL Config data 7
+   * - 8
+     - PLL Config data 8
+   * - 9
+     - PLL Config data 9
+   * - 10
+     - PLL Config data 10
+   * - 11
+     - PLL Config data 11
+   * - 12
+     - Config data for clock matrix CLKIN PLL0
+   * - 13
+     - Config data for clock matrix CLKIN PLL1
+   * - 14
+     - Config data for clock matrix CLKIN PLL2
+   * - 15
+     - Config data for clock matrix CLKIN PLL3
+   * - 16
+     - Config data for clock matrix CLKMUX PLL0 byte 0
+   * - 17
+     - Config data for clock matrix CLKMUX PLL0 byte 1
+   * - 18
+     - Config data for clock matrix CLKMUX PLL1 byte 0
+   * - 19
+     - Config data for clock matrix CLKMUX PLL1 byte 1
+   * - 20
+     - Config data for clock matrix CLKMUX PLL2 byte 0
+   * - 21
+     - Config data for clock matrix CLKMUX PLL2 byte 1
+   * - 22
+     - Config data for clock matrix CLKMUX PLL3 byte 0
+   * - 23
+     - Config data for clock matrix CLKMUX PLL3 byte 1
+
+.. warning::
+    This command have data after payload, and it consists of 6 NOP bytes ``0x00 0x00 0x00 0x00 0x00 0x00``.
+
+CMD_SPLL
+---------
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Bit
+     - Description
+   * - 0
+     - Write config for PLL0
+   * - 1
+     - Write config for PLL1
+   * - 2
+     - Write config for PLL2
+   * - 3
+     - Write config for PLL2
+   * - 4
+     - Configuration set for PLL0
+   * - 5
+     - Configuration set for PLL1
+   * - 6
+     - Configuration set for PLL2
+   * - 7
+     - Configuration set for PLL3
+
+There are two configuration sets, that could be set for each PLL.
+
+CMD_WAIT_PLL
+-------------
+
+Wait for PLL lock.
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Bit
+     - Description
+   * - 0
+     - Wait for PLL0
+   * - 1
+     - Wait for PLL1
+   * - 2
+     - Wait for PLL2
+   * - 3
+     - Wait for PLL3
+
+CMD_CHG_STATUS
+---------------
+
+.. list-table::
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Byte
+     - Bit
+     - Description
+   * - 0
+     - 0
+     - Configuration done
+   * - 
+     - 1
+     - Stop configuration
+   * - 
+     - 2
+     - Reconfiguration enable
+   * - 
+     - 3
+     - Enable CPE configuration
+   * - 
+     - 4
+     - CPE reset
+   * - 
+     - 5
+     - Fill RAM enable
+   * - 
+     - 6..7
+     - Unused
+   * - 1
+     - 0..3
+     - Configuration mode
+   * - 
+     - 4
+     - Select configuration mode
+   * - 
+     - 5..7
+     - Unused
+   * - 2
+     - 0
+     - Enable GPIO bank S1
+   * - 
+     - 1
+     - Enable GPIO bank S2
+   * - 
+     - 2
+     - Unused
+   * - 
+     - 3
+     - Enable GPIO bank S3 (CFG)
+   * - 
+     - 4
+     - Enable GPIO bank E1
+   * - 
+     - 5
+     - Enable GPIO bank E2
+   * - 
+     - 6..7
+     - Unused
+   * - 3
+     - 0
+     - Enable GPIO bank N1
+   * - 
+     - 1
+     - Enable GPIO bank N2
+   * - 
+     - 2..3
+     - Unused
+   * - 
+     - 4
+     - Enable GPIO bank W1
+   * - 
+     - 5
+     - Enable GPIO bank W2
+   * - 
+     - 6..7
+     - Unused
+   * - 4
+     - 
+     - PLL0 Control Register
+   * - 5
+     - 
+     - PLL0 Startup Register
+   * - 6
+     - 
+     - PLL1 Control Register
+   * - 7
+     - 
+     - PLL1 Startup Register
+   * - 8
+     - 
+     - PLL2 Control Register
+   * - 9
+     - 
+     - PLL2 Startup Register
+   * - 10
+     - 
+     - PLL3 Control Register
+   * - 11
+     - 
+     - PLL3 Startup Register
+
+.. warning::
+    This command have data after payload, and it consists of 9 bytes ``0x00 0x00 0x00 0x00 0x33 0x00 0x00 0x00 0x00`` and
+    it is used to execute this JTAG command.
+
+
+CMD_D2D
+--------
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Bit
+     - Description
+   * - 0
+     - Enable D2D on north
+   * - 1
+     - Enable D2D on east
+   * - 2
+     - Enable D2D on south
+   * - 3
+     - Enable D2D on west
+
+
+CMD_SERDES
+-----------
+
+CMD_JUMP
 --------
 
 CMD_CFGMODE
 ------------
 
+.. warning::
+    This command have data after payload, and it consists of 3 NOP bytes ``0x00 0x00 0x00``.
+
 CMD_FLASH
 ----------
 
-CMD_ACLCU
-----------
-
-CMD_FRAM
----------
-
-CMD_SERDES
------------
-
-CMD_D2D
---------
-
-CMD_JUMP
---------
-
-CMD_CHG_STATUS
----------------
-
-CMD_WAIT_PLL
--------------
-
-CMD_SPLL
----------
-
 CMD_SLAVE_MODE
 ---------------
+
+.. warning::
+    This command have data after payload, and it consists of 3 NOP bytes ``0x00 0x00 0x00``.
