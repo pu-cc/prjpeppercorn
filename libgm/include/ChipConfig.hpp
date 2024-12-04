@@ -17,54 +17,52 @@
  *
  */
 
-#ifndef LIBGATEMATE_BITSTREAM_HPP
-#define LIBGATEMATE_BITSTREAM_HPP
+#ifndef LIBGATEMATE_CHIPCONFIG_HPP
+#define LIBGATEMATE_CHIPCONFIG_HPP
 
 #include <cstdint>
-#include <iostream>
-#include <memory>
-
-#include <boost/optional.hpp>
 #include <map>
-#include <stdexcept>
 #include <string>
 #include <vector>
+#include "TileConfig.hpp"
 
 namespace GateMate {
 
 class Chip;
 
-class Bitstream
+struct CfgLoc
 {
-  public:
-    static Bitstream read(std::istream &in);
-    // Serialise a Chip back to a bitstream
-    static Bitstream serialise_chip(const Chip &chip);
+    int die;
+    int x;
+    int y;
 
-    // Deserialise a bitstream to a Chip
-    Chip deserialise_chip();
+    inline bool operator==(const CfgLoc &other) const { return other.die == die && other.x == x && other.y == y; }
+    inline bool operator!=(const CfgLoc &other) const { return other.die != die || x != other.x || y == other.y; }
 
-    void write_bit(std::ostream &out);
-
-  private:
-    Bitstream(const std::vector<uint8_t> &data);
-
-    // Bitstream raw data
-    std::vector<uint8_t> data;
+    inline bool operator<(const CfgLoc &other) const
+    {
+        return die < other.die ||
+               ((die == other.die && y < other.y) || (die == other.die && y == other.y && x < other.x));
+    }
 };
 
-class BitstreamParseError : std::runtime_error
+class ChipConfig
 {
   public:
-    explicit BitstreamParseError(const std::string &desc);
+    string chip_name;
+    string chip_package;
+    std::map<CfgLoc, TileConfig> tiles;
+    std::map<CfgLoc, TileConfig> rams;
 
-    BitstreamParseError(const std::string &desc, size_t offset);
+    // Block RAM initialisation
+    std::map<CfgLoc, std::vector<uint8_t>> bram_data;
 
-    const char *what() const noexcept override;
-
-  private:
-    std::string desc;
-    int offset;
+    std::string to_string() const;
+    static ChipConfig from_string(const std::string &config);
+    Chip to_chip() const;
+    static ChipConfig from_chip(const Chip &chip);
 };
+
 } // namespace GateMate
-#endif // LIBGATEMATE_BITSTREAM_HPP
+
+#endif // LIBGATEMATE_CHIPCONFIG_HPP

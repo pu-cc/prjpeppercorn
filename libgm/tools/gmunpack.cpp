@@ -1,13 +1,33 @@
-#include "Chip.hpp"
-#include "Bitstream.hpp"
-#include "version.hpp"
-#include <iostream>
+/*
+ *  prjpeppercorn -- GateMate FPGAs Bitstream Documentation and Tools
+ *
+ *  Copyright (C) 2024  The Project Peppercorn Authors.
+ *
+ *  Permission to use, copy, modify, and/or distribute this software for any
+ *  purpose with or without fee is hereby granted, provided that the above
+ *  copyright notice and this permission notice appear in all copies.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ *  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ *  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ */
+
+#include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <streambuf>
-#include <fstream>
+#include "Bitstream.hpp"
+#include "Chip.hpp"
+#include "ChipConfig.hpp"
+#include "version.hpp"
 
 using namespace std;
 
@@ -30,21 +50,19 @@ int main(int argc, char *argv[])
         po::parsed_options parsed = po::command_line_parser(argc, argv).options(options).positional(pos).run();
         po::store(parsed, vm);
         po::notify(vm);
-    }
-    catch (po::required_option &e) {
+    } catch (po::required_option &e) {
         cerr << "Error: input file is mandatory." << endl << endl;
         goto help;
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
         cerr << "Error: " << e.what() << endl << endl;
         goto help;
     }
 
     if (vm.count("help")) {
-help:
+    help:
         boost::filesystem::path path(argv[0]);
         cerr << "Open Source Tools for GateMate FPGAs Version " << git_describe_str << endl;
-        cerr << "Copyright (C) 2024 YosysHQ GmbH" << endl;
+        cerr << "Copyright (C) 2024 The Project Peppercorn Authors" << endl;
         cerr << endl;
         cerr << path.stem().c_str() << ": GateMate bitstream to text config converter" << endl;
         cerr << endl;
@@ -61,12 +79,14 @@ help:
     }
 
     try {
-        Bitstream::read(bit_file).deserialise_chip();
+        Chip c = Bitstream::read(bit_file).deserialise_chip();
+        ChipConfig cc = ChipConfig::from_chip(c);
         ofstream out_file(vm["textcfg"].as<string>());
         if (!out_file) {
             cerr << "Failed to open output file" << endl;
             return 1;
         }
+        out_file << cc.to_string();
         return 0;
     } catch (BitstreamParseError &e) {
         cerr << "Failed to process input bitstream: " << e.what() << endl;

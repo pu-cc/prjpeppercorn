@@ -17,31 +17,47 @@
  *
  */
 
-#ifndef LIBGATEMATE_CHIP_HPP
-#define LIBGATEMATE_CHIP_HPP
+#ifndef LIBGATEMATE_TILECONFIG_HPP
+#define LIBGATEMATE_TILECONFIG_HPP
 
+#include <cstdint>
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
-#include "Die.hpp"
+
+using namespace std;
 
 namespace GateMate {
 
-class Chip
+struct ConfigWord
 {
-  public:
-    explicit Chip(std::string name);
-    explicit Chip(int num);
-
-    int get_max_die() const;
-    std::string get_name() const;
-    const Die &get_die(int num) const { return dies.at(num); }
-    Die &get_die(int num) { return dies.at(num); }
-
-  private:
-    int die_num;
-    std::vector<Die> dies;
+    string name;
+    vector<bool> value;
+    inline bool operator==(const ConfigWord &other) const { return other.name == name && other.value == value; }
 };
+
+ostream &operator<<(ostream &out, const ConfigWord &cw);
+
+istream &operator>>(istream &in, ConfigWord &cw);
+
+struct TileConfig
+{
+    vector<ConfigWord> cwords;
+    int total_known_bits = 0;
+
+    void add_word(const string &name, const vector<bool> &value);
+
+    string to_string() const;
+    static TileConfig from_string(const string &str);
+
+    bool empty() const;
+};
+
+ostream &operator<<(ostream &out, const TileConfig &tc);
+
+istream &operator>>(istream &in, TileConfig &ce);
 
 } // namespace GateMate
 
-#endif // LIBGATEMATE_CHIP_HPP
+#endif // LIBGATEMATE_TILECONFIG_HPP
