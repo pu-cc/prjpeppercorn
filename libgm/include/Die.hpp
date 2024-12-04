@@ -21,6 +21,7 @@
 #define LIBGATEMATE_DIE_HPP
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -47,8 +48,6 @@ class Die
     int get_max_ram_row() const { return MAX_RAM_ROWS; }
     int get_max_ram_col() const { return MAX_RAM_COLS; }
 
-    void clear();
-
     bool is_latch_empty(int x, int y) const;
     bool is_ram_empty(int x, int y) const;
     bool is_ram_data_empty(int x, int y) const;
@@ -57,14 +56,14 @@ class Die
     void write_ram(int x, int y, const std::vector<uint8_t> &data);
     void write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_t addr);
 
-    const uint8_t *get_latch_config(int x, int y) const { return &latch[y * MAX_COLS + x][0]; }
-    const uint8_t *get_ram_config(int x, int y) const { return &ram[y * MAX_RAM_COLS + x][0]; }
-    const uint8_t *get_ram_data(int x, int y) const { return &ram_data[y * MAX_RAM_COLS + x][0]; }
+    const std::vector<uint8_t> get_latch_config(int x, int y) const { return latch.at(std::make_pair(x, y)); }
+    const std::vector<uint8_t> get_ram_config(int x, int y) const { return ram.at(std::make_pair(x, y)); }
+    const std::vector<uint8_t> get_ram_data(int x, int y) const { return ram_data.at(std::make_pair(x, y)); }
 
   private:
-    uint8_t latch[MAX_ROWS * MAX_COLS][LATCH_BLOCK_SIZE]; // Config latches
-    uint8_t ram[MAX_RAM][RAM_BLOCK_SIZE];                 // Config RAM
-    uint8_t ram_data[MAX_RAM][MEMORY_SIZE];               // RAM data content FRAM
+    std::map<std::pair<int, int>, std::vector<uint8_t>> latch;    // Config latches
+    std::map<std::pair<int, int>, std::vector<uint8_t>> ram;      // Config RAM
+    std::map<std::pair<int, int>, std::vector<uint8_t>> ram_data; // RAM data content FRAM
 };
 
 } // namespace GateMate

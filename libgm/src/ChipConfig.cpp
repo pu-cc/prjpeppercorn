@@ -168,11 +168,7 @@ ChipConfig ChipConfig::from_chip(const Chip &chip)
                 if (!die.is_ram_empty(x, y)) {
                     cc.rams.emplace(loc, ram_db.ram_data_to_config(die.get_ram_config(x, y)));
                     if (!die.is_ram_data_empty(x, y)) {
-                        std::vector<uint8_t> content(Die::MEMORY_SIZE, 0);
-                        const uint8_t *ptr = die.get_ram_data(x, y);
-                        for (int i = 0; i < Die::MEMORY_SIZE; i++)
-                            content.push_back(ptr[i]);
-                        cc.bram_data.emplace(loc, content);
+                        cc.bram_data.emplace(loc, die.get_ram_data(x, y));
                     }
                 }
             }

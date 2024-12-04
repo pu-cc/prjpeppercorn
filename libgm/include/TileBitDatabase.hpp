@@ -56,7 +56,7 @@ class TileBitDatabase : BaseBitDatabase
 {
   public:
     TileBitDatabase(const int x, const int y);
-    TileConfig tile_data_to_config(const uint8_t *data);
+    TileConfig tile_data_to_config(const vector<uint8_t> &data);
     std::vector<uint8_t> config_to_tile_data(const TileConfig &cfg);
 
   private:
@@ -80,7 +80,7 @@ class RamBitDatabase : BaseBitDatabase
 {
   public:
     RamBitDatabase();
-    TileConfig ram_data_to_config(const uint8_t *data);
+    TileConfig ram_data_to_config(const vector<uint8_t> &data);
     std::vector<uint8_t> config_to_ram_data(const TileConfig &cfg);
 };
 

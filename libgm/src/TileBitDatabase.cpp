@@ -27,7 +27,7 @@
 
 namespace GateMate {
 
-std::vector<bool> data_bytes_to_array(const uint8_t *data, size_t count)
+std::vector<bool> data_bytes_to_array(const vector<uint8_t> &data, size_t count)
 {
     std::vector<bool> result(count * 8);
     for (size_t j = 0; j < count; j++) {
@@ -190,10 +190,10 @@ std::vector<uint8_t> TileBitDatabase::config_to_tile_data(const TileConfig &cfg)
     return bits_to_bytes(tile);
 }
 
-TileConfig TileBitDatabase::tile_data_to_config(const uint8_t *data)
+TileConfig TileBitDatabase::tile_data_to_config(const vector<uint8_t> &data)
 {
     TileConfig cfg;
-    std::vector<bool> d = data_bytes_to_array(&data[0], Die::LATCH_BLOCK_SIZE);
+    std::vector<bool> d = data_bytes_to_array(data, Die::LATCH_BLOCK_SIZE);
     for (auto &w : words) {
         auto val = w.second.get_value(d);
         if (is_array_empty(val))
@@ -214,10 +214,10 @@ std::vector<uint8_t> RamBitDatabase::config_to_ram_data(const TileConfig &cfg)
     return bits_to_bytes(tile);
 }
 
-TileConfig RamBitDatabase::ram_data_to_config(const uint8_t *data)
+TileConfig RamBitDatabase::ram_data_to_config(const vector<uint8_t> &data)
 {
     TileConfig cfg;
-    std::vector<bool> d = data_bytes_to_array(&data[0], Die::RAM_BLOCK_SIZE);
+    std::vector<bool> d = data_bytes_to_array(data, Die::RAM_BLOCK_SIZE);
     for (auto &w : words) {
         auto val = w.second.get_value(d);
         if (is_array_empty(val))

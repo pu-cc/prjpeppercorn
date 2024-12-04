@@ -167,6 +167,12 @@ class BitstreamReadWriter
             write_byte(*(in++));
     }
 
+    void write_bytes(std::vector<uint8_t> in)
+    {
+        for (auto val : in)
+            write_byte(val);
+    }
+
     // Skip over bytes while updating CRC
     void skip_bytes(size_t count)
     {
@@ -580,16 +586,14 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
                 if (iteration != 0 && is_edge_location(x, y))
                     continue;
                 wr.write_cmd_lxlys(x, y);
-                const uint8_t *ptr = die.get_latch_config(x, y);
-                int size = 112;
-                for (int i = 111; i > 0; i--)
-                    if (ptr[i] == 0)
-                        size--;
-                    else
-                        break;
-                wr.write_header(CMD_DLCU, size);
-                for (int i = 0; i < size; i++)
-                    wr.write_byte(ptr[i]);
+                std::vector<uint8_t> data = die.get_latch_config(x, y);
+                if (iteration == 0 && !is_edge_location(x, y)) {
+                    std::fill(data.begin(), data.begin() + 40, 0);
+                }
+                auto rit = std::find_if(data.rbegin(), data.rend(), [](uint8_t val) { return val != 0; });
+                data.erase(rit.base(), end(data));
+                wr.write_header(CMD_DLCU, data.size());
+                wr.write_bytes(data);
                 wr.insert_crc16();
             }
         }

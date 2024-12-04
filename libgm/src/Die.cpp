@@ -22,58 +22,54 @@
 
 namespace GateMate {
 
-Die::Die() { clear(); }
-
-void Die::clear()
+Die::Die()
 {
-    memset(latch, 0, sizeof(uint8_t) * MAX_ROWS * MAX_COLS * LATCH_BLOCK_SIZE);
-    memset(ram, 0, sizeof(uint8_t) * MAX_RAM * RAM_BLOCK_SIZE);
-    memset(ram_data, 0, sizeof(uint8_t) * MAX_RAM * MEMORY_SIZE);
+    for (int y = 0; y < MAX_ROWS; y++) {
+        for (int x = 0; x < MAX_COLS; x++) {
+            latch[std::make_pair(x, y)] = std::vector<u_int8_t>();
+            latch[std::make_pair(x, y)].reserve(LATCH_BLOCK_SIZE);
+        }
+    }
+    for (int y = 0; y < MAX_RAM_ROWS; y++) {
+        for (int x = 0; x < MAX_RAM_COLS; x++) {
+            ram[std::make_pair(x, y)] = std::vector<u_int8_t>();
+            ram[std::make_pair(x, y)].reserve(LATCH_BLOCK_SIZE);
+            ram_data[std::make_pair(x, y)] = std::vector<u_int8_t>();
+        }
+    }
 }
 
-bool Die::is_latch_empty(int x, int y) const
-{
-    for (int i = 0; i < LATCH_BLOCK_SIZE; i++)
-        if (latch[y * MAX_COLS + x][i] != 0)
-            return false;
-    return true;
-}
+bool Die::is_latch_empty(int x, int y) const { return latch.at(std::make_pair(x, y)).empty(); }
 
-bool Die::is_ram_empty(int x, int y) const
-{
-    for (int i = 0; i < RAM_BLOCK_SIZE; i++)
-        if (ram[y * MAX_RAM_COLS + x][i] != 0)
-            return false;
-    return true;
-}
+bool Die::is_ram_empty(int x, int y) const { return ram.at(std::make_pair(x, y)).empty(); }
 
-bool Die::is_ram_data_empty(int x, int y) const
-{
-    for (int i = 0; i < MEMORY_SIZE; i++)
-        if (ram_data[y * MAX_RAM_COLS + x][i] != 0)
-            return false;
-    return true;
-}
+bool Die::is_ram_data_empty(int x, int y) const { return ram_data.at(std::make_pair(x, y)).empty(); }
 
 void Die::write_latch(int x, int y, const std::vector<uint8_t> &data)
 {
     int pos = 0;
+    auto &block = latch.at(std::make_pair(x, y));
+    block.resize(LATCH_BLOCK_SIZE, 0x00);
     for (auto d : data)
-        latch[y * MAX_COLS + x][pos++] = d;
+        block[pos++] = d;
 }
 
 void Die::write_ram(int x, int y, const std::vector<uint8_t> &data)
 {
     int pos = 0;
+    auto &block = ram.at(std::make_pair(x, y));
+    block.resize(RAM_BLOCK_SIZE, 0x00);
     for (auto d : data)
-        ram[y * MAX_RAM_COLS + x][pos++] = d;
+        block[pos++] = d;
 }
 
 void Die::write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_t addr)
 {
     int pos = addr;
+    auto &block = ram_data.at(std::make_pair(x, y));
+    block.resize(MEMORY_SIZE, 0x00);
     for (auto d : data)
-        ram_data[y * MAX_RAM_COLS + x][pos++] = d;
+        block[pos++] = d;
 }
 
 } // namespace GateMate
