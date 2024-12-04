@@ -51,7 +51,7 @@ bool is_array_empty(std::vector<bool> &array)
     return true;
 }
 
-BaseBitDatabase::BaseBitDatabase() {}
+BaseBitDatabase::BaseBitDatabase(int num_bits) : num_bits(num_bits), known_bits(num_bits, false) {}
 BaseBitDatabase::~BaseBitDatabase() {}
 
 void BaseBitDatabase::add_word_settings(const std::string &name, int start, int end)
@@ -59,7 +59,20 @@ void BaseBitDatabase::add_word_settings(const std::string &name, int start, int 
     if (words.find(name) != words.end())
         throw DatabaseConflictError(fmt("word " << name << " already exists in DB"));
 
+    for (int i = start; i < start + end; i++) {
+        if (known_bits[i])
+            throw DatabaseConflictError(fmt("bit " << i << " for word " << name << " already mapped"));
+        known_bits[i] = true;
+    }
     words[name] = {start, start + end};
+}
+
+void BaseBitDatabase::add_unknowns()
+{
+    for (int i = 0; i < num_bits; i++) {
+        if (!known_bits[i])
+            words[stringf("UNKNOWN_%03d", i)] = {i, i + 1};
+    }
 }
 
 std::vector<uint8_t> BaseBitDatabase::bits_to_bytes(std::vector<bool> &bits)
@@ -76,6 +89,28 @@ std::vector<uint8_t> BaseBitDatabase::bits_to_bytes(std::vector<bool> &bits)
         val.push_back(data);
     }
     return val;
+}
+
+std::vector<uint8_t> BaseBitDatabase::config_to_data(const TileConfig &cfg)
+{
+    std::vector<bool> tile(num_bits, false);
+    for (auto &w : cfg.cwords) {
+        words[w.name].set_value(tile, w.value);
+    }
+    return bits_to_bytes(tile);
+}
+
+TileConfig BaseBitDatabase::data_to_config(const vector<uint8_t> &data)
+{
+    TileConfig cfg;
+    std::vector<bool> d = data_bytes_to_array(data, num_bits * 8);
+    for (auto &w : words) {
+        auto val = w.second.get_value(d);
+        if (is_array_empty(val))
+            continue;
+        cfg.add_word(w.first, val);
+    }
+    return cfg;
 }
 
 void TileBitDatabase::add_sb_big(int index, int start) { add_word_settings(stringf("SB_BIG_%02d", index), start, 15); }
@@ -118,7 +153,7 @@ void TileBitDatabase::add_bottom_edge(int index, int start)
     add_word_settings(stringf("BOTTOM_EDGE_%d", index), start, 48);
 }
 
-TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase()
+TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase(Die::LATCH_BLOCK_SIZE * 8)
 {
     bool is_core = false;
     if (y == 0) {
@@ -150,7 +185,7 @@ TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase()
     if (!is_core) {
         add_gpio(0);
         add_edge_io(1, 9 * 8);
-        add_edge_io(2, 10 * 8);
+        add_edge_io(2, 11 * 8);
     }
 
     int pos = 64;
@@ -179,31 +214,10 @@ TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase()
         add_sb_sml(i * 2 + 2, (pos + 1) * 8 + 4);
         pos += 3;
     }
+    add_unknowns();
 }
 
-std::vector<uint8_t> TileBitDatabase::config_to_tile_data(const TileConfig &cfg)
-{
-    std::vector<bool> tile(Die::LATCH_BLOCK_SIZE * 8, false);
-    for (auto &w : cfg.cwords) {
-        words[w.name].set_value(tile, w.value);
-    }
-    return bits_to_bytes(tile);
-}
-
-TileConfig TileBitDatabase::tile_data_to_config(const vector<uint8_t> &data)
-{
-    TileConfig cfg;
-    std::vector<bool> d = data_bytes_to_array(data, Die::LATCH_BLOCK_SIZE);
-    for (auto &w : words) {
-        auto val = w.second.get_value(d);
-        if (is_array_empty(val))
-            continue;
-        cfg.add_word(w.first, val);
-    }
-    return cfg;
-}
-
-RamBitDatabase::RamBitDatabase() : BaseBitDatabase()
+RamBitDatabase::RamBitDatabase() : BaseBitDatabase(Die::RAM_BLOCK_SIZE * 8)
 {
     add_word_settings("RAM_cfg_forward_a_addr", 0 * 8, 8);
     add_word_settings("RAM_cfg_forward_b_addr", 1 * 8, 8);
@@ -232,28 +246,7 @@ RamBitDatabase::RamBitDatabase() : BaseBitDatabase()
     add_word_settings("RAM_cfg_fifo_full", 24 * 8, 8);
     add_word_settings("RAM_cfg_sram_delay", 25 * 8, 8);
     add_word_settings("RAM_cfg_datbm_cascade", 26 * 8, 8);
-}
-
-std::vector<uint8_t> RamBitDatabase::config_to_ram_data(const TileConfig &cfg)
-{
-    std::vector<bool> tile(Die::RAM_BLOCK_SIZE * 8, false);
-    for (auto &w : cfg.cwords) {
-        words[w.name].set_value(tile, w.value);
-    }
-    return bits_to_bytes(tile);
-}
-
-TileConfig RamBitDatabase::ram_data_to_config(const vector<uint8_t> &data)
-{
-    TileConfig cfg;
-    std::vector<bool> d = data_bytes_to_array(data, Die::RAM_BLOCK_SIZE);
-    for (auto &w : words) {
-        auto val = w.second.get_value(d);
-        if (is_array_empty(val))
-            continue;
-        cfg.add_word(w.first, val);
-    }
-    return cfg;
+    add_unknowns();
 }
 
 vector<bool> WordSettingBits::get_value(const vector<bool> &tile) const

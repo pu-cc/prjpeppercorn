@@ -121,7 +121,7 @@ Chip ChipConfig::to_chip() const
                 if (tiles.count(loc)) {
                     TileBitDatabase db(x, y);
                     const TileConfig &cfg = tiles.at(loc);
-                    die.write_latch(x, y, db.config_to_tile_data(cfg));
+                    die.write_latch(x, y, db.config_to_data(cfg));
                 }
             }
         }
@@ -132,7 +132,7 @@ Chip ChipConfig::to_chip() const
                 loc.x = x;
                 if (brams.count(loc)) {
                     const TileConfig &cfg = brams.at(loc);
-                    die.write_ram(x, y, ram_db.config_to_ram_data(cfg));
+                    die.write_ram(x, y, ram_db.config_to_data(cfg));
                 }
                 if (bram_data.count(loc))
                     die.write_ram_data(x, y, bram_data.at(loc), 0);
@@ -157,7 +157,7 @@ ChipConfig ChipConfig::from_chip(const Chip &chip)
                 loc.x = x;
                 TileBitDatabase db(x, y);
                 if (!die.is_latch_empty(x, y))
-                    cc.tiles.emplace(loc, db.tile_data_to_config(die.get_latch_config(x, y)));
+                    cc.tiles.emplace(loc, db.data_to_config(die.get_latch_config(x, y)));
             }
         }
         RamBitDatabase ram_db;
@@ -166,7 +166,7 @@ ChipConfig ChipConfig::from_chip(const Chip &chip)
             for (int x = 0; x < die.get_max_ram_col(); x++) {
                 loc.x = x;
                 if (!die.is_ram_empty(x, y)) {
-                    cc.brams.emplace(loc, ram_db.ram_data_to_config(die.get_ram_config(x, y)));
+                    cc.brams.emplace(loc, ram_db.data_to_config(die.get_ram_config(x, y)));
                     if (!die.is_ram_data_empty(x, y)) {
                         cc.bram_data.emplace(loc, die.get_ram_data(x, y));
                     }

@@ -42,22 +42,26 @@ struct WordSettingBits
 class BaseBitDatabase
 {
   public:
-    BaseBitDatabase();
+    BaseBitDatabase(int num_bits);
     virtual ~BaseBitDatabase();
+
+    TileConfig data_to_config(const vector<uint8_t> &data);
+    std::vector<uint8_t> config_to_data(const TileConfig &cfg);
 
   protected:
     void add_word_settings(const std::string &name, int start, int end);
+    void add_unknowns();
     std::vector<uint8_t> bits_to_bytes(std::vector<bool> &bits);
 
+    int num_bits;
     map<std::string, WordSettingBits> words;
+    std::vector<uint8_t> known_bits;
 };
 
-class TileBitDatabase : BaseBitDatabase
+class TileBitDatabase : public BaseBitDatabase
 {
   public:
     TileBitDatabase(const int x, const int y);
-    TileConfig tile_data_to_config(const vector<uint8_t> &data);
-    std::vector<uint8_t> config_to_tile_data(const TileConfig &cfg);
 
   private:
     void add_sb_big(int index, int start);
@@ -76,12 +80,10 @@ class TileBitDatabase : BaseBitDatabase
     void add_bottom_edge(int index, int start);
 };
 
-class RamBitDatabase : BaseBitDatabase
+class RamBitDatabase : public BaseBitDatabase
 {
   public:
     RamBitDatabase();
-    TileConfig ram_data_to_config(const vector<uint8_t> &data);
-    std::vector<uint8_t> config_to_ram_data(const TileConfig &cfg);
 };
 
 class DatabaseConflictError : public runtime_error
