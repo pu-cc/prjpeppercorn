@@ -38,10 +38,10 @@ std::string ChipConfig::to_string() const
             ss << endl;
         }
     }
-    for (const auto &ram : rams) {
-        if (!ram.second.empty()) {
-            ss << ".ram " << ram.first.die << " " << ram.first.x << " " << ram.first.y << endl;
-            ss << ram.second;
+    for (const auto &bram : brams) {
+        if (!bram.second.empty()) {
+            ss << ".bram " << bram.first.die << " " << bram.first.x << " " << bram.first.y << endl;
+            ss << bram.second;
             ss << endl;
         }
     }
@@ -80,14 +80,14 @@ ChipConfig ChipConfig::from_string(const std::string &config)
             TileConfig tc;
             ss >> tc;
             cc.tiles.emplace(loc, tc);
-        } else if (verb == ".ram") {
+        } else if (verb == ".bram") {
             CfgLoc loc;
             ss >> loc.die;
             ss >> loc.x;
             ss >> loc.y;
             TileConfig tc;
             ss >> tc;
-            cc.rams.emplace(loc, tc);
+            cc.brams.emplace(loc, tc);
         } else if (verb == ".bram_init") {
             CfgLoc loc;
             ss >> loc.die;
@@ -95,7 +95,7 @@ ChipConfig ChipConfig::from_string(const std::string &config)
             ss >> loc.y;
             ios_base::fmtflags f(ss.flags());
             while (!skip_check_eor(ss)) {
-                uint8_t value;
+                uint16_t value;
                 ss >> hex >> value;
                 cc.bram_data[loc].push_back(value);
             }
@@ -130,8 +130,8 @@ Chip ChipConfig::to_chip() const
             loc.y = y;
             for (int x = 0; x < die.get_max_ram_col(); x++) {
                 loc.x = x;
-                if (rams.count(loc)) {
-                    const TileConfig &cfg = rams.at(loc);
+                if (brams.count(loc)) {
+                    const TileConfig &cfg = brams.at(loc);
                     die.write_ram(x, y, ram_db.config_to_ram_data(cfg));
                 }
                 if (bram_data.count(loc))
@@ -166,7 +166,7 @@ ChipConfig ChipConfig::from_chip(const Chip &chip)
             for (int x = 0; x < die.get_max_ram_col(); x++) {
                 loc.x = x;
                 if (!die.is_ram_empty(x, y)) {
-                    cc.rams.emplace(loc, ram_db.ram_data_to_config(die.get_ram_config(x, y)));
+                    cc.brams.emplace(loc, ram_db.ram_data_to_config(die.get_ram_config(x, y)));
                     if (!die.is_ram_data_empty(x, y)) {
                         cc.bram_data.emplace(loc, die.get_ram_data(x, y));
                     }

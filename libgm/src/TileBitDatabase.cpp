@@ -203,7 +203,36 @@ TileConfig TileBitDatabase::tile_data_to_config(const vector<uint8_t> &data)
     return cfg;
 }
 
-RamBitDatabase::RamBitDatabase() : BaseBitDatabase() {}
+RamBitDatabase::RamBitDatabase() : BaseBitDatabase()
+{
+    add_word_settings("RAM_cfg_forward_a_addr", 0 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b_addr", 1 * 8, 8);
+    add_word_settings("RAM_cfg_forward_a0_clk", 2 * 8, 8);
+    add_word_settings("RAM_cfg_forward_a0_en", 3 * 8, 8);
+    add_word_settings("RAM_cfg_forward_a0_we", 4 * 8, 8);
+    add_word_settings("RAM_cfg_forward_a1_clk", 5 * 8, 8);
+    add_word_settings("RAM_cfg_forward_a1_en", 6 * 8, 8);
+    add_word_settings("RAM_cfg_forward_a1_we", 7 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b0_clk", 8 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b0_en", 9 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b0_we", 10 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b1_clk", 11 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b1_en", 12 * 8, 8);
+    add_word_settings("RAM_cfg_forward_b1_we", 13 * 8, 8);
+    add_word_settings("RAM_cfg_sram_mode_i_cfg", 14 * 8, 8);
+    add_word_settings("RAM_cfg_in_out_cfg", 15 * 8, 8);
+    add_word_settings("RAM_cfg_out_cfg", 16 * 8, 8);
+    add_word_settings("RAM_cfg_out_b1_cfg", 17 * 8, 8);
+    add_word_settings("RAM_cfg_wrmode_outreg", 18 * 8, 8);
+    add_word_settings("RAM_cfg_inversion", 19 * 8, 8);
+    add_word_settings("RAM_cfg_inv_ecc_dyn", 20 * 8, 8);
+    add_word_settings("RAM_cfg_fifo_sync_empty", 21 * 8, 8);
+    add_word_settings("RAM_cfg_fifo_empty", 22 * 8, 8);
+    add_word_settings("RAM_cfg_fifo_aync_full", 23 * 8, 8);
+    add_word_settings("RAM_cfg_fifo_full", 24 * 8, 8);
+    add_word_settings("RAM_cfg_sram_delay", 25 * 8, 8);
+    add_word_settings("RAM_cfg_datbm_cascade", 26 * 8, 8);
+}
 
 std::vector<uint8_t> RamBitDatabase::config_to_ram_data(const TileConfig &cfg)
 {
