@@ -86,6 +86,12 @@ class RamBitDatabase : public BaseBitDatabase
     RamBitDatabase();
 };
 
+class PLLBitDatabase : public BaseBitDatabase
+{
+  public:
+    PLLBitDatabase();
+};
+
 class DatabaseConflictError : public runtime_error
 {
   public:

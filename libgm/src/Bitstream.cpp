@@ -315,11 +315,22 @@ class BitstreamReadWriter
         insert_crc16();
     }
 
-    void write_cmd_pll()
+    void write_cmd_pll_empty()
     {
         write_header(CMD_PLL, 12);
         for (int i = 0; i < 12; i++)
             write_byte(0);
+        insert_crc16();
+        write_nops(6);
+    }
+
+    void write_cmd_pll(int index, std::vector<uint8_t> data)
+    {
+        write_header(CMD_PLL, 24);
+        for (int i = 0; i < 12; i++)
+            write_byte(data[i + index * 12]);
+        for (int i = 12 * 8; i < 12 * 8 + 12; i++)
+            write_byte(data[i]);
         insert_crc16();
         write_nops(6);
     }
@@ -371,6 +382,7 @@ Chip Bitstream::deserialise_chip()
     BitstreamReadWriter rd(data);
     bool is_block_ram = false;
     uint8_t x_pos = 0, y_pos = 0;
+    uint8_t pll_select = 0x0f;
     uint16_t aclcu = 0;
     while (!rd.is_end()) {
         rd.crc16.reset_crc16();
@@ -423,7 +435,7 @@ Chip Bitstream::deserialise_chip()
             // Check header CRC
             check_crc(rd);
             // Read data block
-            rd.get_byte();
+            pll_select = rd.get_byte();
             // Check data CRC
             check_crc(rd);
             break;
@@ -438,6 +450,7 @@ Chip Bitstream::deserialise_chip()
 
             // Read data block
             rd.get_vector(block, length);
+            die.write_pll_select(pll_select, block);
             // Check data CRC
             check_crc(rd);
 
@@ -576,8 +589,25 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
 {
     BitstreamReadWriter wr;
     wr.write_cmd_path(0x10);
-    wr.write_cmd_pll();
     auto &die = chip.get_die(0);
+    std::vector<uint8_t> pll_data = die.get_pll_config();
+    bool pll_written = false;
+    for (int i = 0; i < 4; i++) {
+        bool cfg_a = !die.is_pll_cfg_empty(i * 2 + 0);
+        bool cfg_b = !die.is_pll_cfg_empty(i * 2 + 1);
+        if (cfg_a || cfg_b) {
+            wr.write_cmd_spll(1 << i);
+            wr.write_cmd_pll(i * 2, pll_data);
+            if (cfg_b) {
+                wr.write_cmd_spll(1 << i | 1 << (i + 4));
+                wr.write_cmd_pll(i * 2, pll_data);
+            }
+            pll_written = true;
+        }
+    }
+    if (!pll_written)
+        wr.write_cmd_pll_empty();
+
     for (int iteration = 0; iteration < 2; iteration++) {
         for (int y = 0; y < Die::MAX_ROWS; y++) {
             for (int x = 0; x < Die::MAX_COLS; x++) {

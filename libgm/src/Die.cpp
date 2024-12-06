@@ -37,6 +37,7 @@ Die::Die()
             ram_data[std::make_pair(x, y)] = std::vector<u_int8_t>();
         }
     }
+    pll_cfg = std::vector<u_int8_t>(PLL_CONFIG_SIZE, 0x00);
 }
 
 bool Die::is_latch_empty(int x, int y) const { return latch.at(std::make_pair(x, y)).empty(); }
@@ -44,6 +45,15 @@ bool Die::is_latch_empty(int x, int y) const { return latch.at(std::make_pair(x,
 bool Die::is_ram_empty(int x, int y) const { return ram.at(std::make_pair(x, y)).empty(); }
 
 bool Die::is_ram_data_empty(int x, int y) const { return ram_data.at(std::make_pair(x, y)).empty(); }
+
+bool Die::is_pll_cfg_empty(int index) const
+{
+    int pos = index * 12;
+    for (int i = 0; i < 12; i++)
+        if (pll_cfg[i + pos] != 0x00)
+            return false;
+    return true;
+}
 
 void Die::write_latch(int x, int y, const std::vector<uint8_t> &data)
 {
@@ -70,6 +80,23 @@ void Die::write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_
     block.resize(MEMORY_SIZE, 0x00);
     for (auto d : data)
         block[pos++] = d;
+}
+
+void Die::write_pll_select(uint8_t select, const std::vector<uint8_t> &data)
+{
+    for (int i = 0; i < 4; i++) {
+        if (select & (1 << i)) {
+            int pos = i * 2 * 12;
+            if (select & (1 << (i + 4))) {
+                pos += 12;
+            }
+            for (size_t j = 0; j < 12; j++)
+                pll_cfg[pos++] = data[j];
+        }
+    }
+    int pos = 8 * 12; // start after PLL data;
+    for (size_t j = 12; j < data.size(); j++)
+        pll_cfg[pos++] = data[j];
 }
 
 } // namespace GateMate

@@ -249,6 +249,25 @@ RamBitDatabase::RamBitDatabase() : BaseBitDatabase(Die::RAM_BLOCK_SIZE * 8)
     add_unknowns();
 }
 
+PLLBitDatabase::PLLBitDatabase() : BaseBitDatabase(Die::PLL_CONFIG_SIZE * 8)
+{
+    int pos = 0;
+    for (int i = 0; i < 4; i++) {
+        add_word_settings(stringf("PLL%d.CFG_A", i), pos, 96);
+        pos += 96;
+        add_word_settings(stringf("PLL%d.CFG_B", i), pos, 96);
+        pos += 96;
+    }
+    add_word_settings("CLKIN.PLL0", pos + 0, 8);
+    add_word_settings("CLKIN.PLL1", pos + 8, 8);
+    add_word_settings("CLKIN.PLL2", pos + 16, 8);
+    add_word_settings("CLKIN.PLL3", pos + 24, 8);
+    add_word_settings("GLBOUT.PLL0", pos + 32, 16);
+    add_word_settings("GLBOUT.PLL1", pos + 48, 16);
+    add_word_settings("GLBOUT.PLL2", pos + 64, 16);
+    add_word_settings("GLBOUT.PLL3", pos + 80, 16);
+}
+
 vector<bool> WordSettingBits::get_value(const vector<bool> &tile) const
 {
     std::vector<bool> val;

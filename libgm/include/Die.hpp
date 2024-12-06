@@ -38,6 +38,7 @@ class Die
     static constexpr int LATCH_BLOCK_SIZE = 112;
     static constexpr int RAM_BLOCK_SIZE = 27;
     static constexpr int MEMORY_SIZE = 5120;
+    static constexpr int PLL_CONFIG_SIZE = 12 * 8 + 4 + 8;
 
   public:
     explicit Die();
@@ -51,19 +52,24 @@ class Die
     bool is_latch_empty(int x, int y) const;
     bool is_ram_empty(int x, int y) const;
     bool is_ram_data_empty(int x, int y) const;
+    bool is_pll_cfg_empty(int index) const;
 
     void write_latch(int x, int y, const std::vector<uint8_t> &data);
     void write_ram(int x, int y, const std::vector<uint8_t> &data);
     void write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_t addr);
+    void write_pll_select(uint8_t select, const std::vector<uint8_t> &data);
+    void write_pll(const std::vector<uint8_t> &data) { pll_cfg = data; }
 
     const std::vector<uint8_t> get_latch_config(int x, int y) const { return latch.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_config(int x, int y) const { return ram.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_data(int x, int y) const { return ram_data.at(std::make_pair(x, y)); }
+    const std::vector<uint8_t> get_pll_config() const { return pll_cfg; }
 
   private:
     std::map<std::pair<int, int>, std::vector<uint8_t>> latch;    // Config latches
     std::map<std::pair<int, int>, std::vector<uint8_t>> ram;      // Config RAM
     std::map<std::pair<int, int>, std::vector<uint8_t>> ram_data; // RAM data content FRAM
+    std::vector<uint8_t> pll_cfg;                                 // Config for all PLLs, CLKIN and GLBOUT
 };
 
 } // namespace GateMate
