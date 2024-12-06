@@ -38,7 +38,11 @@ class Die
     static constexpr int LATCH_BLOCK_SIZE = 112;
     static constexpr int RAM_BLOCK_SIZE = 27;
     static constexpr int MEMORY_SIZE = 5120;
-    static constexpr int PLL_CONFIG_SIZE = 12 * 8 + 4 + 8;
+    static constexpr int MAX_PLL = 4;
+    static constexpr int PLL_CFG_SIZE = 12;
+    static constexpr int CLKIN_CFG_SIZE = 4;
+    static constexpr int GLBOUT_CFG_SIZE = 8;
+    static constexpr int PLL_CONFIG_SIZE = PLL_CFG_SIZE * MAX_PLL * 2 + CLKIN_CFG_SIZE + GLBOUT_CFG_SIZE;
 
   public:
     explicit Die();
@@ -53,6 +57,8 @@ class Die
     bool is_ram_empty(int x, int y) const;
     bool is_ram_data_empty(int x, int y) const;
     bool is_pll_cfg_empty(int index) const;
+    bool is_clkin_cfg_empty() const;
+    bool is_glbout_cfg_empty() const;
 
     void write_latch(int x, int y, const std::vector<uint8_t> &data);
     void write_ram(int x, int y, const std::vector<uint8_t> &data);

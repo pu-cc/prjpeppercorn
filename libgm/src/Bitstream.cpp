@@ -324,12 +324,13 @@ class BitstreamReadWriter
         write_nops(6);
     }
 
-    void write_cmd_pll(int index, std::vector<uint8_t> data)
+    void write_cmd_pll(int index, std::vector<uint8_t> data, int size)
     {
-        write_header(CMD_PLL, 24);
-        for (int i = 0; i < 12; i++)
-            write_byte(data[i + index * 12]);
-        for (int i = 12 * 8; i < 12 * 8 + 12; i++)
+        write_header(CMD_PLL, size);
+        for (int i = 0; i < Die::PLL_CFG_SIZE; i++)
+            write_byte(data[i + index * Die::PLL_CFG_SIZE]);
+        int pos = Die::PLL_CFG_SIZE * Die::MAX_PLL * 2;
+        for (int i = pos; i < pos + size - Die::PLL_CFG_SIZE; i++)
             write_byte(data[i]);
         insert_crc16();
         write_nops(6);
@@ -592,15 +593,20 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
     auto &die = chip.get_die(0);
     std::vector<uint8_t> pll_data = die.get_pll_config();
     bool pll_written = false;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < Die::MAX_PLL; i++) {
         bool cfg_a = !die.is_pll_cfg_empty(i * 2 + 0);
         bool cfg_b = !die.is_pll_cfg_empty(i * 2 + 1);
+        int size = Die::PLL_CFG_SIZE;
+        if (!die.is_clkin_cfg_empty())
+            size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE;
+        if (!die.is_glbout_cfg_empty())
+            size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE + Die::GLBOUT_CFG_SIZE;
         if (cfg_a || cfg_b) {
             wr.write_cmd_spll(1 << i);
-            wr.write_cmd_pll(i * 2, pll_data);
+            wr.write_cmd_pll(i * 2, pll_data, size);
             if (cfg_b) {
                 wr.write_cmd_spll(1 << i | 1 << (i + 4));
-                wr.write_cmd_pll(i * 2, pll_data);
+                wr.write_cmd_pll(i * 2, pll_data, size);
             }
             pll_written = true;
         }

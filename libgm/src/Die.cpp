@@ -48,8 +48,26 @@ bool Die::is_ram_data_empty(int x, int y) const { return ram_data.at(std::make_p
 
 bool Die::is_pll_cfg_empty(int index) const
 {
-    int pos = index * 12;
-    for (int i = 0; i < 12; i++)
+    int pos = index * PLL_CFG_SIZE;
+    for (int i = 0; i < PLL_CFG_SIZE; i++)
+        if (pll_cfg[i + pos] != 0x00)
+            return false;
+    return true;
+}
+
+bool Die::is_clkin_cfg_empty() const
+{
+    int pos = PLL_CFG_SIZE * MAX_PLL * 2;
+    for (int i = 0; i < CLKIN_CFG_SIZE; i++)
+        if (pll_cfg[i + pos] != 0x00)
+            return false;
+    return true;
+}
+
+bool Die::is_glbout_cfg_empty() const
+{
+    int pos = PLL_CFG_SIZE * MAX_PLL * 2 + CLKIN_CFG_SIZE;
+    for (int i = 0; i < GLBOUT_CFG_SIZE; i++)
         if (pll_cfg[i + pos] != 0x00)
             return false;
     return true;
@@ -84,18 +102,18 @@ void Die::write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_
 
 void Die::write_pll_select(uint8_t select, const std::vector<uint8_t> &data)
 {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < MAX_PLL; i++) {
         if (select & (1 << i)) {
-            int pos = i * 2 * 12;
+            int pos = i * 2 * PLL_CFG_SIZE;
             if (select & (1 << (i + 4))) {
-                pos += 12;
+                pos += PLL_CFG_SIZE;
             }
-            for (size_t j = 0; j < 12; j++)
+            for (size_t j = 0; j < PLL_CFG_SIZE; j++)
                 pll_cfg[pos++] = data[j];
         }
     }
-    int pos = 8 * 12; // start after PLL data;
-    for (size_t j = 12; j < data.size(); j++)
+    int pos = PLL_CFG_SIZE * MAX_PLL * 2; // start after PLL data;
+    for (size_t j = PLL_CFG_SIZE; j < data.size(); j++)
         pll_cfg[pos++] = data[j];
 }
 
