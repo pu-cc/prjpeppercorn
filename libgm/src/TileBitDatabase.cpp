@@ -286,14 +286,12 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
     add_word_settings("GPIO.BANK_W1", pos + 28, 1);
     add_word_settings("GPIO.BANK_W2", pos + 29, 1);
 
-    add_word_settings("PLL0.CTRL", pos + 32, 8);
-    add_word_settings("PLL0.START", pos + 40, 8);
-    add_word_settings("PLL1.CTRL", pos + 48, 8);
-    add_word_settings("PLL1.START", pos + 56, 8);
-    add_word_settings("PLL2.CTRL", pos + 64, 8);
-    add_word_settings("PLL2.START", pos + 72, 8);
-    add_word_settings("PLL3.CTRL", pos + 80, 8);
-    add_word_settings("PLL3.START", pos + 88, 8);
+    pos += 32;
+    for (int i = 0; i < Die::MAX_PLL; i++) {
+        add_word_settings(stringf("PLL%d.CTRL_A", i), pos + 0, 8);
+        add_word_settings(stringf("PLL%d.CTRL_B", i), pos + 8, 8);
+        pos += 16;
+    }
 }
 
 vector<bool> WordSettingBits::get_value(const vector<bool> &tile) const
