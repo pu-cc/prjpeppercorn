@@ -433,7 +433,7 @@ Chip Bitstream::deserialise_chip()
                             val |= Die::FF_INIT_RESET << (i * 2);
                         else if (v == 0xc0)
                             val |= Die::FF_INIT_SET << (i * 2);
-                        else
+                        else if (v != 0x00)
                             BITSTREAM_FATAL(stringf("Unknown CPE state %d on pos %d,%d\n", v, x_pos, y_pos),
                                             rd.get_offset());
                     }
@@ -660,6 +660,9 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
                     if (iteration == 0) {
                         // First iteration does not setup CPE at all
                         std::fill(data.begin(), data.begin() + 40, 0);
+                        // Empty configuration is skipped
+                        if (std::all_of(data.begin(), data.end(), [](uint8_t i) { return i == 0; }))
+                            continue;
                     }
                     // 2nd iteration with no changes if no FF initialization
                     if (iteration == 1 && ff_init) {
