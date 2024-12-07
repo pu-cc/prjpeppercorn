@@ -49,6 +49,15 @@ static constexpr const uint8_t CMD_WAIT_PLL = 0xdc; //
 static constexpr const uint8_t CMD_SPLL = 0xdd;
 static constexpr const uint8_t CMD_SLAVE_MODE = 0xde;
 
+static constexpr const uint8_t CFG_NONE = 0x00;
+static constexpr const uint8_t CFG_DONE = 0x01;
+static constexpr const uint8_t CFG_STOP = 0x02;
+static constexpr const uint8_t CFG_RECONFIG = 0x04;
+static constexpr const uint8_t CFG_CPE_CFG = 0x08;
+static constexpr const uint8_t CFG_CPE_RESET = 0x10;
+static constexpr const uint8_t CFG_FILL_RAM = 0x20;
+static constexpr const uint8_t CFG_SERDES = 0x40;
+
 static const uint16_t crc_table_x25[256] = {
         0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48, 0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5,
         0xe97e, 0xf8f7, 0x1081, 0x0108, 0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e, 0x9cc9, 0x8d40, 0xbfdb, 0xae52,
@@ -340,6 +349,19 @@ class BitstreamReadWriter
     {
         write_header(CMD_CHG_STATUS, 1);
         write_byte(data);
+        insert_crc16();
+        write_nops(4);
+        write_byte(0x33);
+        write_nops(4);
+    }
+
+    void write_cmd_chg_status(uint8_t cfg, std::vector<uint8_t> data)
+    {
+        write_header(CMD_CHG_STATUS, 12);
+        write_byte(cfg);
+        write_byte(0x00);
+        for (int i = 2; i < 12; i++)
+            write_byte(data[Die::STATUS_CFG_START + i]);
         insert_crc16();
         write_nops(4);
         write_byte(0x33);
@@ -673,7 +695,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
 
     // Write RAM contents
     if (ram_used) {
-        wr.write_cmd_chg_status(0x20);
+        wr.write_cmd_chg_status(CFG_FILL_RAM);
         for (int y = Die::MAX_RAM_ROWS - 1; y >= 0; y--) {
             for (int x = Die::MAX_RAM_COLS - 1; x >= 0; x--) {
                 // Empty configuration is skipped
@@ -688,7 +710,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
                 ram_used = true;
             }
         }
-        wr.write_cmd_chg_status(0x00);
+        wr.write_cmd_chg_status(CFG_NONE);
     }
 
     // Write latch configuration
@@ -748,16 +770,15 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
         }
     }
 
-    // Write change status
-    wr.write_header(CMD_CHG_STATUS, 12);
-    wr.write_byte(0x13); // 0
-    wr.write_byte(0x00); // 1
-    for (int i = 2; i < 12; i++)
-        wr.write_byte(die_config[Die::STATUS_CFG_START + i]); // 2
-    wr.insert_crc16();
-    wr.write_nops(4);
-    wr.write_byte(0x33);
-    wr.write_nops(4);
+    //  Write change status
+    if (die.is_using_cfg_gpios())
+        wr.write_cmd_chg_status(CFG_DONE);
+
+    uint8_t cfg_stat = CFG_DONE | CFG_STOP | CFG_CPE_RESET;
+    // cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
+    // cfg_stat |= CFG_SERDES;
+
+    wr.write_cmd_chg_status(cfg_stat, die_config);
     return Bitstream(wr.get());
 }
 

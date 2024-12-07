@@ -92,6 +92,8 @@ bool Die::is_status_cfg_empty() const
     return true;
 }
 
+bool Die::is_using_cfg_gpios() const { return die_cfg[STATUS_CFG_START + 2] & 0x08; }
+
 void Die::write_latch(int x, int y, const std::vector<uint8_t> &data)
 {
     int pos = 0;

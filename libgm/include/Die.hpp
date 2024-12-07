@@ -65,6 +65,7 @@ class Die
     bool is_clkin_cfg_empty() const;
     bool is_glbout_cfg_empty() const;
     bool is_status_cfg_empty() const;
+    bool is_using_cfg_gpios() const;
 
     void write_latch(int x, int y, const std::vector<uint8_t> &data);
     void write_ram(int x, int y, const std::vector<uint8_t> &data);
