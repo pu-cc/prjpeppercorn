@@ -239,7 +239,7 @@ class BitstreamReadWriter
     {
         crc16.reset_crc16();
         write_byte(cmd);
-        if (len == CMD_FRAM)
+        if (cmd == CMD_FRAM)
             write_uint16(len);
         else
             write_byte(len & 0xff);
@@ -334,6 +334,16 @@ class BitstreamReadWriter
             write_byte(data[i]);
         insert_crc16();
         write_nops(6);
+    }
+
+    void write_cmd_chg_status(uint8_t data)
+    {
+        write_header(CMD_CHG_STATUS, 1);
+        write_byte(data);
+        insert_crc16();
+        write_nops(4);
+        write_byte(0x33);
+        write_nops(4);
     }
 };
 
@@ -620,6 +630,8 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
     BitstreamReadWriter wr;
     wr.write_cmd_path(0x10);
     auto &die = chip.get_die(0);
+
+    // PLL setup
     std::vector<uint8_t> die_config = die.get_die_config();
     bool pll_written = false;
     for (int i = 0; i < Die::MAX_PLL; i++) {
@@ -643,6 +655,43 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
     if (!pll_written)
         wr.write_cmd_pll_empty();
 
+    // Write RAM configuration
+    bool ram_used = false;
+    for (int y = Die::MAX_RAM_ROWS - 1; y >= 0; y--) {
+        for (int x = Die::MAX_RAM_COLS - 1; x >= 0; x--) {
+            // Empty configuration is skipped
+            if (die.is_ram_empty(x, y))
+                continue;
+            std::vector<uint8_t> data = std::vector<uint8_t>(die.get_ram_config(x, y));
+            wr.write_cmd_rxrys(x, y);
+            wr.write_header(CMD_DLCU, data.size());
+            wr.write_bytes(data);
+            wr.insert_crc16();
+            ram_used = true;
+        }
+    }
+
+    // Write RAM contents
+    if (ram_used) {
+        wr.write_cmd_chg_status(0x20);
+        for (int y = Die::MAX_RAM_ROWS - 1; y >= 0; y--) {
+            for (int x = Die::MAX_RAM_COLS - 1; x >= 0; x--) {
+                // Empty configuration is skipped
+                if (die.is_ram_data_empty(x, y))
+                    continue;
+                std::vector<uint8_t> data = std::vector<uint8_t>(die.get_ram_data(x, y));
+                wr.write_cmd_rxrys(x, y);
+                wr.write_cmd_aclcu(0);
+                wr.write_header(CMD_FRAM, data.size());
+                wr.write_bytes(data);
+                wr.insert_crc16();
+                ram_used = true;
+            }
+        }
+        wr.write_cmd_chg_status(0x00);
+    }
+
+    // Write latch configuration
     for (int iteration = 0; iteration < 3; iteration++) {
         for (int y = 0; y < Die::MAX_ROWS; y++) {
             for (int x = 0; x < Die::MAX_COLS; x++) {
@@ -698,6 +747,8 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
             }
         }
     }
+
+    // Write change status
     wr.write_header(CMD_CHG_STATUS, 12);
     wr.write_byte(0x13); // 0
     wr.write_byte(0x00); // 1
