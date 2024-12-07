@@ -439,12 +439,12 @@ Chip Bitstream::deserialise_chip()
                     uint8_t val = 0x00;
                     for (int i = 0; i < 4; i++) {
                         uint8_t v = block[i * 10 + 8] ^ data[i * 10 + 8];
-                        if (v == 0x30)
+                        if (v & 0x30)
                             val |= Die::FF_INIT_RESET << (i * 2);
-                        else if (v == 0xc0)
+                        else if (v & 0xc0)
                             val |= Die::FF_INIT_SET << (i * 2);
                         else if (v != 0x00)
-                            BITSTREAM_FATAL(stringf("Unknown CPE state %d on pos %d,%d\n", v, x_pos, y_pos),
+                            BITSTREAM_FATAL(stringf("Unknown CPE state %d on pos 0x%02x,0x%02x\n", v, x_pos, y_pos),
                                             rd.get_offset());
                     }
                     die.write_ff_init(x_pos, y_pos, val);
