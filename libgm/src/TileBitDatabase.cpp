@@ -124,6 +124,11 @@ void TileBitDatabase::add_sb_drive(int index, int start)
 
 void TileBitDatabase::add_cpe(int index, int start) { add_word_settings(stringf("CPE_%d", index), start, 80); }
 
+void TileBitDatabase::add_ff_init(int index, int start)
+{
+    add_word_settings(stringf("CPE_%d.FF_INIT", index), start, 2);
+}
+
 void TileBitDatabase::add_inmux(int index, int plane, int start)
 {
     add_word_settings(stringf("INMUX_%d_%02d", index, plane), start, 4);
@@ -172,6 +177,7 @@ TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase(Die
         is_core = true;
         for (int i = 0; i < 4; i++) {
             add_cpe(i + 1, 10 * i * 8);
+            add_ff_init(i + 1, (Die::LATCH_BLOCK_SIZE - 1) * 8 + i * 2);
         }
         int pos = 40;
         for (int i = 0; i < 4; i++) {

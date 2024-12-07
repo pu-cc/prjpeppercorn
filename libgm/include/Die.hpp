@@ -35,7 +35,7 @@ class Die
     static constexpr int MAX_RAM = 32;
     static constexpr int MAX_RAM_ROWS = 8;
     static constexpr int MAX_RAM_COLS = 4;
-    static constexpr int LATCH_BLOCK_SIZE = 112;
+    static constexpr int LATCH_BLOCK_SIZE = 112 + 1; // Added one more byte for FF_INIT
     static constexpr int RAM_BLOCK_SIZE = 27;
     static constexpr int MEMORY_SIZE = 5120;
     static constexpr int MAX_PLL = 4;
@@ -43,6 +43,8 @@ class Die
     static constexpr int CLKIN_CFG_SIZE = 4;
     static constexpr int GLBOUT_CFG_SIZE = 8;
     static constexpr int PLL_CONFIG_SIZE = PLL_CFG_SIZE * MAX_PLL * 2 + CLKIN_CFG_SIZE + GLBOUT_CFG_SIZE;
+    static constexpr int FF_INIT_RESET = 2;
+    static constexpr int FF_INIT_SET = 3;
 
   public:
     explicit Die();
@@ -54,6 +56,7 @@ class Die
     int get_max_ram_col() const { return MAX_RAM_COLS; }
 
     bool is_latch_empty(int x, int y) const;
+    bool is_cpe_empty(int x, int y) const;
     bool is_ram_empty(int x, int y) const;
     bool is_ram_data_empty(int x, int y) const;
     bool is_pll_cfg_empty(int index) const;
@@ -65,6 +68,7 @@ class Die
     void write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_t addr);
     void write_pll_select(uint8_t select, const std::vector<uint8_t> &data);
     void write_pll(const std::vector<uint8_t> &data) { pll_cfg = data; }
+    void write_ff_init(int x, int y, uint8_t data);
 
     const std::vector<uint8_t> get_latch_config(int x, int y) const { return latch.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_config(int x, int y) const { return ram.at(std::make_pair(x, y)); }

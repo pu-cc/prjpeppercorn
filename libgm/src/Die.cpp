@@ -33,7 +33,7 @@ Die::Die()
     for (int y = 0; y < MAX_RAM_ROWS; y++) {
         for (int x = 0; x < MAX_RAM_COLS; x++) {
             ram[std::make_pair(x, y)] = std::vector<u_int8_t>();
-            ram[std::make_pair(x, y)].reserve(LATCH_BLOCK_SIZE);
+            ram[std::make_pair(x, y)].reserve(RAM_BLOCK_SIZE);
             ram_data[std::make_pair(x, y)] = std::vector<u_int8_t>();
         }
     }
@@ -41,6 +41,15 @@ Die::Die()
 }
 
 bool Die::is_latch_empty(int x, int y) const { return latch.at(std::make_pair(x, y)).empty(); }
+
+bool Die::is_cpe_empty(int x, int y) const
+{
+    auto &block = latch.at(std::make_pair(x, y));
+    for (int i = 0; i < 40; i++)
+        if (block[i] != 0x00)
+            return false;
+    return true;
+}
 
 bool Die::is_ram_empty(int x, int y) const { return ram.at(std::make_pair(x, y)).empty(); }
 
@@ -80,6 +89,13 @@ void Die::write_latch(int x, int y, const std::vector<uint8_t> &data)
     block.resize(LATCH_BLOCK_SIZE, 0x00);
     for (auto d : data)
         block[pos++] = d;
+}
+
+void Die::write_ff_init(int x, int y, uint8_t data)
+{
+    auto &block = latch.at(std::make_pair(x, y));
+    block.resize(LATCH_BLOCK_SIZE, 0x00);
+    block[LATCH_BLOCK_SIZE - 1] = data;
 }
 
 void Die::write_ram(int x, int y, const std::vector<uint8_t> &data)

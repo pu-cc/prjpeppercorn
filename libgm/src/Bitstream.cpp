@@ -385,6 +385,7 @@ Chip Bitstream::deserialise_chip()
     uint8_t x_pos = 0, y_pos = 0;
     uint8_t pll_select = 0x0f;
     uint16_t aclcu = 0;
+    std::map<std::pair<int, int>, int> tile_iteration;
     while (!rd.is_end()) {
         rd.crc16.reset_crc16();
         uint8_t cmd = rd.get_command_opcode();
@@ -412,8 +413,34 @@ Chip Bitstream::deserialise_chip()
 
             if (is_block_ram)
                 die.write_ram(x_pos, y_pos, block);
-            else
+            else {
+                int iteration = -1;
+                if (tile_iteration.count(std::make_pair(x_pos, y_pos)))
+                    iteration = tile_iteration[std::make_pair(x_pos, y_pos)];
+                tile_iteration[std::make_pair(x_pos, y_pos)] = ++iteration;
+
+                // Detection of FF initialization is possible on
+                // last iteration
+                if (iteration == 2) {
+                    std::vector<uint8_t> data = die.get_latch_config(x_pos, y_pos);
+                    // Make sure we have CPE data
+                    // even if uninitialized
+                    block.resize(40, 0x00);
+                    uint8_t val = 0x00;
+                    for (int i = 0; i < 4; i++) {
+                        uint8_t v = block[i * 10 + 8] ^ data[i * 10 + 8];
+                        if (v == 0x30)
+                            val |= Die::FF_INIT_RESET << (i * 2);
+                        else if (v == 0xc0)
+                            val |= Die::FF_INIT_SET << (i * 2);
+                        else
+                            BITSTREAM_FATAL(stringf("Unknown CPE state %d on pos %d,%d\n", v, x_pos, y_pos),
+                                            rd.get_offset());
+                    }
+                    die.write_ff_init(x_pos, y_pos, val);
+                }
                 die.write_latch(x_pos, y_pos, block);
+            }
             break;
         case CMD_PATH:
             BITSTREAM_DEBUG("CMD_PATH");
@@ -614,20 +641,52 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
     if (!pll_written)
         wr.write_cmd_pll_empty();
 
-    for (int iteration = 0; iteration < 2; iteration++) {
+    for (int iteration = 0; iteration < 3; iteration++) {
         for (int y = 0; y < Die::MAX_ROWS; y++) {
             for (int x = 0; x < Die::MAX_COLS; x++) {
+                // Empty configuration is skipped
                 if (die.is_latch_empty(x, y))
                     continue;
+                // Only tiles with CPE can have multiple iterations
                 if (iteration != 0 && is_edge_location(x, y))
                     continue;
-                wr.write_cmd_lxlys(x, y);
-                std::vector<uint8_t> data = die.get_latch_config(x, y);
-                if (iteration == 0 && !is_edge_location(x, y)) {
-                    std::fill(data.begin(), data.begin() + 40, 0);
+                // If CPE empty skip other iterations
+                if (iteration != 0 && die.is_cpe_empty(x, y))
+                    continue;
+                std::vector<uint8_t> data = std::vector<uint8_t>(die.get_latch_config(x, y));
+                uint8_t ff_init = data.back();
+                data.pop_back();
+                if (!is_edge_location(x, y)) {
+                    if (iteration == 0) {
+                        // First iteration does not setup CPE at all
+                        std::fill(data.begin(), data.begin() + 40, 0);
+                    }
+                    // 2nd iteration with no changes if no FF initialization
+                    if (iteration == 1 && ff_init) {
+                        // Only CPE data is exported
+                        data.resize(40);
+                        // Set initial FFs states
+                        for (int i = 0; i < 4; i++) {
+                            uint8_t ff = (ff_init >> (i * 2)) & 0x03;
+                            if (ff == Die::FF_INIT_RESET)
+                                data[i * 10 + 8] &= 0x30 ^ 0xff;
+                            else if (ff == Die::FF_INIT_SET)
+                                data[i * 10 + 8] &= 0xc0 ^ 0xff;
+                        }
+                    }
+                    // 3rd iteration only if there was FF initialization
+                    if (iteration == 2) {
+                        if (!ff_init)
+                            continue;
+                        // Only CPE data is exported
+                        data.resize(40);
+                    }
                 }
+                // minimize output
                 auto rit = std::find_if(data.rbegin(), data.rend(), [](uint8_t val) { return val != 0; });
                 data.erase(rit.base(), end(data));
+
+                wr.write_cmd_lxlys(x, y);
                 wr.write_header(CMD_DLCU, data.size());
                 wr.write_bytes(data);
                 wr.insert_crc16();

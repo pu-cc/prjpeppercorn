@@ -69,6 +69,7 @@ class TileBitDatabase : public BaseBitDatabase
     void add_sb_drive(int index, int start);
 
     void add_cpe(int index, int start);
+    void add_ff_init(int index, int start);
     void add_inmux(int index, int plane, int start);
 
     void add_gpio(int start);
