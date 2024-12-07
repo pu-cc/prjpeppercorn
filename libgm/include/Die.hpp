@@ -42,7 +42,9 @@ class Die
     static constexpr int PLL_CFG_SIZE = 12;
     static constexpr int CLKIN_CFG_SIZE = 4;
     static constexpr int GLBOUT_CFG_SIZE = 8;
-    static constexpr int PLL_CONFIG_SIZE = PLL_CFG_SIZE * MAX_PLL * 2 + CLKIN_CFG_SIZE + GLBOUT_CFG_SIZE;
+    static constexpr int STATUS_CFG_SIZE = 12;
+    static constexpr int STATUS_CFG_START = PLL_CFG_SIZE * MAX_PLL * 2 + CLKIN_CFG_SIZE + GLBOUT_CFG_SIZE;
+    static constexpr int DIE_CONFIG_SIZE = STATUS_CFG_START + STATUS_CFG_SIZE;
     static constexpr int FF_INIT_RESET = 2;
     static constexpr int FF_INIT_SET = 3;
 
@@ -62,24 +64,26 @@ class Die
     bool is_pll_cfg_empty(int index) const;
     bool is_clkin_cfg_empty() const;
     bool is_glbout_cfg_empty() const;
+    bool is_status_cfg_empty() const;
 
     void write_latch(int x, int y, const std::vector<uint8_t> &data);
     void write_ram(int x, int y, const std::vector<uint8_t> &data);
     void write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_t addr);
     void write_pll_select(uint8_t select, const std::vector<uint8_t> &data);
-    void write_pll(const std::vector<uint8_t> &data) { pll_cfg = data; }
+    void write_die_cfg(const std::vector<uint8_t> &data) { die_cfg = data; }
     void write_ff_init(int x, int y, uint8_t data);
+    void write_status(const std::vector<uint8_t> &data);
 
     const std::vector<uint8_t> get_latch_config(int x, int y) const { return latch.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_config(int x, int y) const { return ram.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_data(int x, int y) const { return ram_data.at(std::make_pair(x, y)); }
-    const std::vector<uint8_t> get_pll_config() const { return pll_cfg; }
+    const std::vector<uint8_t> get_die_config() const { return die_cfg; }
 
   private:
     std::map<std::pair<int, int>, std::vector<uint8_t>> latch;    // Config latches
     std::map<std::pair<int, int>, std::vector<uint8_t>> ram;      // Config RAM
     std::map<std::pair<int, int>, std::vector<uint8_t>> ram_data; // RAM data content FRAM
-    std::vector<uint8_t> pll_cfg;                                 // Config for all PLLs, CLKIN and GLBOUT
+    std::vector<uint8_t> die_cfg;                                 // Config for all PLLs, CLKIN and GLBOUT
 };
 
 } // namespace GateMate

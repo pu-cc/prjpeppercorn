@@ -87,10 +87,10 @@ class RamBitDatabase : public BaseBitDatabase
     RamBitDatabase();
 };
 
-class PLLBitDatabase : public BaseBitDatabase
+class ConfigBitDatabase : public BaseBitDatabase
 {
   public:
-    PLLBitDatabase();
+    ConfigBitDatabase();
 };
 
 class DatabaseConflictError : public runtime_error

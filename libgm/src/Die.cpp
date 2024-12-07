@@ -37,7 +37,7 @@ Die::Die()
             ram_data[std::make_pair(x, y)] = std::vector<u_int8_t>();
         }
     }
-    pll_cfg = std::vector<u_int8_t>(PLL_CONFIG_SIZE, 0x00);
+    die_cfg = std::vector<u_int8_t>(DIE_CONFIG_SIZE, 0x00);
 }
 
 bool Die::is_latch_empty(int x, int y) const { return latch.at(std::make_pair(x, y)).empty(); }
@@ -59,7 +59,7 @@ bool Die::is_pll_cfg_empty(int index) const
 {
     int pos = index * PLL_CFG_SIZE;
     for (int i = 0; i < PLL_CFG_SIZE; i++)
-        if (pll_cfg[i + pos] != 0x00)
+        if (die_cfg[i + pos] != 0x00)
             return false;
     return true;
 }
@@ -68,7 +68,7 @@ bool Die::is_clkin_cfg_empty() const
 {
     int pos = PLL_CFG_SIZE * MAX_PLL * 2;
     for (int i = 0; i < CLKIN_CFG_SIZE; i++)
-        if (pll_cfg[i + pos] != 0x00)
+        if (die_cfg[i + pos] != 0x00)
             return false;
     return true;
 }
@@ -77,7 +77,17 @@ bool Die::is_glbout_cfg_empty() const
 {
     int pos = PLL_CFG_SIZE * MAX_PLL * 2 + CLKIN_CFG_SIZE;
     for (int i = 0; i < GLBOUT_CFG_SIZE; i++)
-        if (pll_cfg[i + pos] != 0x00)
+        if (die_cfg[i + pos] != 0x00)
+            return false;
+    return true;
+}
+
+bool Die::is_status_cfg_empty() const
+{
+    int pos = STATUS_CFG_START;
+    // First two bytes contain status change commands
+    for (int i = 2; i < STATUS_CFG_SIZE; i++)
+        if (die_cfg[i + pos] != 0x00)
             return false;
     return true;
 }
@@ -116,6 +126,13 @@ void Die::write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_
         block[pos++] = d;
 }
 
+void Die::write_status(const std::vector<uint8_t> &data)
+{
+    int pos = STATUS_CFG_START;
+    for (auto d : data)
+        die_cfg[pos++] = d;
+}
+
 void Die::write_pll_select(uint8_t select, const std::vector<uint8_t> &data)
 {
     for (int i = 0; i < MAX_PLL; i++) {
@@ -125,12 +142,12 @@ void Die::write_pll_select(uint8_t select, const std::vector<uint8_t> &data)
                 pos += PLL_CFG_SIZE;
             }
             for (size_t j = 0; j < PLL_CFG_SIZE; j++)
-                pll_cfg[pos++] = data[j];
+                die_cfg[pos++] = data[j];
         }
     }
     int pos = PLL_CFG_SIZE * MAX_PLL * 2; // start after PLL data;
     for (size_t j = PLL_CFG_SIZE; j < data.size(); j++)
-        pll_cfg[pos++] = data[j];
+        die_cfg[pos++] = data[j];
 }
 
 } // namespace GateMate

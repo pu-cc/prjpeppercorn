@@ -31,10 +31,10 @@ std::string ChipConfig::to_string() const
 {
     std::stringstream ss;
     ss << ".device " << chip_name << endl << endl;
-    for (const auto &pll : plls) {
-        if (!pll.second.empty()) {
-            ss << ".pll " << pll.first << " " << endl;
-            ss << pll.second;
+    for (const auto &config : configs) {
+        if (!config.second.empty()) {
+            ss << ".config " << config.first << " " << endl;
+            ss << config.second;
             ss << endl;
         }
     }
@@ -79,12 +79,12 @@ ChipConfig ChipConfig::from_string(const std::string &config)
         ss >> verb;
         if (verb == ".device") {
             ss >> cc.chip_name;
-        } else if (verb == ".pll") {
+        } else if (verb == ".config") {
             int die;
             ss >> die;
             TileConfig tc;
             ss >> tc;
-            cc.plls.emplace(die, tc);
+            cc.configs.emplace(die, tc);
         } else if (verb == ".tile") {
             CfgLoc loc;
             ss >> loc.die;
@@ -151,10 +151,10 @@ Chip ChipConfig::to_chip() const
                     die.write_ram_data(x, y, bram_data.at(loc), 0);
             }
         }
-        PLLBitDatabase plldb;
-        if (plls.count(d)) {
-            const TileConfig &cfg = plls.at(d);
-            die.write_pll(plldb.config_to_data(cfg));
+        ConfigBitDatabase cfg_db;
+        if (configs.count(d)) {
+            const TileConfig &cfg = configs.at(d);
+            die.write_die_cfg(cfg_db.config_to_data(cfg));
         }
     }
 
@@ -191,8 +191,8 @@ ChipConfig ChipConfig::from_chip(const Chip &chip)
                 }
             }
         }
-        PLLBitDatabase pll_db;
-        cc.plls.emplace(d, pll_db.data_to_config(die.get_pll_config()));
+        ConfigBitDatabase cfg_db;
+        cc.configs.emplace(d, cfg_db.data_to_config(die.get_die_config()));
     }
     return cc;
 }

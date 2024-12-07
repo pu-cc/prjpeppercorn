@@ -255,7 +255,7 @@ RamBitDatabase::RamBitDatabase() : BaseBitDatabase(Die::RAM_BLOCK_SIZE * 8)
     add_unknowns();
 }
 
-PLLBitDatabase::PLLBitDatabase() : BaseBitDatabase(Die::PLL_CONFIG_SIZE * 8)
+ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 8)
 {
     int pos = 0;
     for (int i = 0; i < 4; i++) {
@@ -272,6 +272,28 @@ PLLBitDatabase::PLLBitDatabase() : BaseBitDatabase(Die::PLL_CONFIG_SIZE * 8)
     add_word_settings("GLBOUT.PLL1", pos + 48, 16);
     add_word_settings("GLBOUT.PLL2", pos + 64, 16);
     add_word_settings("GLBOUT.PLL3", pos + 80, 16);
+
+    pos = Die::STATUS_CFG_START * 8;
+    add_word_settings("GPIO.BANK_S1", pos + 16, 1);
+    add_word_settings("GPIO.BANK_S2", pos + 17, 1);
+    add_word_settings("GPIO.BANK_CFG", pos + 19, 1);
+    add_word_settings("GPIO.BANK_E1", pos + 20, 1);
+    add_word_settings("GPIO.BANK_E2", pos + 21, 1);
+
+    add_word_settings("GPIO.BANK_N1", pos + 24, 1);
+    add_word_settings("GPIO.BANK_N2", pos + 25, 1);
+
+    add_word_settings("GPIO.BANK_W1", pos + 28, 1);
+    add_word_settings("GPIO.BANK_W2", pos + 29, 1);
+
+    add_word_settings("PLL0.CTRL", pos + 32, 8);
+    add_word_settings("PLL0.START", pos + 40, 8);
+    add_word_settings("PLL1.CTRL", pos + 48, 8);
+    add_word_settings("PLL1.START", pos + 56, 8);
+    add_word_settings("PLL2.CTRL", pos + 64, 8);
+    add_word_settings("PLL2.START", pos + 72, 8);
+    add_word_settings("PLL3.CTRL", pos + 80, 8);
+    add_word_settings("PLL3.START", pos + 88, 8);
 }
 
 vector<bool> WordSettingBits::get_value(const vector<bool> &tile) const

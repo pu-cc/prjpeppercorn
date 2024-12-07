@@ -552,6 +552,8 @@ Chip Bitstream::deserialise_chip()
 
             // Read data block
             rd.get_vector(block, length);
+            die.write_status(block);
+
             // Check data CRC
             check_crc(rd);
 
@@ -618,7 +620,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
     BitstreamReadWriter wr;
     wr.write_cmd_path(0x10);
     auto &die = chip.get_die(0);
-    std::vector<uint8_t> pll_data = die.get_pll_config();
+    std::vector<uint8_t> die_config = die.get_die_config();
     bool pll_written = false;
     for (int i = 0; i < Die::MAX_PLL; i++) {
         bool cfg_a = !die.is_pll_cfg_empty(i * 2 + 0);
@@ -630,10 +632,10 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
             size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE + Die::GLBOUT_CFG_SIZE;
         if (cfg_a || cfg_b) {
             wr.write_cmd_spll(1 << i);
-            wr.write_cmd_pll(i * 2, pll_data, size);
+            wr.write_cmd_pll(i * 2, die_config, size);
             if (cfg_b) {
                 wr.write_cmd_spll(1 << i | 1 << (i + 4));
-                wr.write_cmd_pll(i * 2, pll_data, size);
+                wr.write_cmd_pll(i * 2, die_config, size);
             }
             pll_written = true;
         }
@@ -699,16 +701,8 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
     wr.write_header(CMD_CHG_STATUS, 12);
     wr.write_byte(0x13); // 0
     wr.write_byte(0x00); // 1
-    wr.write_byte(0x33); // 2
-    wr.write_byte(0x33); // 3
-    wr.write_byte(0x00); // 4
-    wr.write_byte(0x00); // 5
-    wr.write_byte(0x00); // 6
-    wr.write_byte(0x00); // 7
-    wr.write_byte(0x00); // 8
-    wr.write_byte(0x00); // 9
-    wr.write_byte(0x00); // 10
-    wr.write_byte(0x00); // 11
+    for (int i = 2; i < 12; i++)
+        wr.write_byte(die_config[Die::STATUS_CFG_START + i]); // 2
     wr.insert_crc16();
     wr.write_nops(4);
     wr.write_byte(0x33);
