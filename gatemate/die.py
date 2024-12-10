@@ -115,6 +115,21 @@ CPE_PINS = {
     "POUTY2" : PinType.OUTPUT
 }
 
+GPIO_PINS = {
+    "IN1" : PinType.OUTPUT,
+    "IN2" : PinType.OUTPUT,
+    "OUT1" : PinType.INPUT,
+    "OUT2" : PinType.INPUT,
+    "OUT3" : PinType.INPUT,
+    "OUT4" : PinType.INPUT,
+    "DDR" : PinType.INPUT,
+    "RESET" : PinType.INPUT,
+    "CLOCK1" : PinType.INPUT,
+    "CLOCK2" : PinType.INPUT,
+    "CLOCK3" : PinType.INPUT,
+    "CLOCK4" : PinType.INPUT,
+}
+
 def get_groups_for_type(type):
     groups = []
     def create_group(name, type):
@@ -142,11 +157,15 @@ def get_groups_for_type(type):
 def get_bels_for_type(type):
     if type.startswith("CPE"):
         return [{"name":"CPE", "type":"CPE", "z":0}]
+    if "GPIO" in type:
+        return [{"name":"GPIO", "type":"GPIO", "z":0}]
     return []
 
 def get_bel_pins(bel):
     if bel == "CPE":
         return CPE_PINS.items()
+    elif bel == "GPIO":
+        return GPIO_PINS.items()
     return []
 
 
@@ -236,8 +255,21 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_SML.P{plane}.X14", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X12", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X23", type="SB_SML_WIRE")
-    #if "GPIO" in type:
-    #    # GPIO
+    if "GPIO" in type:
+        # GPIO
+        create_wire("GPIO.IN1", type="GPIO_WIRE")
+        create_wire("GPIO.IN2", type="GPIO_WIRE")
+        create_wire("GPIO.OUT1", type="GPIO_WIRE")
+        create_wire("GPIO.OUT2", type="GPIO_WIRE")
+        create_wire("GPIO.OUT3", type="GPIO_WIRE")
+        create_wire("GPIO.OUT4", type="GPIO_WIRE")
+        create_wire("GPIO.DDR", type="GPIO_WIRE")
+        create_wire("GPIO.RESET", type="GPIO_WIRE")
+        create_wire("GPIO.CLOCK1", type="GPIO_WIRE")
+        create_wire("GPIO.CLOCK2", type="GPIO_WIRE")
+        create_wire("GPIO.CLOCK3", type="GPIO_WIRE")
+        create_wire("GPIO.CLOCK4", type="GPIO_WIRE")
+
     #if "EDGE_IO" in type:
     #    # EDGE_IO
     return wires
