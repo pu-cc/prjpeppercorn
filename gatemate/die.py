@@ -1,4 +1,23 @@
+#
+#  prjpeppercorn -- GateMate FPGAs Bitstream Documentation and Tools
+#
+#  Copyright (C) 2024  The Project Peppercorn Authors.
+#
+#  Permission to use, copy, modify, and/or distribute this software for any
+#  purpose with or without fee is hereby granted, provided that the above
+#  copyright notice and this permission notice appear in all copies.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+#  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+#  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+#  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+#  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+#  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
 from enum import Enum
+from dataclasses import dataclass
 
 def max_row():
     return 131
@@ -81,58 +100,95 @@ class PinType(Enum):
     OUTPUT = 1
     INOUT = 2
 
+@dataclass
+class Primitive:
+    name : str
+    type : str
+    z    : int
+
+@dataclass
+class Pin:
+    name : str
+    dir  : PinType
+    wire_type : str
+
+@dataclass
+class Group:
+    name : str
+    type : str
+
+@dataclass
+class Endpoint:
+    name : str
+    type : str
+
+@dataclass
+class MUX:
+    src : str
+    dst : str
+    name : str
+    bits : int
+    value : int
+
+@dataclass
+class Connection:
+    x : int
+    y : int
+    name : str
+
 PRIMITIVES_PINS = {
-    "CPE": {
-        "RAM_I1" : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "RAM_I2" : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN1"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN2"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN3"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN4"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN5"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN6"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN7"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "IN8"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "CLK"    : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "EN"     : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "SR"     : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "CINX"   : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "PINX"   : [ PinType.INPUT,  "CPE_WIRE_L" ],
-        "CINY1"  : [ PinType.INPUT,  "CPE_WIRE_B" ],
-        "PINY1"  : [ PinType.INPUT,  "CPE_WIRE_B" ],
-        "CINY2"  : [ PinType.INPUT,  "CPE_WIRE_B" ],
-        "PINY2"  : [ PinType.INPUT,  "CPE_WIRE_B" ],
-        "OUT1"   : [ PinType.OUTPUT, "CPE_WIRE_B" ],
-        "OUT2"   : [ PinType.OUTPUT, "CPE_WIRE_B" ],        
-        "RAM_O1" : [ PinType.OUTPUT, "CPE_WIRE_B" ],
-        "RAM_O2" : [ PinType.OUTPUT, "CPE_WIRE_B" ],
-        "COUTX"  : [ PinType.OUTPUT, "CPE_WIRE_B" ],
-        "POUTX"  : [ PinType.OUTPUT, "CPE_WIRE_B" ],
-        "COUTY1" : [ PinType.OUTPUT, "CPE_WIRE_T" ],
-        "POUTY1" : [ PinType.OUTPUT, "CPE_WIRE_T" ],
-        "COUTY2" : [ PinType.OUTPUT, "CPE_WIRE_T" ],
-        "POUTY2" : [ PinType.OUTPUT, "CPE_WIRE_T" ],
-    },
-    "GPIO" : {
-        "IN1"    : [ PinType.OUTPUT, "GPIO_WIRE" ],
-        "IN2"    : [ PinType.OUTPUT, "GPIO_WIRE" ],
-        "OUT1"   : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "OUT2"   : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "OUT3"   : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "OUT4"   : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "DDR"    : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "RESET"  : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "CLOCK1" : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "CLOCK2" : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "CLOCK3" : [ PinType.INPUT,  "GPIO_WIRE" ],
-        "CLOCK4" : [ PinType.INPUT,  "GPIO_WIRE" ],
-    }
+    "CPE": [
+        Pin("RAM_I1" ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("RAM_I2" ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN1"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN2"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN3"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN4"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN5"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN6"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN7"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("IN8"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("CLK"    ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("EN"     ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("SR"     ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("CINX"   ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("PINX"   ,PinType.INPUT,  "CPE_WIRE_L"),
+        Pin("CINY1"  ,PinType.INPUT,  "CPE_WIRE_B"),
+        Pin("PINY1"  ,PinType.INPUT,  "CPE_WIRE_B"),
+        Pin("CINY2"  ,PinType.INPUT,  "CPE_WIRE_B"),
+        Pin("PINY2"  ,PinType.INPUT,  "CPE_WIRE_B"),
+        Pin("OUT1"   ,PinType.OUTPUT, "CPE_WIRE_B"),
+        Pin("OUT2"   ,PinType.OUTPUT, "CPE_WIRE_B"),
+        Pin("RAM_O1" ,PinType.OUTPUT, "CPE_WIRE_B"),
+        Pin("RAM_O2" ,PinType.OUTPUT, "CPE_WIRE_B"),
+        Pin("COUTX"  ,PinType.OUTPUT, "CPE_WIRE_B"),
+        Pin("POUTX"  ,PinType.OUTPUT, "CPE_WIRE_B"),
+        Pin("COUTY1" ,PinType.OUTPUT, "CPE_WIRE_T"),
+        Pin("POUTY1" ,PinType.OUTPUT, "CPE_WIRE_T"),
+        Pin("COUTY2" ,PinType.OUTPUT, "CPE_WIRE_T"),
+        Pin("POUTY2" ,PinType.OUTPUT, "CPE_WIRE_T"),
+    ],
+    "GPIO" : [
+        Pin("IN1"   , PinType.OUTPUT,"GPIO_WIRE"),
+        Pin("IN2"   , PinType.OUTPUT,"GPIO_WIRE"),
+        Pin("OUT1"  , PinType.INPUT, "GPIO_WIRE"),
+        Pin("OUT2"  , PinType.INPUT, "GPIO_WIRE"),
+        Pin("OUT3"  , PinType.INPUT, "GPIO_WIRE"),
+        Pin("OUT4"  , PinType.INPUT, "GPIO_WIRE"),
+        Pin("DDR"   , PinType.INPUT, "GPIO_WIRE"),
+        Pin("RESET" , PinType.INPUT, "GPIO_WIRE"),
+        Pin("CLOCK1", PinType.INPUT, "GPIO_WIRE"),
+        Pin("CLOCK2", PinType.INPUT, "GPIO_WIRE"),
+        Pin("CLOCK3", PinType.INPUT, "GPIO_WIRE"),
+        Pin("CLOCK4", PinType.INPUT, "GPIO_WIRE"),
+    ]
 }
 
 def get_groups_for_type(type):
     groups = []
     def create_group(name, type):
-        groups.append({"name":name, "type":type})
+        groups.append(Group(name,type))
+
     if "CPE" in type:
         # CPE
         for p in range(1,13):
@@ -153,25 +209,25 @@ def get_groups_for_type(type):
     #    # EDGE_IO
     return groups
 
-def get_bels_for_type(type):
-    bels = []
+def get_primitives_for_type(type):
+    primitives = []
     if "CPE" in type:
-        bels.append({"name":"CPE", "type":"CPE", "z":0})
+        primitives.append(Primitive("CPE","CPE",0))
     if "GPIO" in type:
-        bels.append({"name":"GPIO", "type":"GPIO", "z":0})
-    return bels
+        primitives.append(Primitive("GPIO","GPIO",0))
+    return primitives
 
-def get_bel_pins(bel):
-    return PRIMITIVES_PINS[bel].items()
+def get_primitive_pins(bel):
+    return PRIMITIVES_PINS[bel]
 
 def get_endpoints_for_type(type):
     wires = []
     def create_wire(name, type):
-        wires.append({"name":name, "type":type})
+        wires.append(Endpoint(name,type))
 
-    for bel in get_bels_for_type(type):
-        for k,v in get_bel_pins(bel["type"]):
-            create_wire(f"{bel["name"]}.{k}", type=f"{v[1]}")
+    for prim in get_primitives_for_type(type):
+        for pin in get_primitive_pins(prim.type):
+            create_wire(f"{prim.name}.{pin.name}", type=f"{pin.wire_type}")
 
     if "CPE" in type:
         # CPE
@@ -229,8 +285,8 @@ def get_endpoints_for_type(type):
 def get_mux_connections_for_type(type):
     muxes = []
     def create_mux(src, dst, bits, value):
-        mux = dst.replace(".","_") + "_MUX"
-        muxes.append({"src":src, "dst":dst, "mux":mux, "bits":bits, "value": value})
+        name = dst.replace(".","_") + "_MUX"
+        muxes.append(MUX(src, dst, name, bits, value))
 
     if "CPE" in type:
         # CPE
@@ -334,8 +390,8 @@ debug_conn = False
 
 def create_conn(src_x,src_y, src, dst_x, dst_y, dst):
     key_val = f"{src_x}/{src_y}/{src}"
-    key = { "x" : src_x, "y" : src_y, "w" : src }
-    item = { "x" : dst_x,"y" : dst_y, "w" : dst }
+    key  = Connection(src_x, src_y, src)
+    item = Connection(dst_x, dst_y, dst)
     if key_val not in conn:
         conn[key_val] = list()
         conn[key_val].append(key)
@@ -429,7 +485,6 @@ def create_sb(x,y):
 #        else:
             # Handling GPIO connections
         # Handling other inputs
-        
 
 def create_outmux(x,y):
     block_x = ((x-1) & ~1) + 1
