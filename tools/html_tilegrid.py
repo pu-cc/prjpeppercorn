@@ -1,4 +1,22 @@
 #!/usr/bin/env python3
+#
+#  prjpeppercorn -- GateMate FPGAs Bitstream Documentation and Tools
+#
+#  Copyright (C) 2024  The Project Peppercorn Authors.
+#
+#  Permission to use, copy, modify, and/or distribute this software for any
+#  purpose with or without fee is hereby granted, provided that the above
+#  copyright notice and this permission notice appear in all copies.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+#  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+#  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+#  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+#  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+#  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
 import sys
 import argparse
 import die
@@ -13,23 +31,25 @@ parser.add_argument('outfile', type=argparse.FileType('w'),
 
 
 def get_colour(ttype):
-    colour = "#FFFFFF"
-    if ttype.startswith("SB_BIG"):
-        colour = "#73fc03"
-    elif ttype.startswith("SB_SML"):
-        colour = "#F0FC03"
-    elif ttype.startswith("GPIO"):
-        colour = "#88FFFF"
-    elif ttype.startswith("INMUX"):
-        colour = "#FF9040"
-    elif ttype.startswith("OUTMUX"):
-        colour = "#9040FF"
-    elif ttype.startswith("EDGE_IO"):
-        colour = "#6d6d6d"
-    elif ttype.startswith("EDGE_"):
-        colour = "#DDDDDD"
-    else:
-        colour = "#888888"
+    match ttype:
+        case "CPE":
+            colour = "#ACC8E6"
+        case "SB_BIG":
+            colour = "#9CC763"
+        case "SB_SML":
+            colour = "#F8EA56"
+        case "GPIO":
+            colour = "#B699D4"
+        case "OUTMUX":
+            colour = "#D19537"
+        case "EDGE_IO":
+            colour = "#6D6D6D"
+        case "LEFT" | "RIGHT" | "TOP" | "BOTTOM":
+            colour = "#FDD3D3"
+        case "PLL":
+            colour = "#FF7ABE"
+        case _:
+            colour = "#FFFFFF"
     return colour
 
 def main(argv):
@@ -47,28 +67,8 @@ def main(argv):
 
     for y in range(-2, max_row+1):
         for x in range(-2, max_col+1):
-            if die.is_sb_big(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "SB_BIG"))
-            if die.is_sb_sml(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "SB_SML"))
-            if die.is_cpe(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "CPE"))
-                tiles[max_row-y][x+2].append((f"{x},{y}", "INMUX"))
-                if die.is_outmux(x,y):
-                    tiles[max_row-y][x+2].append((f"{x},{y}", "OUTMUX"))
-            if die.is_edge_left(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "EDGE_L"))
-            if die.is_edge_right(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "EDGE_R"))
-            if die.is_edge_bottom(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "EDGE_B"))
-            if die.is_edge_top(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "EDGE_T"))
-
-            if die.is_gpio(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "GPIO"))
-            if die.is_edge_io(x,y):
-                tiles[max_row-y][x+2].append((f"{x},{y}", "EDGE_IO"))
+            for type in die.get_tile_types(x,y):
+                tiles[max_row-y][x+2].append((f"{x},{y}", type))
 
     f = args.outfile
     print(
@@ -83,7 +83,7 @@ def main(argv):
         row_max_height = 0
         for tloc in trow:
             row_max_height = max(row_max_height, len(tloc))
-        row_height = max(75, 30 * row_max_height)
+        row_height = max(90, 30 * row_max_height)
         for tloc in trow:
             print(f"<td style='border: 2px solid black; height: {row_height}px'>", file=f)
             for tile in tloc:

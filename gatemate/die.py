@@ -349,7 +349,7 @@ def get_mux_connections_for_type(type):
     #    # EDGE_IO
     return muxes
 
-def get_tile_type(x,y):
+def get_tile_types(x,y):
     val = list()
     if is_cpe(x,y):
         val.append("CPE")
@@ -372,7 +372,10 @@ def get_tile_type(x,y):
         val.append("LEFT")
     if is_edge_right(x,y):
         val.append("RIGHT")
+    return val
 
+def get_tile_type(x,y):
+    val = get_tile_types(x,y)
     if not val:
         val.append("NONE")
     return "_".join(val)
