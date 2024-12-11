@@ -40,11 +40,13 @@ def get_colour(ttype):
             colour = "#F8EA56"
         case "GPIO":
             colour = "#B699D4"
-        case "OUTMUX":
+        case "IM":
+            colour = "#FFC51F"
+        case "OM":
             colour = "#D19537"
-        case "EDGE_IO":
+        case "IOES":
             colour = "#6D6D6D"
-        case "LEFT" | "RIGHT" | "TOP" | "BOTTOM":
+        case "LES" | "RES" | "TES" | "BES":
             colour = "#FDD3D3"
         case "PLL":
             colour = "#FF7ABE"

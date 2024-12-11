@@ -68,23 +68,23 @@ def is_edge_top(x,y):
     return y==max_row() and x>=1 and x<=162
 
 def is_edge_io(x,y):
-    if (y==-2 and x>=5 and x<=40): # GPIO_S3
+    if (y==-2 and x>=5 and x<=40): # IO Bank S3/WA
         return True
-    if (y==-2 and x>=57 and x<=92):  # GPIO_S1
+    if (y==-2 and x>=57 and x<=92):  # IO Bank S1/WB
         return True
-    if (y==-2 and x>=101 and x<=136): # GPIO_S2
+    if (y==-2 and x>=101 and x<=136): # IO Bank S2/WC
         return True
-    if (x==-2 and y>=25 and y<=60): # GPIO_W1
+    if (x==-2 and y>=25 and y<=60): # IO Bank W1/SA
         return True
-    if (x==-2 and y>=69 and y<=104): # GPIO_W2
+    if (x==-2 and y>=69 and y<=104): # IO Bank W2/SB
         return True
-    if (x==max_col() and y>=25 and y<=60): # GPIO_E1
+    if (x==max_col() and y>=25 and y<=60): # IO Bank E1/NA
         return True
-    if (x==max_col() and y>=69 and y<=104): # GPIO_E2
+    if (x==max_col() and y>=69 and y<=104): # IO Bank E2/NB
         return True
-    if (y==max_row() and x>=57 and x<=92): # GPIO_N1
+    if (y==max_row() and x>=57 and x<=92): # IO Bank N1/EA
         return True
-    if (y==max_row() and x>=101 and x<=136): # GPIO_N2
+    if (y==max_row() and x>=101 and x<=136): # IO Bank N2/EB
         return True
 
 def is_gpio(x,y):
@@ -129,6 +129,7 @@ class MUX:
     name : str
     bits : int
     value : int
+    invert: bool
 
 @dataclass
 class Connection:
@@ -192,9 +193,9 @@ def get_groups_for_type(type):
     if "CPE" in type:
         # CPE
         for p in range(1,13):
-            create_group(f"INMUX_P{p:02d}", "INMUX")
-            if "OUTMUX" in type and p>=9:
-                create_group(f"OUTMUX_P{p:02d}", "OUTMUX")
+            create_group(f"IM_P{p:02d}", "IM")
+            if "OM" in type and p>=9:
+                create_group(f"OM_P{p:02d}", "OM")
     if "SB_BIG" in type:
         # SB_BIG
         for p in range(1,13):
@@ -205,8 +206,8 @@ def get_groups_for_type(type):
             create_group(f"SB_SML_P{p:02d}", "SB_SML")
     #if "GPIO" in type:
     #    # GPIO
-    #if "EDGE_IO" in type:
-    #    # EDGE_IO
+    #if "IOES" in type:
+    #    # IOES
     return groups
 
 def get_primitives_for_type(type):
@@ -234,12 +235,12 @@ def get_endpoints_for_type(type):
         for p in range(1,13):
             plane = f"{p:02d}"
             for i in range(8):
-                create_wire(f"INMUX.P{plane}.D{i}", type="INMUX_WIRE")
-            create_wire(f"INMUX.P{plane}.Y", type="INMUX_WIRE")
-            if "OUTMUX" in type and p>=9:
+                create_wire(f"IM.P{plane}.D{i}", type="IM_WIRE")
+            create_wire(f"IM.P{plane}.Y", type="IM_WIRE")
+            if "OM" in type and p>=9:
                 for i in range(4):
-                    create_wire(f"OUTMUX.P{plane}.D{i}", type="OUTMUX_WIRE")
-                create_wire(f"OUTMUX.P{plane}.Y", type="OUTMUX_WIRE")
+                    create_wire(f"OM.P{plane}.D{i}", type="OM_WIRE")
+                create_wire(f"OM.P{plane}.Y", type="OM_WIRE")
 
     if "SB_BIG" in type:
         # SB_BIG
@@ -278,25 +279,25 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_SML.P{plane}.X23", type="SB_SML_WIRE")
     #if "GPIO" in type:
         # GPIO
-    #if "EDGE_IO" in type:
-    #    # EDGE_IO
+    #if "IOES" in type:
+    #    # IOES
     return wires
 
 def get_mux_connections_for_type(type):
     muxes = []
-    def create_mux(src, dst, bits, value):
+    def create_mux(src, dst, bits, value, invert):
         name = dst.replace(".","_") + "_MUX"
-        muxes.append(MUX(src, dst, name, bits, value))
+        muxes.append(MUX(src, dst, name, bits, value, invert))
 
     if "CPE" in type:
         # CPE
         for p in range(1,13):
             plane = f"{p:02d}"
             for i in range(8):
-                create_mux(f"INMUX.P{plane}.D{i}", f"INMUX.P{plane}.Y", 3, i)
-            if "OUTMUX" in type and p>=9:
+                create_mux(f"IM.P{plane}.D{i}", f"IM.P{plane}.Y", 3, i, True)
+            if "OM" in type and p>=9:
                 for i in range(4):
-                    create_mux(f"OUTMUX.P{plane}.D{i}", f"OUTMUX.P{plane}.Y", 2, i)
+                    create_mux(f"OM.P{plane}.D{i}", f"OM.P{plane}.Y", 2, i, True)
 
     if "SB_BIG" in type:
         # SB_BIG
@@ -304,57 +305,58 @@ def get_mux_connections_for_type(type):
             plane = f"{p:02d}"
             # Per Y output mux
             for i in range(1,5):
-                create_mux(f"SB_BIG.P{plane}.D0",     f"SB_BIG.P{plane}.Y{i}", 3, 0)
-                create_mux(f"SB_BIG.P{plane}.YDIAG",  f"SB_BIG.P{plane}.Y{i}", 3, 1)
-                create_mux(f"SB_BIG.P{plane}.D2_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 2)
-                create_mux(f"SB_BIG.P{plane}.D3_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 3)
-                create_mux(f"SB_BIG.P{plane}.D4_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 4)
-                create_mux(f"SB_BIG.P{plane}.D5_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 5)
-                create_mux(f"SB_BIG.P{plane}.D6_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 6)
-                create_mux(f"SB_BIG.P{plane}.D7_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 7)
+                create_mux(f"SB_BIG.P{plane}.D0",     f"SB_BIG.P{plane}.Y{i}", 3, 0, True)
+                create_mux(f"SB_BIG.P{plane}.YDIAG",  f"SB_BIG.P{plane}.Y{i}", 3, 1, True)
+                create_mux(f"SB_BIG.P{plane}.D2_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 2, True)
+                create_mux(f"SB_BIG.P{plane}.D3_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 3, True)
+                create_mux(f"SB_BIG.P{plane}.D4_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 4, True)
+                create_mux(f"SB_BIG.P{plane}.D5_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 5, True)
+                create_mux(f"SB_BIG.P{plane}.D6_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 6, True)
+                create_mux(f"SB_BIG.P{plane}.D7_{i}", f"SB_BIG.P{plane}.Y{i}", 3, 7, True)
 
             # YDIAG output mux
-            create_mux(f"SB_BIG.P{plane}.Y1",  f"SB_BIG.P{plane}.YDIAG", 3, 0)
-            create_mux(f"SB_BIG.P{plane}.Y2",  f"SB_BIG.P{plane}.YDIAG", 3, 1)
-            create_mux(f"SB_BIG.P{plane}.Y3",  f"SB_BIG.P{plane}.YDIAG", 3, 2)
-            create_mux(f"SB_BIG.P{plane}.Y4",  f"SB_BIG.P{plane}.YDIAG", 3, 3)
-            create_mux(f"SB_BIG.P{plane}.X34", f"SB_BIG.P{plane}.YDIAG", 3, 4)
-            create_mux(f"SB_BIG.P{plane}.X14", f"SB_BIG.P{plane}.YDIAG", 3, 5)
-            create_mux(f"SB_BIG.P{plane}.X12", f"SB_BIG.P{plane}.YDIAG", 3, 6)
-            create_mux(f"SB_BIG.P{plane}.X23", f"SB_BIG.P{plane}.YDIAG", 3, 7)
+            create_mux(f"SB_BIG.P{plane}.Y1",  f"SB_BIG.P{plane}.YDIAG", 3, 0, True)
+            create_mux(f"SB_BIG.P{plane}.Y2",  f"SB_BIG.P{plane}.YDIAG", 3, 1, True)
+            create_mux(f"SB_BIG.P{plane}.Y3",  f"SB_BIG.P{plane}.YDIAG", 3, 2, True)
+            create_mux(f"SB_BIG.P{plane}.Y4",  f"SB_BIG.P{plane}.YDIAG", 3, 3, True)
+            create_mux(f"SB_BIG.P{plane}.X34", f"SB_BIG.P{plane}.YDIAG", 3, 4, True)
+            create_mux(f"SB_BIG.P{plane}.X14", f"SB_BIG.P{plane}.YDIAG", 3, 5, True)
+            create_mux(f"SB_BIG.P{plane}.X12", f"SB_BIG.P{plane}.YDIAG", 3, 6, True)
+            create_mux(f"SB_BIG.P{plane}.X23", f"SB_BIG.P{plane}.YDIAG", 3, 7, True)
     if "SB_SML" in type:
         # SB_SML
         for p in range(1,13):
             plane = f"{p:02d}"
             # Per Y output mux
             for i in range(1,5):
-                create_mux(f"SB_SML.P{plane}.D0",     f"SB_SML.P{plane}.Y{i}", 2, 0)
-                create_mux(f"SB_SML.P{plane}.YDIAG",  f"SB_SML.P{plane}.Y{i}", 2, 1)
-                create_mux(f"SB_SML.P{plane}.D2_{i}", f"SB_SML.P{plane}.Y{i}", 2, 2)
-                create_mux(f"SB_SML.P{plane}.D3_{i}", f"SB_SML.P{plane}.Y{i}", 2, 3)
+                create_mux(f"SB_SML.P{plane}.D0",     f"SB_SML.P{plane}.Y{i}", 2, 0, True)
+                create_mux(f"SB_SML.P{plane}.YDIAG",  f"SB_SML.P{plane}.Y{i}", 2, 1, True)
+                create_mux(f"SB_SML.P{plane}.D2_{i}", f"SB_SML.P{plane}.Y{i}", 2, 2, True)
+                create_mux(f"SB_SML.P{plane}.D3_{i}", f"SB_SML.P{plane}.Y{i}", 2, 3, True)
 
             # YDIAG output mux
-            create_mux(f"SB_SML.P{plane}.Y1",  f"SB_SML.P{plane}.YDIAG", 3, 0)
-            create_mux(f"SB_SML.P{plane}.Y2",  f"SB_SML.P{plane}.YDIAG", 3, 1)
-            create_mux(f"SB_SML.P{plane}.Y3",  f"SB_SML.P{plane}.YDIAG", 3, 2)
-            create_mux(f"SB_SML.P{plane}.Y4",  f"SB_SML.P{plane}.YDIAG", 3, 3)
-            create_mux(f"SB_SML.P{plane}.X34", f"SB_SML.P{plane}.YDIAG", 3, 4)
-            create_mux(f"SB_SML.P{plane}.X14", f"SB_SML.P{plane}.YDIAG", 3, 5)
-            create_mux(f"SB_SML.P{plane}.X12", f"SB_SML.P{plane}.YDIAG", 3, 6)
-            create_mux(f"SB_SML.P{plane}.X23", f"SB_SML.P{plane}.YDIAG", 3, 7)
+            create_mux(f"SB_SML.P{plane}.Y1",  f"SB_SML.P{plane}.YDIAG", 3, 0, True)
+            create_mux(f"SB_SML.P{plane}.Y2",  f"SB_SML.P{plane}.YDIAG", 3, 1, True)
+            create_mux(f"SB_SML.P{plane}.Y3",  f"SB_SML.P{plane}.YDIAG", 3, 2, True)
+            create_mux(f"SB_SML.P{plane}.Y4",  f"SB_SML.P{plane}.YDIAG", 3, 3, True)
+            create_mux(f"SB_SML.P{plane}.X34", f"SB_SML.P{plane}.YDIAG", 3, 4, True)
+            create_mux(f"SB_SML.P{plane}.X14", f"SB_SML.P{plane}.YDIAG", 3, 5, True)
+            create_mux(f"SB_SML.P{plane}.X12", f"SB_SML.P{plane}.YDIAG", 3, 6, True)
+            create_mux(f"SB_SML.P{plane}.X23", f"SB_SML.P{plane}.YDIAG", 3, 7, True)
 
     #if "GPIO" in type:
     #    # GPIO
-    #if "EDGE_IO" in type:
-    #    # EDGE_IO
+    #if "IOES" in type:
+    #    # IOES
     return muxes
 
 def get_tile_types(x,y):
     val = list()
     if is_cpe(x,y):
         val.append("CPE")
+        val.append("IM")
         if is_outmux(x,y): 
-            val.append("OUTMUX")
+            val.append("OM")
 
     if is_sb_big(x,y):
         val.append("SB_BIG")
@@ -363,15 +365,15 @@ def get_tile_types(x,y):
     if is_gpio(x,y):
         val.append("GPIO")
     if is_edge_io(x,y):
-        val.append("EDGE_IO")
+        val.append("IOES")
     if is_edge_top(x,y):        
-        val.append("TOP")
+        val.append("TES")
     if is_edge_bottom(x,y):
-        val.append("BOTTOM")
+        val.append("BES")
     if is_edge_left(x,y):
-        val.append("LEFT")
+        val.append("LES")
     if is_edge_right(x,y):
-        val.append("RIGHT")
+        val.append("RES")
     return val
 
 def get_tile_type(x,y):
@@ -409,17 +411,17 @@ def alt_plane(dir,plane):
     return alt[dir][plane-1]
 
 def create_cpe(x,y):
-    create_conn(x,y,"INMUX.P01.Y", x,y,"CPE.IN1")
-    create_conn(x,y,"INMUX.P02.Y", x,y,"CPE.IN2")
-    create_conn(x,y,"INMUX.P03.Y", x,y,"CPE.IN3")
-    create_conn(x,y,"INMUX.P04.Y", x,y,"CPE.IN4")
-    create_conn(x,y,"INMUX.P05.Y", x,y,"CPE.IN5")
-    create_conn(x,y,"INMUX.P06.Y", x,y,"CPE.IN6")
-    create_conn(x,y,"INMUX.P07.Y", x,y,"CPE.IN7")
-    create_conn(x,y,"INMUX.P08.Y", x,y,"CPE.IN8")
-    create_conn(x,y,"INMUX.P09.Y", x,y,"CPE.CLK")
-    create_conn(x,y,"INMUX.P10.Y", x,y,"CPE.EN")
-    create_conn(x,y,"INMUX.P11.Y", x,y,"CPE.SR")
+    create_conn(x,y,"IM.P01.Y", x,y,"CPE.IN1")
+    create_conn(x,y,"IM.P02.Y", x,y,"CPE.IN2")
+    create_conn(x,y,"IM.P03.Y", x,y,"CPE.IN3")
+    create_conn(x,y,"IM.P04.Y", x,y,"CPE.IN4")
+    create_conn(x,y,"IM.P05.Y", x,y,"CPE.IN5")
+    create_conn(x,y,"IM.P06.Y", x,y,"CPE.IN6")
+    create_conn(x,y,"IM.P07.Y", x,y,"CPE.IN7")
+    create_conn(x,y,"IM.P08.Y", x,y,"CPE.IN8")
+    create_conn(x,y,"IM.P09.Y", x,y,"CPE.CLK")
+    create_conn(x,y,"IM.P10.Y", x,y,"CPE.EN")
+    create_conn(x,y,"IM.P11.Y", x,y,"CPE.SR")
     if is_cpe(x,y-1):
         create_conn(x,y-1,"CPE.COUTY1", x,y,"CPE.CINY1")
         create_conn(x,y-1,"CPE.COUTY2", x,y,"CPE.CINY2")
@@ -435,22 +437,22 @@ def create_inmux(x,y):
 
         # D0 - D3 are from nearby SBs
         offset = 2 if is_sb(x,y) else 1
-        create_conn(x-offset,y,f"{get_sb_type(x-offset,y)}.P{plane}.Y1", x,y,f"INMUX.P{plane}.D0")
-        create_conn(x,y-offset,f"{get_sb_type(x,y-offset)}.P{plane}.Y2", x,y,f"INMUX.P{plane}.D1")
-        create_conn(x+offset,y,f"{get_sb_type(x+offset,y)}.P{plane}.Y3", x,y,f"INMUX.P{plane}.D2")
-        create_conn(x,y+offset,f"{get_sb_type(x,y+offset)}.P{plane}.Y4", x,y,f"INMUX.P{plane}.D3")
+        create_conn(x-offset,y,f"{get_sb_type(x-offset,y)}.P{plane}.Y1", x,y,f"IM.P{plane}.D0")
+        create_conn(x,y-offset,f"{get_sb_type(x,y-offset)}.P{plane}.Y2", x,y,f"IM.P{plane}.D1")
+        create_conn(x+offset,y,f"{get_sb_type(x+offset,y)}.P{plane}.Y3", x,y,f"IM.P{plane}.D2")
+        create_conn(x,y+offset,f"{get_sb_type(x,y+offset)}.P{plane}.Y4", x,y,f"IM.P{plane}.D3")
 
         # D4 and D5 are from diagonal INMUX
         if is_cpe(x-1,y-1):
-            create_conn(x-1,y-1,f"INMUX.P{plane}.Y", x,y,f"INMUX.P{plane}.D4")
+            create_conn(x-1,y-1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D4")
         if is_cpe(x+1,y+1):
-            create_conn(x+1,y+1,f"INMUX.P{plane}.Y", x,y,f"INMUX.P{plane}.D5")
+            create_conn(x+1,y+1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D5")
 
         # D6 and D7 are from alternate planes
         alt = f"{alt_plane(0,p):02d}"
-        create_conn(x,y,f"INMUX.P{alt}.Y", x,y,f"INMUX.P{plane}.D6")
+        create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D6")
         alt = f"{alt_plane(1,p):02d}"
-        create_conn(x,y,f"INMUX.P{alt}.Y", x,y,f"INMUX.P{plane}.D7")
+        create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D7")
 
 OUT_PLANE_1 = [ 2, 1, 2, 1, 1, 2, 1, 2]
 OUT_PLANE_2 = [ 1, 2, 1, 2, 2, 1, 2, 1]
@@ -484,7 +486,7 @@ def create_sb(x,y):
                 create_conn(x_cpe,y_cpe,f"CPE.OUT{out}", x,y,f"{sb_type}.P{plane}.D0")
             else:
                 # planes 9..12
-                create_conn(x,y,f"OUTMUX.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
+                create_conn(x,y,f"OM.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
 #        else:
             # Handling GPIO connections
         # Handling other inputs
@@ -496,10 +498,10 @@ def create_outmux(x,y):
         plane = f"{p:02d}"
         output_1 = 1 if (x % 2)  ^ (p % 2) else 2
         output_2 = 2 if (x % 2)  ^ (p % 2) else 1
-        create_conn(block_x,   block_y,   f"CPE.OUT{output_1}", x,y, f"OUTMUX.P{plane}.D0")
-        create_conn(block_x,   block_y+1, f"CPE.OUT{output_1}", x,y, f"OUTMUX.P{plane}.D1")
-        create_conn(block_x+1, block_y,   f"CPE.OUT{output_2}", x,y, f"OUTMUX.P{plane}.D2")
-        create_conn(block_x+1, block_y+1, f"CPE.OUT{output_2}", x,y, f"OUTMUX.P{plane}.D3")
+        create_conn(block_x,   block_y,   f"CPE.OUT{output_1}", x,y, f"OM.P{plane}.D0")
+        create_conn(block_x,   block_y+1, f"CPE.OUT{output_1}", x,y, f"OM.P{plane}.D1")
+        create_conn(block_x+1, block_y,   f"CPE.OUT{output_2}", x,y, f"OM.P{plane}.D2")
+        create_conn(block_x+1, block_y+1, f"CPE.OUT{output_2}", x,y, f"OM.P{plane}.D3")
 
 def get_connections():
     for y in range(-2, max_row()+1):
