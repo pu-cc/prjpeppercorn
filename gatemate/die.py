@@ -78,7 +78,7 @@ def is_edge_io(x,y):
         return True
     if (x==-2 and y>=69 and y<=104): # GPIO_W2
         return True
-    if (x==max_col() and y>=25 and y<=50): # GPIO_E1
+    if (x==max_col() and y>=25 and y<=60): # GPIO_E1
         return True
     if (x==max_col() and y>=69 and y<=104): # GPIO_E2
         return True
