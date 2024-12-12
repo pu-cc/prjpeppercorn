@@ -363,8 +363,13 @@ def get_mux_connections_for_type(type):
 
     #if "GPIO" in type:
     #    # GPIO
-    #if "IOES" in type:
-    #    # IOES
+    if "IOES" in type:
+        # IOES
+        for p in range(1,13):
+            plane = f"{p:02d}"
+            io_in = 1 if p % 2 else 2
+            create_mux(f"IOES.IO_IN{io_in}", f"IOES.SB_IN_{plane}", 0, 1, False)
+            create_mux(f"IOES.ALTIN_{plane}", f"IOES.SB_IN_{plane}", 1, 1, False)
     return muxes
 
 def get_tile_types(x,y):
@@ -372,7 +377,7 @@ def get_tile_types(x,y):
     if is_cpe(x,y):
         val.append("CPE")
         val.append("IM")
-        if is_outmux(x,y): 
+        if is_outmux(x,y):
             val.append("OM")
 
     if is_sb_big(x,y):
@@ -383,7 +388,7 @@ def get_tile_types(x,y):
         val.append("GPIO")
     if is_edge_io(x,y):
         val.append("IOES")
-    if is_edge_top(x,y):        
+    if is_edge_top(x,y):
         val.append("TES")
     if is_edge_bottom(x,y):
         val.append("BES")
@@ -399,7 +404,7 @@ def get_tile_type(x,y):
         val.append("NONE")
     return "_".join(val)
 
-def get_tile_type_list():    
+def get_tile_type_list():
     tt = set()
     for y in range(-2, max_row()+1):
         for x in range(-2, max_col()+1):
@@ -486,7 +491,7 @@ def create_sb(x,y):
         # Handling input D0
         if is_cpe(x,y):
             # Core section SBs are connected to CPE
-            if (p<9):
+            if p < 9:
                 # planes 1..8
                 x_cpe = x_0 + (1 if (p-1) & 2 else 0)
                 y_cpe = y_0 + (1 if (p-1) & 1 else 0)
