@@ -265,6 +265,10 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_BIG.P{plane}.X12", type="SB_BIG_WIRE")
             create_wire(f"SB_BIG.P{plane}.X23", type="SB_BIG_WIRE")
 
+            for i in range(1,5):
+                create_wire(f"SB_DRIVE.P{plane}.D{i}.IN", type="SB_DRIVE_WIRE")
+                create_wire(f"SB_DRIVE.P{plane}.D{i}.OUT", type="SB_DRIVE_WIRE")
+
     if "SB_SML" in type:
         # SB_SML
         for p in range(1,13):
@@ -326,6 +330,10 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_BIG.P{plane}.X14", f"SB_BIG.P{plane}.YDIAG", 3, 5, True)
             create_mux(f"SB_BIG.P{plane}.X12", f"SB_BIG.P{plane}.YDIAG", 3, 6, True)
             create_mux(f"SB_BIG.P{plane}.X23", f"SB_BIG.P{plane}.YDIAG", 3, 7, True)
+
+            for i in range(1,5):
+                create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, False)
+
     if "SB_SML" in type:
         # SB_SML
         for p in range(1,13):
@@ -457,6 +465,12 @@ def create_inmux(x,y):
         alt = f"{alt_plane(1,p):02d}"
         create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D7")
 
+def prev_plane(p):
+    return (p-2) % 12 + 1
+
+def next_plane(p):
+    return p % 12 + 1
+
 def create_sb(x,y):
     x_0,y_0 = base_loc(x,y)
     sb_type = get_sb_type(x,y)
@@ -478,7 +492,35 @@ def create_sb(x,y):
                 create_conn(x,y,f"OM.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
 #        else:
             # Handling GPIO connections
-        # Handling other inputs
+        # Handling inputs D2_* till D7_*
+        distances = [2, 4, 8, 12, 16, 20] if is_sb_big(x,y) else [2, 4]
+        for i,distance in enumerate(distances):
+            for direction in range(4):
+                sb_x, sb_y = x, y
+                match direction:
+                    case 0 :
+                        sb_x -= distance
+                    case 1 :
+                        sb_y -= distance
+                    case 2 :
+                        sb_x += distance
+                    case 3 :
+                        sb_y += distance
+                if is_sb(sb_x,sb_y):
+                    src  = f"{get_sb_type(sb_x,sb_y)}.P{plane}.Y{direction+1}"
+                    # Long distance signals are coming from SB_DRIVE
+                    if (distance>4):
+                        src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
+                    create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}")
+
+        # Diagonal inputs
+        # X12 and X34 on edges are unconnected
+        if is_sb(x-1,y-1):
+            create_conn(x-1,y-1,f"{get_sb_type(x-1,y-1)}.P{plane}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X12")
+        if is_sb(x+1,y+1):
+            create_conn(x+1,y+1,f"{get_sb_type(x+1,y+1)}.P{plane}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X34")
+        create_conn(x,y,f"{get_sb_type(x,y)}.P{prev_plane(p):02d}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X14")
+        create_conn(x,y,f"{get_sb_type(x,y)}.P{next_plane(p):02d}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X23")
 
 def create_outmux(x,y):
     x_0,y_0 = base_loc(x,y)
