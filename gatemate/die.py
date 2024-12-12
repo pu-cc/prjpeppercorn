@@ -284,10 +284,16 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_SML.P{plane}.X14", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X12", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X23", type="SB_SML_WIRE")
-    #if "GPIO" in type:
-        # GPIO
-    #if "IOES" in type:
-    #    # IOES
+
+    if "IOES" in type:
+        # IOES
+        create_wire(f"IOES.IO_IN1", type="IOES_WIRE")
+        create_wire(f"IOES.IO_IN2", type="IOES_WIRE")
+        for p in range(1,13):
+            plane = f"{p:02d}"
+            create_wire(f"IOES.SB_IN_{plane}", type="IOES_WIRE")
+            create_wire(f"IOES.ALTIN_{plane}", type="IOES_WIRE")
+
     return wires
 
 def get_mux_connections_for_type(type):
@@ -490,8 +496,7 @@ def create_sb(x,y):
             else:
                 # planes 9..12
                 create_conn(x,y,f"OM.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
-#        else:
-            # Handling GPIO connections
+        # Handling GPIO connections is done in create_io
         # Handling inputs D2_* till D7_*
         distances = [2, 4, 8, 12, 16, 20] if is_sb_big(x,y) else [2, 4]
         for i,distance in enumerate(distances):
@@ -533,6 +538,60 @@ def create_outmux(x,y):
         create_conn(x_0+1, y_0,   f"CPE.OUT{outputs[2]}", x,y, f"OM.P{plane}.D2")
         create_conn(x_0+1, y_0+1, f"CPE.OUT{outputs[3]}", x,y, f"OM.P{plane}.D3")
 
+def create_io(x,y):
+    cpe_x, cpe_y = gpio_x, gpio_y = sb_x, sb_y = x, y
+    alt = False
+    if is_edge_left(sb_x,sb_y):
+        output = "Y3"
+        cpe_x += 3
+        if is_sb(sb_x+1,sb_y):
+            sb_x += 1
+        else:
+            sb_x += 2
+            gpio_y -= 1
+            alt = True
+    elif is_edge_right(sb_x,sb_y):
+        output = "Y1"
+        cpe_x -= 3
+        if is_sb(sb_x-1,sb_y):
+            sb_x -= 1
+            gpio_y -= 1
+            alt = True
+        else:
+            sb_x -= 2
+    elif is_edge_bottom(sb_x,sb_y):
+        output = "Y4"
+        cpe_y += 3
+        if is_sb(sb_x,sb_y+1):
+            sb_y += 1
+        else:
+            sb_y += 2
+            gpio_x -= 1
+            alt = True
+    else:
+        output = "Y2"
+        cpe_y -= 3
+        if is_sb(sb_x,sb_y-1):
+            sb_y -= 1
+            gpio_x -= 1
+            alt = True
+        else:
+            sb_y -= 2
+
+    for p in range(1,13):
+        plane = f"{p:02d}"
+        create_conn(sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.{output}", x,y, f"IOES.ALTIN_{plane}")
+        create_conn(x,y, f"IOES.SB_IN_{plane}", sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.D0")
+    create_conn(gpio_x,gpio_y,"GPIO.IN1", x,y, "IOES.IO_IN1")
+    create_conn(gpio_x,gpio_y,"GPIO.IN2", x,y, "IOES.IO_IN2")
+
+    if alt:
+        create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT3")
+        create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT4")
+    else:
+        create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT1")
+        create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT2")
+
 def get_connections():
     for y in range(-2, max_row()+1):
         for x in range(-2, max_col()+1):
@@ -543,4 +602,6 @@ def get_connections():
                     create_outmux(x,y)
             if is_sb(x,y):
                 create_sb(x,y)
+            if is_edge_io(x,y):
+                create_io(x,y)
     return conn.items()
