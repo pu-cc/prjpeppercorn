@@ -95,6 +95,9 @@ def is_gpio(x,y):
             return y % 2==1
     return False
 
+def base_loc(x,y):
+    return (((x-1) & ~1) + 1, ((y-1) & ~1) + 1)
+
 class PinType(Enum):
     INPUT = 0
     OUTPUT = 1
@@ -454,12 +457,8 @@ def create_inmux(x,y):
         alt = f"{alt_plane(1,p):02d}"
         create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D7")
 
-OUT_PLANE_1 = [ 2, 1, 2, 1, 1, 2, 1, 2]
-OUT_PLANE_2 = [ 1, 2, 1, 2, 2, 1, 2, 1]
-
 def create_sb(x,y):
-    block_x = ((x-1) & ~1) + 1
-    block_y = ((y-1) & ~1) + 1
+    x_0,y_0 = base_loc(x,y)
     sb_type = get_sb_type(x,y)
 
     for p in range(1,13):
@@ -469,21 +468,11 @@ def create_sb(x,y):
             # Core section SBs are connected to CPE
             if (p<9):
                 # planes 1..8
-                # for SB in lower left section of block
-                #   x offset +0 y offset +0 output 2 plane 1
-                #   x offset +0 y offset +1 output 1 plane 2
-                #   x offset +1 y offset +0 output 2 plane 3
-                #   x offset +1 y offset +1 output 1 plane 4
-                #   x offset +0 y offset +0 output 1 plane 5
-                #   x offset +0 y offset +1 output 2 plane 6
-                #   x offset +1 y offset +0 output 1 plane 7
-                #   x offset +1 y offset +1 output 2 plane 8
-                # for SB in upper right section of block
-                # difference is only that outputs are reversed
-                x_cpe = block_x + (1 if (p-1) & 2 else 0)
-                y_cpe = block_y + (1 if (p-1) & 1 else 0)
-                out = OUT_PLANE_1[p-1] if x & 1 else OUT_PLANE_2[p-1]
-                create_conn(x_cpe,y_cpe,f"CPE.OUT{out}", x,y,f"{sb_type}.P{plane}.D0")
+                x_cpe = x_0 + (1 if (p-1) & 2 else 0)
+                y_cpe = y_0 + (1 if (p-1) & 1 else 0)
+                # alternate patterns for lower-left SB(1,1) and upper-right SB(2,2)
+                out = [ 2, 1, 2, 1, 1, 2, 1, 2] if x & 1 else [ 1, 2, 1, 2, 2, 1, 2, 1]
+                create_conn(x_cpe,y_cpe,f"CPE.OUT{out[p-1]}", x,y,f"{sb_type}.P{plane}.D0")
             else:
                 # planes 9..12
                 create_conn(x,y,f"OM.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
@@ -492,16 +481,15 @@ def create_sb(x,y):
         # Handling other inputs
 
 def create_outmux(x,y):
-    block_x = ((x-1) & ~1) + 1
-    block_y = ((y-1) & ~1) + 1
+    x_0,y_0 = base_loc(x,y)
     for p in range(9,13):
         plane = f"{p:02d}"
-        output_1 = 1 if (x % 2)  ^ (p % 2) else 2
-        output_2 = 2 if (x % 2)  ^ (p % 2) else 1
-        create_conn(block_x,   block_y,   f"CPE.OUT{output_1}", x,y, f"OM.P{plane}.D0")
-        create_conn(block_x,   block_y+1, f"CPE.OUT{output_1}", x,y, f"OM.P{plane}.D1")
-        create_conn(block_x+1, block_y,   f"CPE.OUT{output_2}", x,y, f"OM.P{plane}.D2")
-        create_conn(block_x+1, block_y+1, f"CPE.OUT{output_2}", x,y, f"OM.P{plane}.D3")
+        # alternating patters depending of plane and outmux position
+        outputs = [2, 2, 1, 1] if p % 2 == x & 1 else [1, 1, 2, 2]
+        create_conn(x_0,   y_0,   f"CPE.OUT{outputs[0]}", x,y, f"OM.P{plane}.D0")
+        create_conn(x_0,   y_0+1, f"CPE.OUT{outputs[1]}", x,y, f"OM.P{plane}.D1")
+        create_conn(x_0+1, y_0,   f"CPE.OUT{outputs[2]}", x,y, f"OM.P{plane}.D2")
+        create_conn(x_0+1, y_0+1, f"CPE.OUT{outputs[3]}", x,y, f"OM.P{plane}.D3")
 
 def get_connections():
     for y in range(-2, max_row()+1):
