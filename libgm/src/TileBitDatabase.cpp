@@ -95,7 +95,11 @@ std::vector<uint8_t> BaseBitDatabase::config_to_data(const TileConfig &cfg)
 {
     std::vector<bool> tile(num_bits, false);
     for (auto &w : cfg.cwords) {
-        words[w.name].set_value(tile, w.value);
+        if (words.count(w.name)) {
+            words[w.name].set_value(tile, w.value);
+        } else {
+            throw runtime_error(fmt("unknown word " << w.name << " found while converting data"));
+        }
     }
     return bits_to_bytes(tile);
 }
