@@ -185,6 +185,9 @@ PRIMITIVES_PINS = {
         Pin("CLOCK2", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK3", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK4", PinType.INPUT, "GPIO_WIRE"),
+        Pin("DI"    , PinType.INPUT, "GPIO_WIRE"),
+        Pin("DO"    , PinType.OUTPUT,"GPIO_WIRE"),
+        Pin("OE"    , PinType.OUTPUT,"GPIO_WIRE"),
     ]
 }
 
@@ -298,8 +301,8 @@ def get_endpoints_for_type(type):
 
 def get_mux_connections_for_type(type):
     muxes = []
-    def create_mux(src, dst, bits, value, invert):
-        name = dst.replace(".","_") + "_MUX"
+    def create_mux(src, dst, bits, value, invert, name = None):
+        name = dst if name is None else name
         muxes.append(MUX(src, dst, name, bits, value, invert))
 
     if "CPE" in type:
@@ -338,7 +341,7 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_BIG.P{plane}.X23", f"SB_BIG.P{plane}.YDIAG", 3, 7, True)
 
             for i in range(1,5):
-                create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, False)
+                create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, False, f"SB_DRIVE.P{plane}.D{i}")
 
     if "SB_SML" in type:
         # SB_SML
@@ -368,7 +371,7 @@ def get_mux_connections_for_type(type):
         for p in range(1,13):
             plane = f"{p:02d}"
             io_in = 1 if p % 2 else 2
-            create_mux(f"IOES.IO_IN{io_in}", f"IOES.SB_IN_{plane}", 0, 1, False)
+            create_mux(f"IOES.IO_IN{io_in}", f"IOES.SB_IN_{plane}", 1, 0, False)
             create_mux(f"IOES.ALTIN_{plane}", f"IOES.SB_IN_{plane}", 1, 1, False)
     return muxes
 
