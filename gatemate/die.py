@@ -237,7 +237,6 @@ def get_endpoints_for_type(type):
             create_wire(f"{prim.name}.{pin.name}", type=f"{pin.wire_type}")
 
     if "CPE" in type:
-        # CPE
         for p in range(1,13):
             plane = f"{p:02d}"
             for i in range(8):
@@ -249,7 +248,6 @@ def get_endpoints_for_type(type):
                 create_wire(f"OM.P{plane}.Y", type="OM_WIRE")
 
     if "SB_BIG" in type:
-        # SB_BIG
         for p in range(1,13):
             plane = f"{p:02d}"
             create_wire(f"SB_BIG.P{plane}.D0", type="SB_BIG_WIRE")
@@ -273,7 +271,6 @@ def get_endpoints_for_type(type):
                 create_wire(f"SB_DRIVE.P{plane}.D{i}.OUT", type="SB_DRIVE_WIRE")
 
     if "SB_SML" in type:
-        # SB_SML
         for p in range(1,13):
             plane = f"{p:02d}"
             create_wire(f"SB_SML.P{plane}.D0", type="SB_SML_WIRE")
@@ -289,13 +286,60 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_SML.P{plane}.X23", type="SB_SML_WIRE")
 
     if "IOES" in type:
-        # IOES
-        create_wire(f"IOES.IO_IN1", type="IOES_WIRE")
-        create_wire(f"IOES.IO_IN2", type="IOES_WIRE")
+        create_wire("IOES.IO_IN1", type="IOES_WIRE")
+        create_wire("IOES.IO_IN2", type="IOES_WIRE")
         for p in range(1,13):
             plane = f"{p:02d}"
             create_wire(f"IOES.SB_IN_{plane}", type="IOES_WIRE")
             create_wire(f"IOES.ALTIN_{plane}", type="IOES_WIRE")
+
+    if "LES" in type:
+        for p in range(1,9):
+            create_wire(f"LES.SB_Y3.P{p}", type="LES_WIRE")
+            create_wire(f"LES.MDIE1.P{p}", type="LES_WIRE")
+        for i in range(4):
+            create_wire(f"LES.GLB{i}", type="LES_WIRE")
+        create_wire("LES.CINX", type="LES_WIRE")
+        create_wire("LES.PINX", type="LES_WIRE")
+
+    if "BES" in type:
+        for p in range(1,9):
+            create_wire(f"BES.SB_Y4.P{p}", type="BES_WIRE")
+            create_wire(f"BES.MDIE2.P{p}", type="BES_WIRE")
+        for i in range(4):
+            create_wire(f"BES.GLB{i}", type="BES_WIRE")
+        create_wire("BES.P_CINY1", type="BES_WIRE")
+        create_wire("BES.P_PINY1", type="BES_WIRE")
+        create_wire("BES.P_CINY2", type="BES_WIRE")
+        create_wire("BES.P_PINY2", type="BES_WIRE")
+        create_wire("BES.CINY1", type="BES_WIRE")
+        create_wire("BES.PINY1", type="BES_WIRE")
+        create_wire("BES.CINY2", type="BES_WIRE")
+        create_wire("BES.PINY2", type="BES_WIRE")
+
+    if "RES" in type:
+        create_wire("RES.RAM_O1", type="RES_WIRE")
+        create_wire("RES.RAM_O2", type="RES_WIRE")
+        create_wire("RES.COUTX", type="RES_WIRE")
+        create_wire("RES.POUTX", type="RES_WIRE")
+        for p in range(1,9):
+            create_wire(f"RES.SB_Y1.P{p}", type="RES_WIRE")
+            create_wire(f"RES.MDIE1.P{p}", type="RES_WIRE")
+        for i in range(4):
+            create_wire(f"RES.GLB{i}", type="RES_WIRE")
+
+    if "TES" in type:
+        create_wire("TES.RAM_O1", type="TES_WIRE")
+        create_wire("TES.RAM_O2", type="TES_WIRE")
+        create_wire("TES.COUTY1", type="TES_WIRE")
+        create_wire("TES.POUTY1", type="TES_WIRE")
+        create_wire("TES.COUTY2", type="TES_WIRE")
+        create_wire("TES.POUTY2", type="TES_WIRE")
+        for p in range(1,9):
+            create_wire(f"TES.SB_Y2.P{p}", type="TES_WIRE")
+            create_wire(f"TES.MDIE2.P{p}", type="TES_WIRE")
+        for i in range(4):
+            create_wire(f"TES.GLB{i}", type="TES_WIRE")
 
     return wires
 
