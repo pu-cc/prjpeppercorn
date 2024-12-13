@@ -56,16 +56,16 @@ def is_outmux(x,y):
     return is_cpe(x,y) and (x+1) % 2 == (y+1) % 2
 
 def is_edge_left(x,y):
-    return x==-2 and y>=1 and y<=130
+    return x==-2 and y>=1 and y<=128
 
 def is_edge_right(x,y):
     return x==max_col() and y>=1 and y<=128
 
 def is_edge_bottom(x,y):
-    return y==-2 and x>=-1 and x<=162
+    return y==-2 and x>=1 and x<=160
 
 def is_edge_top(x,y):
-    return y==max_row() and x>=1 and x<=162
+    return y==max_row() and x>=28 and x<=160
 
 def is_edge_io(x,y):
     if (y==-2 and x>=5 and x<=40): # IO Bank S3/WA
