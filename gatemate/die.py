@@ -310,10 +310,10 @@ def get_mux_connections_for_type(type):
         for p in range(1,13):
             plane = f"{p:02d}"
             for i in range(8):
-                create_mux(f"IM.P{plane}.D{i}", f"IM.P{plane}.Y", 3, i, True)
+                create_mux(f"IM.P{plane}.D{i}", f"IM.P{plane}.Y", 3, i, True, f"IM.P{plane}")
             if "OM" in type and p>=9:
                 for i in range(4):
-                    create_mux(f"OM.P{plane}.D{i}", f"OM.P{plane}.Y", 2, i, True)
+                    create_mux(f"OM.P{plane}.D{i}", f"OM.P{plane}.Y", 2, i, True, f"OM.P{plane}")
 
     if "SB_BIG" in type:
         # SB_BIG

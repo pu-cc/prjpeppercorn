@@ -71,6 +71,7 @@ class TileBitDatabase : public BaseBitDatabase
     void add_cpe(int index, int start);
     void add_ff_init(int index, int start);
     void add_inmux(int index, int plane, int start);
+    void add_outmux(int index, int plane, int start);
 
     void add_gpio(int start);
     void add_edge_io(int index, int start);

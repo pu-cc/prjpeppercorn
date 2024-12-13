@@ -113,30 +113,54 @@ TileConfig BaseBitDatabase::data_to_config(const vector<uint8_t> &data)
     return cfg;
 }
 
-void TileBitDatabase::add_sb_big(int index, int start) { add_word_settings(stringf("SB_BIG_%02d", index), start, 15); }
+void TileBitDatabase::add_sb_big(int index, int start)
+{
+    add_word_settings(stringf("SB_BIG.P%02d.YDIAG", index), start + 0, 3);
+    add_word_settings(stringf("SB_BIG.P%02d.Y1", index), start + 3, 3);
+    add_word_settings(stringf("SB_BIG.P%02d.Y2", index), start + 6, 3);
+    add_word_settings(stringf("SB_BIG.P%02d.Y3", index), start + 9, 3);
+    add_word_settings(stringf("SB_BIG.P%02d.Y4", index), start + 12, 3);
+}
 
-void TileBitDatabase::add_sb_sml(int index, int start) { add_word_settings(stringf("SB_SML_%02d", index), start, 12); }
+void TileBitDatabase::add_sb_sml(int index, int start)
+{
+    add_word_settings(stringf("SB_SML.P%02d.YDIAG", index), start + 0, 3);
+    add_word_settings(stringf("SB_SML.P%02d.Y1", index), start + 3, 2);
+    add_word_settings(stringf("SB_SML.P%02d.Y2", index), start + 5, 2);
+    add_word_settings(stringf("SB_SML.P%02d.Y3", index), start + 7, 2);
+    add_word_settings(stringf("SB_SML.P%02d.Y4", index), start + 9, 2);
+}
 
 void TileBitDatabase::add_sb_drive(int index, int start)
 {
-    add_word_settings(stringf("SB_DRIVE_%02d", index), start, 4);
+    for (int i = 0; i < 4; i++)
+        add_word_settings(stringf("SB_DRIVE.P%02d.D%d", index, i), start + i, 1);
 }
 
-void TileBitDatabase::add_cpe(int index, int start) { add_word_settings(stringf("CPE_%d", index), start, 80); }
+void TileBitDatabase::add_cpe(int index, int start) { add_word_settings(stringf("CPE%d.INIT", index), start, 80); }
 
 void TileBitDatabase::add_ff_init(int index, int start)
 {
-    add_word_settings(stringf("CPE_%d.FF_INIT", index), start, 2);
+    add_word_settings(stringf("CPE%d.FF_INIT", index), start, 2);
 }
 
 void TileBitDatabase::add_inmux(int index, int plane, int start)
 {
-    add_word_settings(stringf("INMUX_%d_%02d", index, plane), start, 4);
+    add_word_settings(stringf("IM%d.P%02d", index, plane), start, 3);
 }
 
-void TileBitDatabase::add_gpio(int start) { add_word_settings("GPIO", start, 72); }
+void TileBitDatabase::add_outmux(int index, int plane, int start)
+{
+    add_word_settings(stringf("OM%d.P%02d", index, plane), start, 2);
+}
 
-void TileBitDatabase::add_edge_io(int index, int start) { add_word_settings(stringf("EDGE_IO_%d", index), start, 16); }
+void TileBitDatabase::add_gpio(int start) { add_word_settings("GPIO.INIT", start, 72); }
+
+void TileBitDatabase::add_edge_io(int index, int start)
+{
+    for (int i = 0; i < 12; i++)
+        add_word_settings(stringf("IOES%d.SB_IN_{%d}", index, i + 1), start + i, 1);
+}
 
 void TileBitDatabase::add_right_edge(int index, int start)
 {
@@ -183,7 +207,14 @@ TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase(Die
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 6; j++) {
                 add_inmux(i + 1, j * 2 + 1, pos * 8);
-                add_inmux(i + 1, j * 2 + 2, pos * 8 + 4);
+                add_inmux(i + 1, j * 2 + 2, pos * 8 + 3);
+                pos++;
+            }
+        }
+        for (int i = 0; i < 2; i++) {
+            pos = 54 + i * 6;
+            for (int j = 9; j <= 12; j++) {
+                add_outmux(i ? 4 : 1, j, pos * 8 + 6);
                 pos++;
             }
         }
