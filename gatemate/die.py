@@ -87,6 +87,35 @@ def is_edge_io(x,y):
     if (y==max_row() and x>=101 and x<=136): # IO Bank N2/EB
         return True
 
+def get_io_name(x,y):
+    if (y==-2 and x>=5 and x<=40): # IO Bank S3/WA
+        x-=5
+        return f"IO_WA_{("A" if x % 4==0 else "B")}{x//4}"
+    if (y==-2 and x>=57 and x<=92):  # IO Bank S1/WB
+        x-=57
+        return f"IO_WB_{("A" if x % 4==0 else "B")}{x//4}"
+    if (y==-2 and x>=101 and x<=136): # IO Bank S2/WC
+        x-=101
+        return f"IO_WC_{("A" if x % 4==0 else "B")}{x//4}"
+    if (x==-2 and y>=25 and y<=60): # IO Bank W1/SA
+        y-=25
+        return f"IO_SA_{("A" if y % 4==0 else "B")}{y//4}"
+    if (x==-2 and y>=69 and y<=104): # IO Bank W2/SB
+        y-=69
+        return f"IO_SB_{("A" if y % 4==0 else "B")}{y//4}"
+    if (x==max_col() and y>=25 and y<=60): # IO Bank E1/NA
+        y-=25
+        return f"IO_NA_{("A" if y % 4==0 else "B")}{y//4}"
+    if (x==max_col() and y>=69 and y<=104): # IO Bank E2/NB
+        y-=69
+        return f"IO_NB_{("A" if y % 4==0 else "B")}{y//4}"
+    if (y==max_row() and x>=57 and x<=92): # IO Bank N1/EA
+        x-=57
+        return f"IO_EA_{("A" if x % 4==0 else "B")}{x//4}"
+    if (y==max_row() and x>=101 and x<=136): # IO Bank N2/EB
+        x-=101
+        return f"IO_EB_{("A" if x % 4==0 else "B")}{x//4}"
+
 def is_gpio(x,y):
     if is_edge_io(x,y):
         if (y==-2 or y==max_row()):
@@ -139,6 +168,15 @@ class Connection:
     x : int
     y : int
     name : str
+
+@dataclass
+class Pad:
+    x : int
+    y : int
+    name : str
+    bel : str
+    function : str
+    bank : int
 
 PRIMITIVES_PINS = {
     "CPE": [
@@ -657,3 +695,11 @@ def get_connections():
             if is_edge_io(x,y):
                 create_io(x,y)
     return conn.items()
+
+def get_package_pads():
+    pads = []
+    for y in range(-2, max_row()+1):
+        for x in range(-2, max_col()+1):
+            if is_gpio(x,y):
+                pads.append(Pad(x,y,get_io_name(x,y),"GPIO","",0))
+    return pads
