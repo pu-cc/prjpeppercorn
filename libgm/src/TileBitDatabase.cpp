@@ -141,7 +141,61 @@ void TileBitDatabase::add_sb_drive(int index, int start)
         add_word_settings(stringf("SB_DRIVE.P%02d.D%d", index, i), start + i, 1);
 }
 
-void TileBitDatabase::add_cpe(int index, int start) { add_word_settings(stringf("CPE%d.INIT", index), start, 80); }
+void TileBitDatabase::add_cpe(int index, int start)
+{
+    add_word_settings(stringf("CPE%d.INIT_L00", index), start + 0, 4);
+    add_word_settings(stringf("CPE%d.INIT_L01", index), start + 4, 4);
+    add_word_settings(stringf("CPE%d.INIT_L02", index), start + 8, 4);
+    add_word_settings(stringf("CPE%d.INIT_L03", index), start + 12, 4);
+
+    add_word_settings(stringf("CPE%d.INIT_L10", index), start + 16, 4);
+    add_word_settings(stringf("CPE%d.INIT_L11", index), start + 20, 4);
+
+    add_word_settings(stringf("CPE%d.INIT_L20", index), start + 24, 4);
+
+    add_word_settings(stringf("CPE%d.INIT_L30", index), start + 28, 4);
+
+    add_word_settings(stringf("CPE%d.I1", index), start + 32, 1);
+    add_word_settings(stringf("CPE%d.I2", index), start + 33, 1);
+    add_word_settings(stringf("CPE%d.I3", index), start + 34, 1);
+    add_word_settings(stringf("CPE%d.I4", index), start + 35, 1);
+
+    add_word_settings(stringf("CPE%d.FUNCTION", index), start + 36, 3);
+    add_word_settings(stringf("CPE%d.COMP", index), start + 39, 1);
+    add_word_settings(stringf("CPE%d.COMP_I", index), start + 40, 1);
+    add_word_settings(stringf("CPE%d.HORIZ", index), start + 41, 1);
+    add_word_settings(stringf("CPE%d.SELX", index), start + 42, 1);
+    add_word_settings(stringf("CPE%d.SELY1", index), start + 43, 1);
+    add_word_settings(stringf("CPE%d.SELY2", index), start + 44, 1);
+    add_word_settings(stringf("CPE%d.SEL_C", index), start + 45, 1);
+    add_word_settings(stringf("CPE%d.SEL_P", index), start + 46, 1);
+    add_word_settings(stringf("CPE%d.Y12", index), start + 47, 1);
+    add_word_settings(stringf("CPE%d.CX_I", index), start + 48, 1);
+    add_word_settings(stringf("CPE%d.CY1_I", index), start + 49, 1);
+    add_word_settings(stringf("CPE%d.CY2_I", index), start + 50, 1);
+    add_word_settings(stringf("CPE%d.PX_I", index), start + 51, 1);
+    add_word_settings(stringf("CPE%d.PY1_I", index), start + 52, 1);
+    add_word_settings(stringf("CPE%d.PY2_I", index), start + 53, 1);
+    add_word_settings(stringf("CPE%d.C_P", index), start + 54, 1);
+    add_word_settings(stringf("CPE%d.2D_IN", index), start + 55, 1);
+    add_word_settings(stringf("CPE%d.SN", index), start + 56, 3);
+    add_word_settings(stringf("CPE%d.O1", index), start + 59, 2);
+    add_word_settings(stringf("CPE%d.O2", index), start + 61, 2);
+    add_word_settings(stringf("CPE%d.BR", index), start + 63, 1);
+
+    add_word_settings(stringf("CPE%d.CLK", index), start + 64, 2);
+    add_word_settings(stringf("CPE%d.EN", index), start + 66, 2);
+    add_word_settings(stringf("CPE%d.R", index), start + 68, 2);
+    add_word_settings(stringf("CPE%d.S", index), start + 70, 2);
+    add_word_settings(stringf("CPE%d.RAM_I1", index), start + 72, 1);
+    add_word_settings(stringf("CPE%d.RAM_I2", index), start + 73, 1);
+    add_word_settings(stringf("CPE%d.RAM_O1", index), start + 74, 1);
+    add_word_settings(stringf("CPE%d.RAM_O2", index), start + 75, 1);
+    add_word_settings(stringf("CPE%d.L_D", index), start + 76, 1);
+    add_word_settings(stringf("CPE%d.EN_SR", index), start + 77, 1);
+    add_word_settings(stringf("CPE%d.CLKSEL", index), start + 78, 1);
+    add_word_settings(stringf("CPE%d.ENSEL", index), start + 79, 1);
+}
 
 void TileBitDatabase::add_ff_init(int index, int start)
 {
@@ -158,7 +212,51 @@ void TileBitDatabase::add_outmux(int index, int plane, int start)
     add_word_settings(stringf("OM%d.P%02d", index, plane), start, 2);
 }
 
-void TileBitDatabase::add_gpio(int start) { add_word_settings("GPIO.INIT", start, 72); }
+void TileBitDatabase::add_gpio(int start)
+{
+    add_word_settings("GPIO.OPEN_DRAIN", start + 0, 1);
+    add_word_settings("GPIO.SLEW", start + 1, 1);
+    add_word_settings("GPIO.DRIVE", start + 2, 2);
+    add_word_settings("GPIO.INPUT_ENABLE", start + 4, 1);
+    add_word_settings("GPIO.PULLDOWN", start + 5, 1);
+    add_word_settings("GPIO.PULLUP", start + 6, 1);
+    add_word_settings("GPIO.SCHMITT_TRIGGER", start + 7, 1);
+
+    add_word_settings("GPIO.OUT_SIGNAL", start + 8, 1);
+
+    add_word_settings("GPIO.OUT1/4", start + 9, 1);
+    add_word_settings("GPIO.OUT2/3", start + 10, 1);
+    add_word_settings("GPIO.OUT23_14_SEL", start + 11, 1);
+
+    add_word_settings("GPIO.USE_CFG_BIT", start + 12, 1); // Use bit 9 for clock, error in silicon
+    add_word_settings("GPIO.USE_DDR", start + 13, 1);
+
+    add_word_settings("GPIO.SEL_IN_CLOCK", start + 14, 1);  // Use clock signals for IN CLK
+    add_word_settings("GPIO.SEL_OUT_CLOCK", start + 15, 1); // Use clock signals for OUT CLK
+
+    add_word_settings("GPIO.OE_ENABLE", start + 16, 1);
+    add_word_settings("GPIO.OE_SIGNAL", start + 17, 2); // 0 is constant 1
+    // 19 unused
+    add_word_settings("GPIO.OUT1_FF", start + 20, 1);
+    add_word_settings("GPIO.OUT2_FF", start + 21, 1);
+    add_word_settings("GPIO.IN1_FF", start + 22, 1);
+    add_word_settings("GPIO.IN2_FF", start + 23, 1);
+
+    add_word_settings("GPIO.OUT_CLOCK", start + 24, 2);
+    add_word_settings("GPIO.INV_OUT1_CLOCK", start + 26, 1);
+    add_word_settings("GPIO.INV_OUT2_CLOCK", start + 27, 1);
+    add_word_settings("GPIO.IN_CLOCK", start + 28, 2);
+    add_word_settings("GPIO.INV_IN1_CLOCK", start + 30, 1);
+    add_word_settings("GPIO.INV_IN2_CLOCK", start + 31, 1);
+
+    add_word_settings("GPIO.DELAY_OBF", start + 32, 16);
+    add_word_settings("GPIO.DELAY_IBF", start + 48, 16);
+
+    add_word_settings("GPIO.LVDS_EN", start + 64, 1);
+    add_word_settings("GPIO.LVDS_BOOST", start + 65, 1);
+    add_word_settings("GPIO.LVDS_IE", start + 66, 1);
+    add_word_settings("GPIO.LVDS_RTERM", start + 67, 1);
+}
 
 void TileBitDatabase::add_edge_io(int index, int start)
 {
@@ -168,22 +266,26 @@ void TileBitDatabase::add_edge_io(int index, int start)
 
 void TileBitDatabase::add_right_edge(int index, int start)
 {
-    add_word_settings(stringf("RIGHT_EDGE_%d", index), start, 24);
+    // 4 * 3 bits + 8 * 1 bit = 20 bits
+    add_word_settings(stringf("RES%d.INIT", index), start, 24);
 }
 
 void TileBitDatabase::add_left_edge(int index, int start)
 {
-    add_word_settings(stringf("LEFT_EDGE_%d", index), start, 24);
+    // 4 * 3 bits + 2 * 2 bits + 2 * 2 bits = 20 bits
+    add_word_settings(stringf("LES%d.INIT", index), start, 24);
 }
 
 void TileBitDatabase::add_top_edge(int index, int start)
 {
-    add_word_settings(stringf("TOP_EDGE_%d", index), start, 24);
+    // 4 * 3 bits + 8 * 1 bit = 20 bits
+    add_word_settings(stringf("TES%d.INIT", index), start, 24);
 }
 
 void TileBitDatabase::add_bottom_edge(int index, int start)
 {
-    add_word_settings(stringf("BOTTOM_EDGE_%d", index), start, 48);
+    // 8 * 3 bits + 8 * 2 bits + 4 * 1 bit = 44 bits
+    add_word_settings(stringf("BES%d.INIT", index), start, 48);
 }
 
 TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase(Die::LATCH_BLOCK_SIZE * 8)
