@@ -250,8 +250,21 @@ def get_groups_for_type(type):
             create_group(f"SB_SML_P{p:02d}", "SB_SML")
     #if "GPIO" in type:
     #    # GPIO
-    #if "IOES" in type:
-    #    # IOES
+    if "IOES" in type:
+        # IOES
+        create_group("IOES", "IOES")
+    if "LES" in type:
+        # LES
+        create_group("LES", "LES")
+    if "RES" in type:
+        # RES
+        create_group("RES", "RES")
+    if "TES" in type:
+        # TES
+        create_group("TES", "TES")
+    if "BES" in type:
+        # BES
+        create_group("BES", "BES")
     return groups
 
 def get_primitives_for_type(type):
