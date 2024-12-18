@@ -29,8 +29,6 @@
 #include "ChipConfig.hpp"
 #include "version.hpp"
 
-using namespace std;
-
 int main(int argc, char *argv[])
 {
     using namespace GateMate;
@@ -51,48 +49,48 @@ int main(int argc, char *argv[])
         po::store(parsed, vm);
         po::notify(vm);
     } catch (po::required_option &e) {
-        cerr << "Error: input file is mandatory." << endl << endl;
+        std::cerr << "Error: input file is mandatory." << std::endl << std::endl;
         goto help;
     } catch (std::exception &e) {
-        cerr << "Error: " << e.what() << endl << endl;
+        std::cerr << "Error: " << e.what() << std::endl << std::endl;
         goto help;
     }
 
     if (vm.count("help")) {
     help:
         boost::filesystem::path path(argv[0]);
-        cerr << "Open Source Tools for GateMate FPGAs Version " << git_describe_str << endl;
-        cerr << "Copyright (C) 2024 The Project Peppercorn Authors" << endl;
-        cerr << endl;
-        cerr << path.stem().c_str() << ": GateMate bitstream to text config converter" << endl;
-        cerr << endl;
-        cerr << "Usage: " << argv[0] << " input.bit [output.config] [options]" << endl;
-        cerr << endl;
-        cerr << options << endl;
+        std::cerr << "Open Source Tools for GateMate FPGAs Version " << git_describe_str << std::endl;
+        std::cerr << "Copyright (C) 2024 The Project Peppercorn Authors" << std::endl;
+        std::cerr << std::endl;
+        std::cerr << path.stem().c_str() << ": GateMate bitstream to text config converter" << std::endl;
+        std::cerr << std::endl;
+        std::cerr << "Usage: " << argv[0] << " input.bit [output.config] [options]" << std::endl;
+        std::cerr << std::endl;
+        std::cerr << options << std::endl;
         return vm.count("help") ? 0 : 1;
     }
 
-    ifstream bit_file(vm["input"].as<string>(), ios::binary);
+    std::ifstream bit_file(vm["input"].as<std::string>(), std::ios::binary);
     if (!bit_file) {
-        cerr << "Failed to open input file" << endl;
+        std::cerr << "Failed to open input file" << std::endl;
         return 1;
     }
 
     try {
         Chip c = Bitstream::read(bit_file).deserialise_chip();
         ChipConfig cc = ChipConfig::from_chip(c);
-        ofstream out_file(vm["textcfg"].as<string>());
+        std::ofstream out_file(vm["textcfg"].as<std::string>());
         if (!out_file) {
-            cerr << "Failed to open output file" << endl;
+            std::cerr << "Failed to open output file" << std::endl;
             return 1;
         }
         out_file << cc.to_string();
         return 0;
     } catch (BitstreamParseError &e) {
-        cerr << "Failed to process input bitstream: " << e.what() << endl;
+        std::cerr << "Failed to process input bitstream: " << e.what() << std::endl;
         return 1;
-    } catch (runtime_error &e) {
-        cerr << "Failed to process input bitstream: " << e.what() << endl;
+    } catch (std::runtime_error &e) {
+        std::cerr << "Failed to process input bitstream: " << e.what() << std::endl;
         return 1;
     }
 }

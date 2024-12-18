@@ -30,41 +30,41 @@ namespace GateMate {
 std::string ChipConfig::to_string() const
 {
     std::stringstream ss;
-    ss << ".device " << chip_name << endl << endl;
+    ss << ".device " << chip_name << std::endl << std::endl;
     for (const auto &config : configs) {
         if (!config.second.empty()) {
-            ss << ".config " << config.first << " " << endl;
+            ss << ".config " << config.first << " " << std::endl;
             ss << config.second;
-            ss << endl;
+            ss << std::endl;
         }
     }
     for (const auto &tile : tiles) {
         if (!tile.second.empty()) {
-            ss << ".tile " << tile.first.die << " " << tile.first.x << " " << tile.first.y << endl;
+            ss << ".tile " << tile.first.die << " " << tile.first.x << " " << tile.first.y << std::endl;
             ss << tile.second;
-            ss << endl;
+            ss << std::endl;
         }
     }
     for (const auto &bram : brams) {
         if (!bram.second.empty()) {
-            ss << ".bram " << bram.first.die << " " << bram.first.x << " " << bram.first.y << endl;
+            ss << ".bram " << bram.first.die << " " << bram.first.x << " " << bram.first.y << std::endl;
             ss << bram.second;
-            ss << endl;
+            ss << std::endl;
         }
     }
     for (const auto &bram : bram_data) {
         if (!bram.second.empty()) {
-            ss << ".bram_init " << bram.first.die << " " << bram.first.x << " " << bram.first.y << endl;
-            ios_base::fmtflags f(ss.flags());
+            ss << ".bram_init " << bram.first.die << " " << bram.first.x << " " << bram.first.y << std::endl;
+            std::ios_base::fmtflags f(ss.flags());
             for (size_t i = 0; i < bram.second.size(); i++) {
-                ss << setw(2) << setfill('0') << hex << (int)bram.second.at(i);
+                ss << std::setw(2) << std::setfill('0') << std::hex << (int)bram.second.at(i);
                 if (i % 32 == 31)
-                    ss << endl;
+                    ss << std::endl;
                 else
                     ss << " ";
             }
             ss.flags(f);
-            ss << endl;
+            ss << std::endl;
         }
     }
     return ss.str();
@@ -106,15 +106,15 @@ ChipConfig ChipConfig::from_string(const std::string &config)
             ss >> loc.die;
             ss >> loc.x;
             ss >> loc.y;
-            ios_base::fmtflags f(ss.flags());
+            std::ios_base::fmtflags f(ss.flags());
             while (!skip_check_eor(ss)) {
                 uint16_t value;
-                ss >> hex >> value;
+                ss >> std::hex >> value;
                 cc.bram_data[loc].push_back(value);
             }
             ss.flags(f);
         } else {
-            throw runtime_error("unrecognised config entry " + verb);
+            throw std::runtime_error("unrecognised config entry " + verb);
         }
     }
     return cc;

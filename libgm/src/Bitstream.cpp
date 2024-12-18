@@ -98,10 +98,10 @@ class BitstreamReadWriter
   public:
     BitstreamReadWriter() : data(), iter(data.begin()) {};
 
-    BitstreamReadWriter(const vector<uint8_t> &data) : data(data), iter(this->data.begin()) {};
+    BitstreamReadWriter(const std::vector<uint8_t> &data) : data(data), iter(this->data.begin()) {};
 
-    vector<uint8_t> data;
-    vector<uint8_t>::iterator iter;
+    std::vector<uint8_t> data;
+    std::vector<uint8_t>::iterator iter;
     Crc16 crc16;
 
     // Return a single byte and update CRC
@@ -218,8 +218,8 @@ class BitstreamReadWriter
         // cerr << hex << int(crc_bytes[0]) << " " << int(crc_bytes[1]) << endl;
         uint16_t exp_crc = (crc_bytes[0] << 8) | crc_bytes[1];
         if (actual_crc != exp_crc) {
-            ostringstream err;
-            err << "crc fail, calculated 0x" << hex << actual_crc << " but expecting 0x" << exp_crc;
+            std::ostringstream err;
+            err << "crc fail, calculated 0x" << std::hex << actual_crc << " but expecting 0x" << exp_crc;
             throw BitstreamParseError(err.str(), get_offset());
         }
         crc16.reset_crc16();
@@ -235,7 +235,7 @@ class BitstreamReadWriter
 
     bool is_end() { return (iter >= data.end()); }
 
-    const vector<uint8_t> &get() { return data; };
+    const std::vector<uint8_t> &get() { return data; };
 
     void write_nops(size_t count)
     {
@@ -374,21 +374,21 @@ void check_crc(BitstreamReadWriter &rd)
     uint16_t actual_crc = rd.crc16.get_crc16();
     uint16_t exp_crc = rd.get_crc(); // crc
     if (actual_crc != exp_crc) {
-        ostringstream err;
-        err << "crc fail, calculated 0x" << hex << actual_crc << " but expecting 0x" << exp_crc;
+        std::ostringstream err;
+        err << "crc fail, calculated 0x" << std::hex << actual_crc << " but expecting 0x" << exp_crc;
         throw BitstreamParseError(err.str());
     }
 }
 
 #define BITSTREAM_DEBUG(x)                                                                                             \
     if (verbosity >= VerbosityLevel::DEBUG)                                                                            \
-    cerr << "bitstream: " << x << endl
+    std::cerr << "bitstream: " << x << std::endl
 #define BITSTREAM_NOTE(x)                                                                                              \
     if (verbosity >= VerbosityLevel::NOTE)                                                                             \
-    cerr << "bitstream: " << x << endl
+    std::cerr << "bitstream: " << x << std::endl
 #define BITSTREAM_FATAL(x, pos)                                                                                        \
     {                                                                                                                  \
-        ostringstream ss;                                                                                              \
+        std::ostringstream ss;                                                                                         \
         ss << x;                                                                                                       \
         throw BitstreamParseError(ss.str(), pos);                                                                      \
     }
@@ -408,7 +408,7 @@ Bitstream Bitstream::read(std::istream &in)
 
 Chip Bitstream::deserialise_chip()
 {
-    cerr << "bitstream size: " << data.size() * 8 << " bits" << endl;
+    std::cerr << "bitstream size: " << data.size() * 8 << " bits" << std::endl;
     Chip chip(1);
     Die &die = chip.get_die(0);
 
@@ -635,7 +635,8 @@ Chip Bitstream::deserialise_chip()
             rd.skip_bytes(3);
             break;
         default:
-            BITSTREAM_FATAL("Unhandled command 0x" << hex << setw(2) << setfill('0') << int(cmd), rd.get_offset());
+            BITSTREAM_FATAL("Unhandled command 0x" << std::hex << std::setw(2) << std::setfill('0') << int(cmd),
+                            rd.get_offset());
             break;
         }
     }
@@ -803,7 +804,7 @@ const char *BitstreamParseError::what() const noexcept
     ss << "Bitstream Parse Error: ";
     ss << desc;
     if (offset != -1)
-        ss << " [at 0x" << std::hex << setw(8) << setfill('0') << offset << "]";
+        ss << " [at 0x" << std::hex << std::setw(8) << std::setfill('0') << offset << "]";
     return strdup(ss.str().c_str());
 }
 } // namespace GateMate

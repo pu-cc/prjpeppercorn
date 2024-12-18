@@ -32,9 +32,9 @@ struct WordSettingBits
 {
     int start;
     int end;
-    vector<bool> get_value(const vector<bool> &tile) const;
+    std::vector<bool> get_value(const std::vector<bool> &tile) const;
 
-    void set_value(vector<bool> &tile, const vector<bool> &value) const;
+    void set_value(std::vector<bool> &tile, const std::vector<bool> &value) const;
 
     inline bool operator==(const WordSettingBits &other) const { return (start == other.start) && (end == other.end); }
 };
@@ -45,7 +45,7 @@ class BaseBitDatabase
     BaseBitDatabase(int num_bits);
     virtual ~BaseBitDatabase();
 
-    TileConfig data_to_config(const vector<uint8_t> &data);
+    TileConfig data_to_config(const std::vector<uint8_t> &data);
     std::vector<uint8_t> config_to_data(const TileConfig &cfg);
 
   protected:
@@ -54,7 +54,7 @@ class BaseBitDatabase
     std::vector<uint8_t> bits_to_bytes(std::vector<bool> &bits);
 
     int num_bits;
-    map<std::string, WordSettingBits> words;
+    std::map<std::string, WordSettingBits> words;
     std::vector<uint8_t> known_bits;
 };
 
@@ -94,10 +94,10 @@ class ConfigBitDatabase : public BaseBitDatabase
     ConfigBitDatabase();
 };
 
-class DatabaseConflictError : public runtime_error
+class DatabaseConflictError : public std::runtime_error
 {
   public:
-    explicit DatabaseConflictError(const string &desc);
+    explicit DatabaseConflictError(const std::string &desc);
 };
 
 } // namespace GateMate

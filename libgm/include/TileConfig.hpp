@@ -26,37 +26,35 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 namespace GateMate {
 
 struct ConfigWord
 {
-    string name;
-    vector<bool> value;
+    std::string name;
+    std::vector<bool> value;
     inline bool operator==(const ConfigWord &other) const { return other.name == name && other.value == value; }
 };
 
-ostream &operator<<(ostream &out, const ConfigWord &cw);
+std::ostream &operator<<(std::ostream &out, const ConfigWord &cw);
 
-istream &operator>>(istream &in, ConfigWord &cw);
+std::istream &operator>>(std::istream &in, ConfigWord &cw);
 
 struct TileConfig
 {
-    vector<ConfigWord> cwords;
+    std::vector<ConfigWord> cwords;
     int total_known_bits = 0;
 
-    void add_word(const string &name, const vector<bool> &value);
+    void add_word(const std::string &name, const std::vector<bool> &value);
 
-    string to_string() const;
-    static TileConfig from_string(const string &str);
+    std::string to_string() const;
+    static TileConfig from_string(const std::string &str);
 
     bool empty() const;
 };
 
-ostream &operator<<(ostream &out, const TileConfig &tc);
+std::ostream &operator<<(std::ostream &out, const TileConfig &tc);
 
-istream &operator>>(istream &in, TileConfig &ce);
+std::istream &operator>>(std::istream &in, TileConfig &ce);
 
 } // namespace GateMate
 

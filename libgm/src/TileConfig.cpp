@@ -21,31 +21,30 @@
 #include <algorithm>
 #include <sstream>
 #include "Util.hpp"
-using namespace std;
 
 namespace GateMate {
 
-ostream &operator<<(ostream &out, const ConfigWord &cw)
+std::ostream &operator<<(std::ostream &out, const ConfigWord &cw)
 {
-    out << cw.name << " " << to_string(cw.value) << endl;
+    out << cw.name << " " << to_string(cw.value) << std::endl;
     return out;
 }
 
-istream &operator>>(istream &in, ConfigWord &cw)
+std::istream &operator>>(std::istream &in, ConfigWord &cw)
 {
     in >> cw.name;
     in >> cw.value;
     return in;
 }
 
-ostream &operator<<(ostream &out, const TileConfig &tc)
+std::ostream &operator<<(std::ostream &out, const TileConfig &tc)
 {
     for (const auto &cword : tc.cwords)
         out << cword;
     return out;
 }
 
-istream &operator>>(istream &in, TileConfig &tc)
+std::istream &operator>>(std::istream &in, TileConfig &tc)
 {
     tc.cwords.clear();
     while (!skip_check_eor(in)) {
@@ -56,18 +55,18 @@ istream &operator>>(istream &in, TileConfig &tc)
     return in;
 }
 
-void TileConfig::add_word(const string &name, const vector<bool> &value) { cwords.push_back({name, value}); }
+void TileConfig::add_word(const std::string &name, const std::vector<bool> &value) { cwords.push_back({name, value}); }
 
-string TileConfig::to_string() const
+std::string TileConfig::to_string() const
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << *this;
     return ss.str();
 }
 
-TileConfig TileConfig::from_string(const string &str)
+TileConfig TileConfig::from_string(const std::string &str)
 {
-    stringstream ss(str);
+    std::stringstream ss(str);
     TileConfig tc;
     ss >> tc;
     return tc;

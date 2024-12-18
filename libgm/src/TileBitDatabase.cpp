@@ -27,7 +27,7 @@
 
 namespace GateMate {
 
-std::vector<bool> data_bytes_to_array(const vector<uint8_t> &data, size_t count)
+std::vector<bool> data_bytes_to_array(const std::vector<uint8_t> &data, size_t count)
 {
     std::vector<bool> result(count * 8);
     for (size_t j = 0; j < count; j++) {
@@ -98,13 +98,13 @@ std::vector<uint8_t> BaseBitDatabase::config_to_data(const TileConfig &cfg)
         if (words.count(w.name)) {
             words[w.name].set_value(tile, w.value);
         } else {
-            throw runtime_error(fmt("unknown word " << w.name << " found while converting data"));
+            throw std::runtime_error(fmt("unknown word " << w.name << " found while converting data"));
         }
     }
     return bits_to_bytes(tile);
 }
 
-TileConfig BaseBitDatabase::data_to_config(const vector<uint8_t> &data)
+TileConfig BaseBitDatabase::data_to_config(const std::vector<uint8_t> &data)
 {
     TileConfig cfg;
     std::vector<bool> d = data_bytes_to_array(data, num_bits * 8);
@@ -431,7 +431,7 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
     }
 }
 
-vector<bool> WordSettingBits::get_value(const vector<bool> &tile) const
+std::vector<bool> WordSettingBits::get_value(const std::vector<bool> &tile) const
 {
     std::vector<bool> val;
     for (int i = start; i < end; i++)
@@ -439,12 +439,12 @@ vector<bool> WordSettingBits::get_value(const vector<bool> &tile) const
     return val;
 }
 
-void WordSettingBits::set_value(vector<bool> &tile, const vector<bool> &value) const
+void WordSettingBits::set_value(std::vector<bool> &tile, const std::vector<bool> &value) const
 {
     for (int i = start; i < end; i++)
         tile[i] = value[i - start];
 }
 
-DatabaseConflictError::DatabaseConflictError(const string &desc) : runtime_error(desc) {}
+DatabaseConflictError::DatabaseConflictError(const std::string &desc) : runtime_error(desc) {}
 
 } // namespace GateMate

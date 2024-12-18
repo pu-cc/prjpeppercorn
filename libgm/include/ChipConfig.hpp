@@ -49,8 +49,8 @@ struct CfgLoc
 class ChipConfig
 {
   public:
-    string chip_name;
-    string chip_package;
+    std::string chip_name;
+    std::string chip_package;
     std::map<CfgLoc, TileConfig> tiles;
     std::map<CfgLoc, TileConfig> brams;
     std::map<int, TileConfig> configs;
