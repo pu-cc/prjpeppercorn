@@ -224,8 +224,8 @@ void TileBitDatabase::add_gpio(int start)
 
     add_word_settings("GPIO.OUT_SIGNAL", start + 8, 1);
 
-    add_word_settings("GPIO.OUT1/4", start + 9, 1);
-    add_word_settings("GPIO.OUT2/3", start + 10, 1);
+    add_word_settings("GPIO.OUT1_4", start + 9, 1);
+    add_word_settings("GPIO.OUT2_3", start + 10, 1);
     add_word_settings("GPIO.OUT23_14_SEL", start + 11, 1);
 
     add_word_settings("GPIO.USE_CFG_BIT", start + 12, 1); // Use bit 9 for clock, error in silicon
