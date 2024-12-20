@@ -261,7 +261,7 @@ void TileBitDatabase::add_gpio(int start)
 void TileBitDatabase::add_edge_io(int index, int start)
 {
     for (int i = 0; i < 12; i++)
-        add_word_settings(stringf("IOES%d.SB_IN_{%d}", index, i + 1), start + i, 1);
+        add_word_settings(stringf("IOES%d.SB_IN_%02d", index, i + 1), start + i, 1);
 }
 
 void TileBitDatabase::add_right_edge(int index, int start)
