@@ -133,6 +133,10 @@ void Die::write_status(const std::vector<uint8_t> &data)
     int pos = STATUS_CFG_START;
     for (auto d : data)
         die_cfg[pos++] = d;
+    // Clean command bits, we do not wish this exported
+    pos = STATUS_CFG_START;
+    die_cfg[pos++] = 0x00;
+    die_cfg[pos++] = 0x00;
 }
 
 void Die::write_pll_select(uint8_t select, const std::vector<uint8_t> &data)

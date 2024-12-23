@@ -401,14 +401,27 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
         add_word_settings(stringf("PLL%d.CFG_B", i), pos, 96);
         pos += 96;
     }
-    add_word_settings("CLKIN.PLL0", pos + 0, 8);
-    add_word_settings("CLKIN.PLL1", pos + 8, 8);
-    add_word_settings("CLKIN.PLL2", pos + 16, 8);
-    add_word_settings("CLKIN.PLL3", pos + 24, 8);
-    add_word_settings("GLBOUT.PLL0", pos + 32, 16);
-    add_word_settings("GLBOUT.PLL1", pos + 48, 16);
-    add_word_settings("GLBOUT.PLL2", pos + 64, 16);
-    add_word_settings("GLBOUT.PLL3", pos + 80, 16);
+
+    add_word_settings("CLKIN.REF0", pos + 0, 3);
+    add_word_settings("CLKIN.REF0_INV", pos + 3, 1);
+    add_word_settings("CLKIN.REF1", pos + 8, 3);
+    add_word_settings("CLKIN.REF1_INV", pos + 8 + 3, 1);
+    add_word_settings("CLKIN.REF2", pos + 16, 3);
+    add_word_settings("CLKIN.REF2_INV", pos + 16 + 3, 1);
+    add_word_settings("CLKIN.REF3", pos + 24, 3);
+    add_word_settings("CLKIN.REF3_INV", pos + 24 + 3, 1);
+    add_word_settings("GLBOUT.GLB0", pos + 32, 3);
+    add_word_settings("GLBOUT.USR_GLB0", pos + 32 + 3, 1);
+    add_word_settings("GLBOUT.GLB0_EN", pos + 32 + 4, 1);
+    add_word_settings("GLBOUT.GLB1", pos + 48, 3);
+    add_word_settings("GLBOUT.USR_GLB1", pos + 48 + 3, 1);
+    add_word_settings("GLBOUT.GLB1_EN", pos + 48 + 4, 1);
+    add_word_settings("GLBOUT.GLB2", pos + 64, 3);
+    add_word_settings("GLBOUT.USR_GLB2", pos + 64 + 3, 1);
+    add_word_settings("GLBOUT.GLB2_EN", pos + 64 + 4, 1);
+    add_word_settings("GLBOUT.GBL3", pos + 80, 3);
+    add_word_settings("GLBOUT.USR_GLB3", pos + 80 + 3, 1);
+    add_word_settings("GLBOUT.GLB3_EN", pos + 80 + 4, 1);
 
     pos = Die::STATUS_CFG_START * 8;
     add_word_settings("GPIO.BANK_S1", pos + 16, 1);
@@ -429,6 +442,7 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
         add_word_settings(stringf("PLL%d.CTRL_B", i), pos + 8, 8);
         pos += 16;
     }
+    add_unknowns();
 }
 
 std::vector<bool> WordSettingBits::get_value(const std::vector<bool> &tile) const
