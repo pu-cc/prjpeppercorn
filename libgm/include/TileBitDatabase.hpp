@@ -92,6 +92,9 @@ class ConfigBitDatabase : public BaseBitDatabase
 {
   public:
     ConfigBitDatabase();
+
+  private:
+    void add_pll_cfg(int index, char cfg, int start);
 };
 
 class DatabaseConflictError : public std::runtime_error

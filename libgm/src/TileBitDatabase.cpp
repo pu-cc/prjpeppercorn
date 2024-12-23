@@ -392,13 +392,42 @@ RamBitDatabase::RamBitDatabase() : BaseBitDatabase(Die::RAM_BLOCK_SIZE * 8)
     add_unknowns();
 }
 
+void ConfigBitDatabase::add_pll_cfg(int index, char cfg, int start)
+{
+    add_word_settings(stringf("PLL%d.CFG_%c.CI_FILTER_CONST", index, cfg), start + 0, 5);
+    add_word_settings(stringf("PLL%d.CFG_%c.CP_FILTER_CONST", index, cfg), start + 5, 5);
+    add_word_settings(stringf("PLL%d.CFG_%c.N1", index, cfg), start + 10, 6);
+    add_word_settings(stringf("PLL%d.CFG_%c.N2", index, cfg), start + 16, 10);
+    add_word_settings(stringf("PLL%d.CFG_%c.M1", index, cfg), start + 26, 6);
+    add_word_settings(stringf("PLL%d.CFG_%c.M2", index, cfg), start + 32, 10);
+    add_word_settings(stringf("PLL%d.CFG_%c.K", index, cfg), start + 42, 12);
+    add_word_settings(stringf("PLL%d.CFG_%c.FB_PATH", index, cfg), start + 54, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.FINE_TUNE", index, cfg), start + 55, 11);
+    add_word_settings(stringf("PLL%d.CFG_%c.COARSE_TUNE", index, cfg), start + 66, 3);
+    add_word_settings(stringf("PLL%d.CFG_%c.AO_SW", index, cfg), start + 69, 5);
+    add_word_settings(stringf("PLL%d.CFG_%c.OPEN_LOOP", index, cfg), start + 74, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.ENFORCE_LOCK", index, cfg), start + 75, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.PFD_SEL", index, cfg), start + 76, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.LOCK_DETECT_WIN", index, cfg), start + 77, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.SYNC_BYPASS", index, cfg), start + 78, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.FILTER_SHIFT", index, cfg), start + 79, 2);
+    add_word_settings(stringf("PLL%d.CFG_%c.FAST_LOCK", index, cfg), start + 81, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.SAR_LIMIT", index, cfg), start + 82, 3);
+    add_word_settings(stringf("PLL%d.CFG_%c.OP_LOCK", index, cfg), start + 85, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.PDIV1_SEL", index, cfg), start + 86, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.PDIV0_MUX", index, cfg), start + 87, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.EN_COARSE_TUNE", index, cfg), start + 88, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.EN_USR_CFG", index, cfg), start + 89, 1);
+    add_word_settings(stringf("PLL%d.CFG_%c.PLL_EN_SEL", index, cfg), start + 90, 1);
+}
+
 ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 8)
 {
     int pos = 0;
     for (int i = 0; i < 4; i++) {
-        add_word_settings(stringf("PLL%d.CFG_A", i), pos, 96);
+        add_pll_cfg(i, 'A', pos);
         pos += 96;
-        add_word_settings(stringf("PLL%d.CFG_B", i), pos, 96);
+        add_pll_cfg(i, 'B', pos);
         pos += 96;
     }
 
@@ -438,8 +467,19 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
 
     pos += 32;
     for (int i = 0; i < Die::MAX_PLL; i++) {
-        add_word_settings(stringf("PLL%d.CTRL_A", i), pos + 0, 8);
-        add_word_settings(stringf("PLL%d.CTRL_B", i), pos + 8, 8);
+        add_word_settings(stringf("PLL%d.PLL_RST", i), pos + 0, 1);
+        add_word_settings(stringf("PLL%d.PLL_EN", i), pos + 1, 1);
+        add_word_settings(stringf("PLL%d.AUTN", i), pos + 2, 1);
+        add_word_settings(stringf("PLL%d.SET_SEL", i), pos + 3, 1);
+        add_word_settings(stringf("PLL%d.USR_SET", i), pos + 4, 1);
+        add_word_settings(stringf("PLL%d.USR_CLK_REF", i), pos + 5, 1);
+        add_word_settings(stringf("PLL%d.CLK_OUT_EN", i), pos + 6, 1);
+        add_word_settings(stringf("PLL%d.LOCK_REQ", i), pos + 7, 1);
+
+        add_word_settings(stringf("PLL%d.AUTN_C", i), pos + 8 + 0, 3);
+        add_word_settings(stringf("PLL%d.CLK180_DOUB", i), pos + 8 + 3, 1);
+        add_word_settings(stringf("PLL%d.CLK270_DOUB", i), pos + 8 + 4, 1);
+        add_word_settings(stringf("PLL%d.USR_CLK_OUT", i), pos + 8 + 7, 1);
         pos += 16;
     }
     add_unknowns();
