@@ -50,6 +50,8 @@ def get_colour(ttype):
             colour = "#FDD3D3"
         case "PLL":
             colour = "#FF7ABE"
+        case "SERDES":
+            colour = "#64FF65"
         case _:
             colour = "#FFFFFF"
     return colour

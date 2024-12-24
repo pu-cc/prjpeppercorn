@@ -19,6 +19,11 @@
 from enum import Enum
 from dataclasses import dataclass
 
+PLL_X_POS = 33
+PLL_Y_POS = 131
+SERDES_X_POS = 1
+SERDES_Y_POS = 131
+
 def max_row():
     return 131
 
@@ -124,6 +129,12 @@ def is_gpio(x,y):
             return y % 2==1
     return False
 
+def is_pll(x,y):
+    return x==PLL_X_POS and y==PLL_Y_POS
+
+def is_serdes(x,y):
+    return x==SERDES_X_POS and y==SERDES_Y_POS
+
 def base_loc(x,y):
     return (((x-1) & ~1) + 1, ((y-1) & ~1) + 1)
 
@@ -226,7 +237,25 @@ PRIMITIVES_PINS = {
         Pin("DI"    , PinType.INPUT, "GPIO_WIRE"),
         Pin("DO"    , PinType.OUTPUT,"GPIO_WIRE"),
         Pin("OE"    , PinType.OUTPUT,"GPIO_WIRE"),
-    ]
+    ],
+    "BUFG" : [
+        Pin("I"     , PinType.INPUT, "BUFG_WIRE"),
+        Pin("O"     , PinType.OUTPUT,"BUFG_WIRE"),
+    ],
+    "PLL" : [
+        Pin("CLK_REF",             PinType.INPUT, "PLL_WIRE"),
+        Pin("USR_CLK_REF",         PinType.INPUT, "PLL_WIRE"),
+        Pin("USR_SEL_A_B",         PinType.INPUT, "PLL_WIRE"),
+        Pin("CLK_FEEDBACK",        PinType.INPUT, "PLL_WIRE"),
+        Pin("USR_LOCKED_STDY_RST", PinType.INPUT, "PLL_WIRE"),
+        Pin("CLK0",                PinType.OUTPUT,"PLL_WIRE"),
+        Pin("CLK90",               PinType.OUTPUT,"PLL_WIRE"),
+        Pin("CLK180",              PinType.OUTPUT,"PLL_WIRE"),
+        Pin("CLK270",              PinType.OUTPUT,"PLL_WIRE"),
+        Pin("CLK_REF_OUT",         PinType.OUTPUT,"PLL_WIRE"),
+        Pin("USR_PLL_LOCKED_STDY", PinType.OUTPUT,"PLL_WIRE"),
+        Pin("USR_PLL_LOCKED",      PinType.OUTPUT,"PLL_WIRE"),
+    ],
 }
 
 def get_groups_for_type(type):
@@ -273,6 +302,15 @@ def get_primitives_for_type(type):
         primitives.append(Primitive("CPE","CPE",0))
     if "GPIO" in type:
         primitives.append(Primitive("GPIO","GPIO",0))
+    if "PLL" in type:
+        primitives.append(Primitive("BUFG0","BUFG",0))
+        primitives.append(Primitive("BUFG1","BUFG",1))
+        primitives.append(Primitive("BUFG2","BUFG",2))
+        primitives.append(Primitive("BUFG3","BUFG",3))
+        primitives.append(Primitive("PLL0","PLL",4))
+        primitives.append(Primitive("PLL1","PLL",5))
+        primitives.append(Primitive("PLL2","PLL",6))
+        primitives.append(Primitive("PLL3","PLL",7))
     return primitives
 
 def get_primitive_pins(bel):
@@ -392,6 +430,59 @@ def get_endpoints_for_type(type):
         for i in range(4):
             create_wire(f"TES.CLOCK{i}", type="TES_WIRE")
 
+    if "PLL" in type:
+        # CLKIN
+        create_wire("CLKIN.CLK0", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK1", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK2", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK3", type="CLKIN_WIRE")
+        create_wire("CLKIN.SER_CLK", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK_REF_INT0", type="CLKIN_INT_WIRE") # internal
+        create_wire("CLKIN.CLK_REF_INT1", type="CLKIN_INT_WIRE") # internal
+        create_wire("CLKIN.CLK_REF_INT2", type="CLKIN_INT_WIRE") # internal
+        create_wire("CLKIN.CLK_REF_INT3", type="CLKIN_INT_WIRE") # internal
+        create_wire("CLKIN.CLK_REF_0", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK_REF_1", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK_REF_2", type="CLKIN_WIRE")
+        create_wire("CLKIN.CLK_REF_3", type="CLKIN_WIRE")
+        # GLBOUT
+        create_wire("GLBOUT.CLK0_0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK90_0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK180_0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK270_0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK_INT_0", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_SEL_INT_0", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_REF_OUT0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.USR_GLB0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.GLB0", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK0_1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK90_1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK180_1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK270_1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK_INT_1", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_SEL_INT_1", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_REF_OUT1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.USR_GLB1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.GLB1", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK0_2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK90_2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK180_2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK270_2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK_INT_2", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_SEL_INT_2", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_REF_OUT2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.USR_GLB2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.GLB2", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK0_3", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK90_3", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK180_3", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK270_3", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.CLK_INT_3", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_SEL_INT_3", type="GLBOUT_INT_WIRE")
+        create_wire("GLBOUT.CLK_REF_OUT3", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.USR_GLB3", type="GLBOUT_WIRE")
+        create_wire("GLBOUT.GLB3", type="GLBOUT_WIRE")
+
     return wires
 
 def get_mux_connections_for_type(type):
@@ -468,6 +559,95 @@ def get_mux_connections_for_type(type):
             io_in = 1 if p % 2 else 2
             create_mux(f"IOES.IO_IN{io_in}", f"IOES.SB_IN_{plane}", 1, 0, False)
             create_mux(f"IOES.ALTIN_{plane}", f"IOES.SB_IN_{plane}", 1, 1, False)
+
+    if "PLL" in type:
+        create_mux("CLKIN.CLK0", "CLKIN.CLK_REF_INT0", 3, 0, False, "CLKIN.REF0")
+        create_mux("CLKIN.CLK1", "CLKIN.CLK_REF_INT0", 3, 1, False, "CLKIN.REF0")
+        create_mux("CLKIN.CLK2", "CLKIN.CLK_REF_INT0", 3, 2, False, "CLKIN.REF0")
+        create_mux("CLKIN.CLK3", "CLKIN.CLK_REF_INT0", 3, 3, False, "CLKIN.REF0")
+        create_mux("CLKIN.SER_CLK", "CLKIN.CLK_REF_INT0", 3, 4, False, "CLKIN.REF0")
+        create_mux("CLKIN.CLK_REF_INT0", "CLKIN.CLK_REF_0", 1, 0, False, "CLKIN.REF0_INV")
+
+        create_mux("CLKIN.CLK0", "CLKIN.CLK_REF_INT1", 3, 0, False, "CLKIN.REF1")
+        create_mux("CLKIN.CLK1", "CLKIN.CLK_REF_INT1", 3, 1, False, "CLKIN.REF1")
+        create_mux("CLKIN.CLK2", "CLKIN.CLK_REF_INT1", 3, 2, False, "CLKIN.REF1")
+        create_mux("CLKIN.CLK3", "CLKIN.CLK_REF_INT1", 3, 3, False, "CLKIN.REF1")
+        create_mux("CLKIN.SER_CLK", "CLKIN.CLK_REF_INT1", 3, 4, False, "CLKIN.REF1")
+        create_mux("CLKIN.CLK_REF_INT1", "CLKIN.CLK_REF_1", 1, 0, False, "CLKIN.REF1_INV")
+
+        create_mux("CLKIN.CLK0", "CLKIN.CLK_REF_INT2", 3, 0, False, "CLKIN.REF2")
+        create_mux("CLKIN.CLK1", "CLKIN.CLK_REF_INT2", 3, 1, False, "CLKIN.REF2")
+        create_mux("CLKIN.CLK2", "CLKIN.CLK_REF_INT2", 3, 2, False, "CLKIN.REF2")
+        create_mux("CLKIN.CLK3", "CLKIN.CLK_REF_INT2", 3, 3, False, "CLKIN.REF2")
+        create_mux("CLKIN.SER_CLK", "CLKIN.CLK_REF_INT2", 3, 4, False, "CLKIN.REF2")
+        create_mux("CLKIN.CLK_REF_INT2", "CLKIN.CLK_REF_2", 1, 0, False, "CLKIN.REF2_INV")
+
+        create_mux("CLKIN.CLK0", "CLKIN.CLK_REF_INT3", 3, 0, False, "CLKIN.REF3")
+        create_mux("CLKIN.CLK1", "CLKIN.CLK_REF_INT3", 3, 1, False, "CLKIN.REF3")
+        create_mux("CLKIN.CLK2", "CLKIN.CLK_REF_INT3", 3, 2, False, "CLKIN.REF3")
+        create_mux("CLKIN.CLK3", "CLKIN.CLK_REF_INT3", 3, 3, False, "CLKIN.REF3")
+        create_mux("CLKIN.SER_CLK", "CLKIN.CLK_REF_INT3", 3, 4, False, "CLKIN.REF3")
+        create_mux("CLKIN.CLK_REF_INT3", "CLKIN.CLK_REF_3", 1, 0, False, "CLKIN.REF3_INV")
+
+        # GLBOUT
+
+        create_mux("GLBOUT.CLK_REF_OUT0", "GLBOUT.CLK_INT_0", 3, 0, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK0_1", "GLBOUT.CLK_INT_0", 3, 1, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK0_2", "GLBOUT.CLK_INT_0", 3, 2, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK0_3", "GLBOUT.CLK_INT_0", 3, 3, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK0_0", "GLBOUT.CLK_INT_0", 3, 4, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK90_0", "GLBOUT.CLK_INT_0", 3, 5, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK180_0", "GLBOUT.CLK_INT_0", 3, 6, False, "GLBOUT.GLB0")
+        create_mux("GLBOUT.CLK270_0", "GLBOUT.CLK_INT_0", 3, 7, False, "GLBOUT.GLB0")
+
+        create_mux("GLBOUT.CLK_INT_0", "GLBOUT.CLK_SEL_INT_0", 1, 0, False, "GLBOUT.USR_GLB0")
+        create_mux("GLBOUT.USR_GLB0", "GLBOUT.CLK_SEL_INT_0", 1, 1, False, "GLBOUT.USR_GLB0")
+
+        create_mux("GLBOUT.CLK_SEL_INT_0", "GLBOUT.GLB0", 1, 1, False, "GLBOUT.USR_GLB0_EN")
+
+
+        create_mux("GLBOUT.CLK_REF_OUT1", "GLBOUT.CLK_INT_1", 3, 0, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK90_0", "GLBOUT.CLK_INT_1", 3, 1, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK90_2", "GLBOUT.CLK_INT_1", 3, 2, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK90_3", "GLBOUT.CLK_INT_1", 3, 3, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK0_1", "GLBOUT.CLK_INT_1", 3, 4, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK90_1", "GLBOUT.CLK_INT_1", 3, 5, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK180_1", "GLBOUT.CLK_INT_1", 3, 6, False, "GLBOUT.GLB1")
+        create_mux("GLBOUT.CLK270_1", "GLBOUT.CLK_INT_1", 3, 7, False, "GLBOUT.GLB1")
+
+        create_mux("GLBOUT.CLK_INT_1", "GLBOUT.CLK_SEL_INT_1", 1, 0, False, "GLBOUT.USR_GLB1")
+        create_mux("GLBOUT.USR_GLB1", "GLBOUT.CLK_SEL_INT_1", 1, 1, False, "GLBOUT.USR_GLB1")
+
+        create_mux("GLBOUT.CLK_SEL_INT_1", "GLBOUT.GLB1", 1, 1, False, "GLBOUT.USR_GLB1_EN")
+
+        create_mux("GLBOUT.CLK_REF_OUT2", "GLBOUT.CLK_INT_2", 3, 0, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK180_0", "GLBOUT.CLK_INT_2", 3, 1, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK180_1", "GLBOUT.CLK_INT_2", 3, 2, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK180_3", "GLBOUT.CLK_INT_2", 3, 3, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK0_2", "GLBOUT.CLK_INT_2", 3, 4, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK90_2", "GLBOUT.CLK_INT_2", 3, 5, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK180_2", "GLBOUT.CLK_INT_2", 3, 6, False, "GLBOUT.GLB2")
+        create_mux("GLBOUT.CLK270_2", "GLBOUT.CLK_INT_2", 3, 7, False, "GLBOUT.GLB2")
+
+        create_mux("GLBOUT.CLK_INT_2", "GLBOUT.CLK_SEL_INT_2", 1, 0, False, "GLBOUT.USR_GLB2")
+        create_mux("GLBOUT.USR_GLB2", "GLBOUT.CLK_SEL_INT_2", 1, 1, False, "GLBOUT.USR_GLB2")
+
+        create_mux("GLBOUT.CLK_SEL_INT_2", "GLBOUT.GLB2", 1, 1, False, "GLBOUT.USR_GLB2_EN")
+
+        create_mux("GLBOUT.CLK_REF_OUT3", "GLBOUT.CLK_INT_3", 3, 0, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK270_1", "GLBOUT.CLK_INT_3", 3, 1, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK270_2", "GLBOUT.CLK_INT_3", 3, 2, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK270_3", "GLBOUT.CLK_INT_3", 3, 3, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK0_3", "GLBOUT.CLK_INT_3", 3, 4, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK90_3", "GLBOUT.CLK_INT_3", 3, 5, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK180_3", "GLBOUT.CLK_INT_3", 3, 6, False, "GLBOUT.GLB3")
+        create_mux("GLBOUT.CLK270_3", "GLBOUT.CLK_INT_3", 3, 7, False, "GLBOUT.GLB3")
+
+        create_mux("GLBOUT.CLK_INT_3", "GLBOUT.CLK_SEL_INT_3", 1, 0, False, "GLBOUT.USR_GLB3")
+        create_mux("GLBOUT.USR_GLB3", "GLBOUT.CLK_SEL_INT_3", 1, 1, False, "GLBOUT.USR_GLB3")
+
+        create_mux("GLBOUT.CLK_SEL_INT_3", "GLBOUT.GLB3", 1, 1, False, "GLBOUT.USR_GLB3_EN")
+
     return muxes
 
 def get_tile_types(x,y):
@@ -494,6 +674,10 @@ def get_tile_types(x,y):
         val.append("LES")
     if is_edge_right(x,y):
         val.append("RES")
+    if is_pll(x,y):
+        val.append("PLL")
+    if is_serdes(x,y):
+        val.append("SERDES")
     return val
 
 def get_tile_type(x,y):
@@ -695,6 +879,9 @@ def create_io(x,y):
         create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT1")
         create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT2")
 
+def create_pll():
+    create_conn(-2, 101, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
+
 def get_connections():
     for y in range(-2, max_row()+1):
         for x in range(-2, max_col()+1):
@@ -707,6 +894,7 @@ def get_connections():
                 create_sb(x,y)
             if is_edge_io(x,y):
                 create_io(x,y)
+    create_pll()
     return conn.items()
 
 def get_package_pads():
