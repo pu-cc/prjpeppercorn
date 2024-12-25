@@ -173,6 +173,7 @@ class MUX:
     bits : int
     value : int
     invert: bool
+    visible: bool
 
 @dataclass
 class Connection:
@@ -367,8 +368,10 @@ def get_endpoints_for_type(type):
                 create_wire(f"SB_SML.P{plane}.D2_{i}", type="SB_SML_WIRE")
                 create_wire(f"SB_SML.P{plane}.D3_{i}", type="SB_SML_WIRE")
                 create_wire(f"SB_SML.P{plane}.Y{i}", type="SB_SML_WIRE")
+                create_wire(f"SB_SML.P{plane}.Y{i}_int", type="SB_SML_WIRE")
 
             create_wire(f"SB_SML.P{plane}.YDIAG", type="SB_SML_WIRE")
+            create_wire(f"SB_SML.P{plane}.YDIAG_int", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X34", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X14", type="SB_SML_WIRE")
             create_wire(f"SB_SML.P{plane}.X12", type="SB_SML_WIRE")
@@ -487,9 +490,9 @@ def get_endpoints_for_type(type):
 
 def get_mux_connections_for_type(type):
     muxes = []
-    def create_mux(src, dst, bits, value, invert, name = None):
+    def create_mux(src, dst, bits, value, invert, name = None, visible = True):
         name = dst if name is None else name
-        muxes.append(MUX(src, dst, name, bits, value, invert))
+        muxes.append(MUX(src, dst, name, bits, value, invert, visible))
 
     if "CPE" in type:
         # CPE
@@ -535,20 +538,26 @@ def get_mux_connections_for_type(type):
             plane = f"{p:02d}"
             # Per Y output mux
             for i in range(1,5):
-                create_mux(f"SB_SML.P{plane}.D0",     f"SB_SML.P{plane}.Y{i}", 2, 0, True)
-                create_mux(f"SB_SML.P{plane}.YDIAG",  f"SB_SML.P{plane}.Y{i}", 2, 1, True)
-                create_mux(f"SB_SML.P{plane}.D2_{i}", f"SB_SML.P{plane}.Y{i}", 2, 2, True)
-                create_mux(f"SB_SML.P{plane}.D3_{i}", f"SB_SML.P{plane}.Y{i}", 2, 3, True)
+                create_mux(f"SB_SML.P{plane}.D0",       f"SB_SML.P{plane}.Y{i}_int", 2, 0, False, f"SB_SML.P{plane}.Y{i}")
+                create_mux(f"SB_SML.P{plane}.YDIAG_int",f"SB_SML.P{plane}.Y{i}_int", 2, 1, False, f"SB_SML.P{plane}.Y{i}")
+                create_mux(f"SB_SML.P{plane}.D2_{i}",   f"SB_SML.P{plane}.Y{i}_int", 2, 2, False, f"SB_SML.P{plane}.Y{i}")
+                create_mux(f"SB_SML.P{plane}.D3_{i}",   f"SB_SML.P{plane}.Y{i}_int", 2, 3, False, f"SB_SML.P{plane}.Y{i}")
 
             # YDIAG output mux
-            create_mux(f"SB_SML.P{plane}.Y1",  f"SB_SML.P{plane}.YDIAG", 3, 0, True)
-            create_mux(f"SB_SML.P{plane}.Y2",  f"SB_SML.P{plane}.YDIAG", 3, 1, True)
-            create_mux(f"SB_SML.P{plane}.Y3",  f"SB_SML.P{plane}.YDIAG", 3, 2, True)
-            create_mux(f"SB_SML.P{plane}.Y4",  f"SB_SML.P{plane}.YDIAG", 3, 3, True)
-            create_mux(f"SB_SML.P{plane}.X34", f"SB_SML.P{plane}.YDIAG", 3, 4, True)
-            create_mux(f"SB_SML.P{plane}.X14", f"SB_SML.P{plane}.YDIAG", 3, 5, True)
-            create_mux(f"SB_SML.P{plane}.X12", f"SB_SML.P{plane}.YDIAG", 3, 6, True)
-            create_mux(f"SB_SML.P{plane}.X23", f"SB_SML.P{plane}.YDIAG", 3, 7, True)
+            create_mux(f"SB_SML.P{plane}.Y1_int", f"SB_SML.P{plane}.YDIAG_int", 3, 0, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.Y2_int", f"SB_SML.P{plane}.YDIAG_int", 3, 1, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.Y3_int", f"SB_SML.P{plane}.YDIAG_int", 3, 2, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.Y4_int", f"SB_SML.P{plane}.YDIAG_int", 3, 3, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.X34",    f"SB_SML.P{plane}.YDIAG_int", 3, 4, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.X14",    f"SB_SML.P{plane}.YDIAG_int", 3, 5, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.X12",    f"SB_SML.P{plane}.YDIAG_int", 3, 6, False, f"SB_SML.P{plane}.YDIAG")
+            create_mux(f"SB_SML.P{plane}.X23",    f"SB_SML.P{plane}.YDIAG_int", 3, 7, False, f"SB_SML.P{plane}.YDIAG")
+
+            create_mux(f"SB_SML.P{plane}.Y1_int",    f"SB_SML.P{plane}.Y1",    1, 1, True, f"SB_SML.P{plane}.Y1_INT", False)
+            create_mux(f"SB_SML.P{plane}.Y2_int",    f"SB_SML.P{plane}.Y2",    1, 1, True, f"SB_SML.P{plane}.Y2_INT", False)
+            create_mux(f"SB_SML.P{plane}.Y3_int",    f"SB_SML.P{plane}.Y3",    1, 1, True, f"SB_SML.P{plane}.Y3_INT", False)
+            create_mux(f"SB_SML.P{plane}.Y4_int",    f"SB_SML.P{plane}.Y4",    1, 1, True, f"SB_SML.P{plane}.Y4_INT", False)
+            create_mux(f"SB_SML.P{plane}.YDIAG_int", f"SB_SML.P{plane}.YDIAG", 1, 1, True, f"SB_SML.P{plane}.YDIAG_INT", False)
 
     #if "GPIO" in type:
     #    # GPIO
