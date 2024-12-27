@@ -22,6 +22,7 @@ from os import path
 from string import Template
 import html_tilegrid
 import shutil
+import chip
 
 GM_DOCS_INDEX = """
 <html>
@@ -56,7 +57,7 @@ def main():
     docs_toc += f"<h3>{family.upper()} Family</h3>"
     docs_toc += "<h4>Bitstream Documentation</h4>"
     docs_toc += "<ul>"
-    for device in ["A1"]:
+    for device in chip.get_all_devices():
         print("Device: " + device)
         docs_toc += f'<li><a href="{device}.html">{device} Documentation</a></li>'
         html_tilegrid.main(["html_tilegrid", family,  device, path.join("work_html",device + ".html")])

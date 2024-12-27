@@ -19,6 +19,7 @@
 
 import sys
 import argparse
+import chip
 import die
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -58,9 +59,10 @@ def get_colour(ttype):
 
 def main(argv):
     args = parser.parse_args(argv[1:])
+    ch = chip.get_device(args.device)
 
-    max_row = die.max_row()
-    max_col = die.max_col()
+    max_row = ch.max_row()
+    max_col = ch.max_col()
     tiles = []
 
     for i in range(-2, max_row+1):
@@ -71,7 +73,7 @@ def main(argv):
 
     for y in range(-2, max_row+1):
         for x in range(-2, max_col+1):
-            for type in die.get_tile_types(x,y):
+            for type in ch.get_tile_types(x,y):
                 tiles[max_row-y][x+2].append((f"{x},{y}", type))
 
     f = args.outfile

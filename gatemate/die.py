@@ -30,6 +30,12 @@ def max_row():
 def max_col():
     return 163
 
+def num_rows():
+    return max_row() + 3
+
+def num_cols():
+    return max_col() + 3
+
 def is_sb(x,y):
     if (x>=-1 and x<=162 and y>=-1 and y<=130):
         return (x+1) % 2 == (y+1) % 2
