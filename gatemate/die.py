@@ -101,30 +101,39 @@ def is_edge_io(x,y):
 def get_io_name(x,y):
     if (y==-2 and x>=5 and x<=40): # IO Bank S3/WA
         x-=5
+        #return f"GPIO_S3_{("A" if x % 4==0 else "B")}[{x//4}]"
         return f"IO_WA_{("A" if x % 4==0 else "B")}{x//4}"
     if (y==-2 and x>=57 and x<=92):  # IO Bank S1/WB
         x-=57
+        #return f"GPIO_S1_{("A" if x % 4==0 else "B")}[{x//4}]"
         return f"IO_WB_{("A" if x % 4==0 else "B")}{x//4}"
     if (y==-2 and x>=101 and x<=136): # IO Bank S2/WC
         x-=101
+        #return f"GPIO_S2_{("A" if x % 4==0 else "B")}[{x//4}]"
         return f"IO_WC_{("A" if x % 4==0 else "B")}{x//4}"
     if (x==-2 and y>=25 and y<=60): # IO Bank W1/SA
         y-=25
+        #return f"GPIO_W1_{("A" if y % 4==0 else "B")}[{y//4}]"
         return f"IO_SA_{("A" if y % 4==0 else "B")}{y//4}"
     if (x==-2 and y>=69 and y<=104): # IO Bank W2/SB
         y-=69
+        #return f"GPIO_W2_{("A" if y % 4==0 else "B")}[{y//4}]"
         return f"IO_SB_{("A" if y % 4==0 else "B")}{y//4}"
     if (x==max_col() and y>=25 and y<=60): # IO Bank E1/NA
         y-=25
+        #return f"GPIO_E1_{("A" if y % 4==0 else "B")}[{y//4}]"
         return f"IO_NA_{("A" if y % 4==0 else "B")}{y//4}"
     if (x==max_col() and y>=69 and y<=104): # IO Bank E2/NB
         y-=69
+        #return f"GPIO_E2_{("A" if y % 4==0 else "B")}[{y//4}]"
         return f"IO_NB_{("A" if y % 4==0 else "B")}{y//4}"
     if (y==max_row() and x>=57 and x<=92): # IO Bank N1/EA
         x-=57
+        #return f"GPIO_N1_{("A" if x % 4==0 else "B")}[{x//4}]"
         return f"IO_EA_{("A" if x % 4==0 else "B")}{x//4}"
     if (y==max_row() and x>=101 and x<=136): # IO Bank N2/EB
         x-=101
+        #return f"GPIO_N2_{("A" if x % 4==0 else "B")}[{x//4}]"
         return f"IO_EB_{("A" if x % 4==0 else "B")}{x//4}"
 
 def is_gpio(x,y):
@@ -187,14 +196,6 @@ class Connection:
     y : int
     name : str
 
-@dataclass
-class Pad:
-    x : int
-    y : int
-    name : str
-    bel : str
-    function : str
-    bank : int
 
 PRIMITIVES_PINS = {
     "CPE": [
@@ -711,17 +712,23 @@ def get_tile_type_list():
 
 conn = dict()
 debug_conn = False
+offset_x = 0
+offset_y = 0
+
+def clean_conn():
+    global conn
+    conn = dict()
 
 def create_conn(src_x,src_y, src, dst_x, dst_y, dst):
-    key_val = f"{src_x}/{src_y}/{src}"
-    key  = Connection(src_x, src_y, src)
-    item = Connection(dst_x, dst_y, dst)
+    key_val = f"{src_x + offset_x}/{src_y + offset_y}/{src}"
+    key  = Connection(src_x + offset_x, src_y + offset_y, src)
+    item = Connection(dst_x + offset_x, dst_y + offset_y, dst)
     if key_val not in conn:
         conn[key_val] = list()
         conn[key_val].append(key)
     conn[key_val].append(item)
     if debug_conn:
-        print(f"({src_x},{src_y}) {src} => ({dst_x},{dst_y}) {dst}")
+        print(f"({src_x + offset_x},{src_y}) {src} => ({dst_x + offset_x},{dst_y + offset_y}) {dst}")
 
 
 def alt_plane(dir,plane):
@@ -897,7 +904,11 @@ def create_io(x,y):
 def create_pll():
     create_conn(-2, 101, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
 
-def get_connections():
+def create_in_die_connections(off_x, off_y):
+    global offset_x
+    global offset_y
+    offset_x = off_x
+    offset_y = off_y
     for y in range(-2, max_row()+1):
         for x in range(-2, max_col()+1):
             if is_cpe(x,y):
@@ -910,12 +921,7 @@ def get_connections():
             if is_edge_io(x,y):
                 create_io(x,y)
     create_pll()
+
+def get_connections():
     return conn.items()
 
-def get_package_pads():
-    pads = []
-    for y in range(-2, max_row()+1):
-        for x in range(-2, max_col()+1):
-            if is_gpio(x,y):
-                pads.append(Pad(x,y,get_io_name(x,y),"GPIO","",0))
-    return pads

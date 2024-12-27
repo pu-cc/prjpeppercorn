@@ -21,6 +21,15 @@ from dataclasses import dataclass
 from typing import List
 
 @dataclass
+class Pad:
+    x : int
+    y : int
+    name : str
+    bel : str
+    function : str
+    bank : int
+
+@dataclass
 class Die:
     name : str
     die_x : int
@@ -43,6 +52,25 @@ class Chip:
         x_pos = (x + 2) % die.num_cols() - 2
         y_pos = (y + 2) % die.num_rows() - 2
         return die.get_tile_types(x_pos,y_pos)
+
+    def get_tile_type(self,x,y):
+        x_pos = (x + 2) % die.num_cols() - 2
+        y_pos = (y + 2) % die.num_rows() - 2
+        return die.get_tile_type(x_pos,y_pos)
+    
+    def get_connections(self):
+        die.clean_conn()
+        for d in self.dies:
+            die.create_in_die_connections(d.die_x * die.num_cols(), d.die_y * die.num_rows())
+        return die.get_connections()
+    
+    def get_package_pads(self):
+        pads = []
+        for y in range(-2, die.max_row()+1):
+            for x in range(-2, die.max_col()+1):
+                if die.is_gpio(x,y):
+                    pads.append(Pad(x,y,die.get_io_name(x,y),"GPIO","",0))
+        return pads
 
 CCGM1_DEVICES = {
     "CCGM1A1":  Chip("CCGM1A1", 1, 1, [
