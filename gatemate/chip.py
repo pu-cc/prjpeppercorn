@@ -19,7 +19,7 @@
 import die
 from die import Die
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
 @dataclass
 class Pad:
@@ -31,11 +31,18 @@ class Pad:
     bank : int
 
 @dataclass
+class Bank:
+    die : str
+    bank: str
+
+@dataclass
 class Chip:
     name : str
     die_width : int
     die_height : int
-    dies : List[Die]
+    dies : Dict[str,Die]
+    packages: Dict[str,Dict[str, List[Bank]]]
+    not_exist: Dict[str,List[str]]
 
     def max_row(self):
         return self.die_height * die.num_rows() - 3
@@ -55,32 +62,88 @@ class Chip:
     
     def get_connections(self):
         conn = dict()
-        for d in self.dies:
+        for d in self.dies.values():
             d.create_in_die_connections(conn)
         return conn.items()
     
-    def get_package_pads(self):
+    def get_packages(self):
+        return self.packages
+
+    def get_package_pads(self, package):
         pads = []
-        for y in range(-2, die.max_row()+1):
-            for x in range(-2, die.max_col()+1):
-                if die.is_gpio(x,y):
-                    pads.append(Pad(x,y,die.get_io_name(x,y),"GPIO","",0))
+        pkg = self.packages[package]
+        not_exist = self.not_exist[package]
+        for name, banks in pkg.items():
+            for bank in banks:
+                for p in ["A","B"]:
+                    for num in range(9):
+                        loc = self.dies[bank.die].io_pad_names[bank.bank][p][num]
+                        pad_name = f"IO_{name}_{p}{num}"
+                        if pad_name not in not_exist:
+                            pads.append(Pad(loc.x,loc.y,pad_name,"GPIO","",0))
         return pads
 
 CCGM1_DEVICES = {
-    "CCGM1A1":  Chip("CCGM1A1", 1, 1, [
-                    Die("1A", 0, 0)
-                ]),
-    "CCGM1A2":  Chip("CCGM1A2", 1, 2, [
-                    Die("1A", 0, 0),
-                    Die("1B", 0, 1)
-                ]),
-    "CCGM1A4":  Chip("CCGM1A4", 2, 2, [
-                    Die("1A", 0, 0),
-                    Die("1B", 0, 1),
-                    Die("2A", 1, 0),
-                    Die("2B", 1, 1)
-                ])
+    "CCGM1A1":  Chip("CCGM1A1", 1, 1, {
+                    "1A" : Die("1A", 0, 0)
+                }, {
+                    "FBGA324" : {
+                        "EA" : [ Bank("1A", "N1") ],
+                        "EB" : [ Bank("1A", "N2") ],
+                        "NA" : [ Bank("1A", "E1") ],
+                        "NB" : [ Bank("1A", "E2") ],
+                        "WA" : [ Bank("1A", "S3") ],
+                        "WB" : [ Bank("1A", "S1") ],
+                        "WC" : [ Bank("1A", "S2") ],
+                        "SA" : [ Bank("1A", "W1") ],
+                        "SB" : [ Bank("1A", "W2") ]
+                    }
+                }, { # non existing pins
+                    "FBGA324" : []
+                }),
+    "CCGM1A2":  Chip("CCGM1A2", 1, 2, {
+                    "1A" : Die("1A", 0, 0),
+                    "1B" : Die("1B", 0, 1)
+                }, {
+                    "FBGA324" : {
+                        "EA" : [ Bank("1B", "N1") ],
+                        "EB" : [ Bank("1B", "N2") ],
+                        "NA" : [ Bank("1A", "E1"), Bank("1B", "E1") ],
+                        "NB" : [ Bank("1A", "E2") ],
+                        "WA" : [ Bank("1A", "S3") ],
+                        "WB" : [ Bank("1A", "S1"), Bank("1B", "S1") ],
+                        "WC" : [ Bank("1A", "S2") ],
+                        "SA" : [ Bank("1A", "W1") ],
+                        "SB" : [ Bank("1A", "W2"), Bank("1B", "W2") ]
+                    }
+                }, { # non existing pins
+                    "FBGA324" : []
+                }),
+    "CCGM1A4":  Chip("CCGM1A4", 2, 2, {
+                    "1A" : Die("1A", 0, 0),
+                    "1B" : Die("1B", 0, 1),
+                    "2A" : Die("2A", 1, 0),
+                    "2B" : Die("2B", 1, 1)
+                }, {
+                    "FBGA324" : {
+                        "EA" : [ Bank("1B", "N1") ],
+                        "EB" : [ Bank("1B", "N2") ],
+                        "NA" : [ Bank("1A", "E1"), Bank("1B", "E1"), Bank("2A", "E1"), Bank("2B", "E1") ],
+                        "NB" : [ Bank("2A", "N1"), Bank("2B", "S1") ],
+                        "WA" : [ Bank("1A", "S3") ],
+                        "WB" : [ Bank("1A", "N1"), Bank("1B", "S1") ],
+                        "WC" : [ Bank("1A", "S2") ],
+                        "SA" : [ Bank("1A", "W1") ],
+                        "SB" : [ Bank("1A", "W2"), Bank("1B", "W2"), Bank("2A", "W2"), Bank("2B", "W2") ]
+                    }
+                }, { # non existing pins
+                    "FBGA324" : [
+                                 "IO_SB_A0","IO_SB_B0",
+                                 "IO_SB_A1","IO_SB_B1",
+                                 "IO_SB_A2","IO_SB_B2",
+                                 "IO_SB_A3","IO_SB_B3"
+                                ]
+                }),
 }
 
 def get_all_devices():
