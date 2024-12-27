@@ -710,75 +710,10 @@ def get_tile_type_list():
 
     return tt
 
-conn = dict()
-debug_conn = False
-offset_x = 0
-offset_y = 0
-
-def clean_conn():
-    global conn
-    conn = dict()
-
-def create_conn(src_x,src_y, src, dst_x, dst_y, dst):
-    key_val = f"{src_x + offset_x}/{src_y + offset_y}/{src}"
-    key  = Connection(src_x + offset_x, src_y + offset_y, src)
-    item = Connection(dst_x + offset_x, dst_y + offset_y, dst)
-    if key_val not in conn:
-        conn[key_val] = list()
-        conn[key_val].append(key)
-    conn[key_val].append(item)
-    if debug_conn:
-        print(f"({src_x + offset_x},{src_y}) {src} => ({dst_x + offset_x},{dst_y + offset_y}) {dst}")
-
-
 def alt_plane(dir,plane):
     alt = [[5, 6, 7, 8, 1, 2, 3, 4,11,12, 9,10],
            [9,10,11,12, 9,10,11,12,12,11,10, 9]]
     return alt[dir][plane-1]
-
-def create_cpe(x,y):
-    create_conn(x,y,"IM.P01.Y", x,y,"CPE.IN1")
-    create_conn(x,y,"IM.P02.Y", x,y,"CPE.IN2")
-    create_conn(x,y,"IM.P03.Y", x,y,"CPE.IN3")
-    create_conn(x,y,"IM.P04.Y", x,y,"CPE.IN4")
-    create_conn(x,y,"IM.P05.Y", x,y,"CPE.IN5")
-    create_conn(x,y,"IM.P06.Y", x,y,"CPE.IN6")
-    create_conn(x,y,"IM.P07.Y", x,y,"CPE.IN7")
-    create_conn(x,y,"IM.P08.Y", x,y,"CPE.IN8")
-    create_conn(x,y,"IM.P09.Y", x,y,"CPE.CLK")
-    create_conn(x,y,"IM.P10.Y", x,y,"CPE.EN")
-    create_conn(x,y,"IM.P11.Y", x,y,"CPE.SR")
-    if is_cpe(x,y-1):
-        create_conn(x,y-1,"CPE.COUTY1", x,y,"CPE.CINY1")
-        create_conn(x,y-1,"CPE.COUTY2", x,y,"CPE.CINY2")
-        create_conn(x,y-1,"CPE.POUTY1", x,y,"CPE.PINY1")
-        create_conn(x,y-1,"CPE.POUTY2", x,y,"CPE.PINY2")
-    if is_cpe(x-1,y):
-        create_conn(x-1,y,"CPE.COUTX", x,y,"CPE.CINX")
-        create_conn(x-1,y,"CPE.POUTX", x,y,"CPE.PINX")
-
-def create_inmux(x,y):
-    for p in range(1,13):
-        plane = f"{p:02d}"
-
-        # D0 - D3 are from nearby SBs
-        offset = 2 if is_sb(x,y) else 1
-        create_conn(x-offset,y,f"{get_sb_type(x-offset,y)}.P{plane}.Y1", x,y,f"IM.P{plane}.D0")
-        create_conn(x,y-offset,f"{get_sb_type(x,y-offset)}.P{plane}.Y2", x,y,f"IM.P{plane}.D1")
-        create_conn(x+offset,y,f"{get_sb_type(x+offset,y)}.P{plane}.Y3", x,y,f"IM.P{plane}.D2")
-        create_conn(x,y+offset,f"{get_sb_type(x,y+offset)}.P{plane}.Y4", x,y,f"IM.P{plane}.D3")
-
-        # D4 and D5 are from diagonal INMUX
-        if is_cpe(x-1,y-1):
-            create_conn(x-1,y-1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D4")
-        if is_cpe(x+1,y+1):
-            create_conn(x+1,y+1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D5")
-
-        # D6 and D7 are from alternate planes
-        alt = f"{alt_plane(0,p):02d}"
-        create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D6")
-        alt = f"{alt_plane(1,p):02d}"
-        create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D7")
 
 def prev_plane(p):
     return (p-2) % 12 + 1
@@ -786,142 +721,201 @@ def prev_plane(p):
 def next_plane(p):
     return p % 12 + 1
 
-def create_sb(x,y):
-    x_0,y_0 = base_loc(x,y)
-    sb_type = get_sb_type(x,y)
+class Die:
+    def __init__(self, name : str, die_x : int, die_y : int):
+        self.name = name
+        self.die_x = die_x
+        self.die_y = die_y
+        self.debug_conn = False
+        self.offset_x = die_x * num_cols()
+        self.offset_y = die_y * num_rows()
 
-    for p in range(1,13):
-        plane = f"{p:02d}"
-        # Handling input D0
-        if is_cpe(x,y):
-            # Core section SBs are connected to CPE
-            if p < 9:
-                # planes 1..8
-                x_cpe = x_0 + (1 if (p-1) & 2 else 0)
-                y_cpe = y_0 + (1 if (p-1) & 1 else 0)
-                # alternate patterns for lower-left SB(1,1) and upper-right SB(2,2)
-                out = [ 2, 1, 2, 1, 1, 2, 1, 2] if x & 1 else [ 1, 2, 1, 2, 2, 1, 2, 1]
-                create_conn(x_cpe,y_cpe,f"CPE.OUT{out[p-1]}", x,y,f"{sb_type}.P{plane}.D0")
-            else:
-                # planes 9..12
-                create_conn(x,y,f"OM.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
-        # Handling GPIO connections is done in create_io
-        # Handling inputs D2_* till D7_*
-        distances = [2, 4, 8, 12, 16, 20] if is_sb_big(x,y) else [2, 4]
-        for i,distance in enumerate(distances):
-            for direction in range(4):
-                sb_x, sb_y = x, y
-                match direction:
-                    case 0 :
-                        sb_x -= distance
-                    case 1 :
-                        sb_y -= distance
-                    case 2 :
-                        sb_x += distance
-                    case 3 :
-                        sb_y += distance
-                if is_sb(sb_x,sb_y):
-                    src  = f"{get_sb_type(sb_x,sb_y)}.P{plane}.Y{direction+1}"
-                    # Long distance signals are coming from SB_DRIVE
-                    if (distance>4):
-                        src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
-                    create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}")
+    def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst):
+        key_val = f"{src_x + self.offset_x}/{src_y + self.offset_y}/{src}"
+        key  = Connection(src_x + self.offset_x, src_y +self. offset_y, src)
+        item = Connection(dst_x + self.offset_x, dst_y + self.offset_y, dst)
+        if key_val not in self.conn:
+            self.conn[key_val] = list()
+            self.conn[key_val].append(key)
+        self.conn[key_val].append(item)
+        if self.debug_conn:
+            print(f"({src_x + self.offset_x},{src_y}) {src} => ({dst_x + self.offset_x},{dst_y + self.offset_y}) {dst}")
 
-        # Diagonal inputs
-        # X12 and X34 on edges are unconnected
-        if is_sb(x-1,y-1):
-            create_conn(x-1,y-1,f"{get_sb_type(x-1,y-1)}.P{plane}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X12")
-        if is_sb(x+1,y+1):
-            create_conn(x+1,y+1,f"{get_sb_type(x+1,y+1)}.P{plane}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X34")
-        create_conn(x,y,f"{get_sb_type(x,y)}.P{prev_plane(p):02d}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X14")
-        create_conn(x,y,f"{get_sb_type(x,y)}.P{next_plane(p):02d}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X23")
+    def create_cpe(self, x,y):
+        self.create_conn(x,y,"IM.P01.Y", x,y,"CPE.IN1")
+        self.create_conn(x,y,"IM.P02.Y", x,y,"CPE.IN2")
+        self.create_conn(x,y,"IM.P03.Y", x,y,"CPE.IN3")
+        self.create_conn(x,y,"IM.P04.Y", x,y,"CPE.IN4")
+        self.create_conn(x,y,"IM.P05.Y", x,y,"CPE.IN5")
+        self.create_conn(x,y,"IM.P06.Y", x,y,"CPE.IN6")
+        self.create_conn(x,y,"IM.P07.Y", x,y,"CPE.IN7")
+        self.create_conn(x,y,"IM.P08.Y", x,y,"CPE.IN8")
+        self.create_conn(x,y,"IM.P09.Y", x,y,"CPE.CLK")
+        self.create_conn(x,y,"IM.P10.Y", x,y,"CPE.EN")
+        self.create_conn(x,y,"IM.P11.Y", x,y,"CPE.SR")
+        if is_cpe(x,y-1):
+            self.create_conn(x,y-1,"CPE.COUTY1", x,y,"CPE.CINY1")
+            self.create_conn(x,y-1,"CPE.COUTY2", x,y,"CPE.CINY2")
+            self.create_conn(x,y-1,"CPE.POUTY1", x,y,"CPE.PINY1")
+            self.create_conn(x,y-1,"CPE.POUTY2", x,y,"CPE.PINY2")
+        if is_cpe(x-1,y):
+            self.create_conn(x-1,y,"CPE.COUTX", x,y,"CPE.CINX")
+            self.create_conn(x-1,y,"CPE.POUTX", x,y,"CPE.PINX")
 
-def create_outmux(x,y):
-    x_0,y_0 = base_loc(x,y)
-    for p in range(9,13):
-        plane = f"{p:02d}"
-        # alternating patters depending of plane and outmux position
-        outputs = [2, 2, 1, 1] if p % 2 == x & 1 else [1, 1, 2, 2]
-        create_conn(x_0,   y_0,   f"CPE.OUT{outputs[0]}", x,y, f"OM.P{plane}.D0")
-        create_conn(x_0,   y_0+1, f"CPE.OUT{outputs[1]}", x,y, f"OM.P{plane}.D1")
-        create_conn(x_0+1, y_0,   f"CPE.OUT{outputs[2]}", x,y, f"OM.P{plane}.D2")
-        create_conn(x_0+1, y_0+1, f"CPE.OUT{outputs[3]}", x,y, f"OM.P{plane}.D3")
+    def create_inmux(self, x,y):
+        for p in range(1,13):
+            plane = f"{p:02d}"
 
-def create_io(x,y):
-    cpe_x, cpe_y = gpio_x, gpio_y = sb_x, sb_y = x, y
-    alt = False
-    if is_edge_left(sb_x,sb_y):
-        output = "Y3"
-        cpe_x += 3
-        if is_sb(sb_x+1,sb_y):
-            sb_x += 1
-        else:
-            sb_x += 2
-            gpio_y -= 1
-            alt = True
-    elif is_edge_right(sb_x,sb_y):
-        output = "Y1"
-        cpe_x -= 3
-        if is_sb(sb_x-1,sb_y):
-            sb_x -= 1
-            gpio_y -= 1
-            alt = True
-        else:
-            sb_x -= 2
-    elif is_edge_bottom(sb_x,sb_y):
-        output = "Y4"
-        cpe_y += 3
-        if is_sb(sb_x,sb_y+1):
-            sb_y += 1
-        else:
-            sb_y += 2
-            gpio_x -= 1
-            alt = True
-    else:
-        output = "Y2"
-        cpe_y -= 3
-        if is_sb(sb_x,sb_y-1):
-            sb_y -= 1
-            gpio_x -= 1
-            alt = True
-        else:
-            sb_y -= 2
+            # D0 - D3 are from nearby SBs
+            offset = 2 if is_sb(x,y) else 1
+            self.create_conn(x-offset,y,f"{get_sb_type(x-offset,y)}.P{plane}.Y1", x,y,f"IM.P{plane}.D0")
+            self.create_conn(x,y-offset,f"{get_sb_type(x,y-offset)}.P{plane}.Y2", x,y,f"IM.P{plane}.D1")
+            self.create_conn(x+offset,y,f"{get_sb_type(x+offset,y)}.P{plane}.Y3", x,y,f"IM.P{plane}.D2")
+            self.create_conn(x,y+offset,f"{get_sb_type(x,y+offset)}.P{plane}.Y4", x,y,f"IM.P{plane}.D3")
 
-    for p in range(1,13):
-        plane = f"{p:02d}"
-        create_conn(sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.{output}", x,y, f"IOES.ALTIN_{plane}")
-        create_conn(x,y, f"IOES.SB_IN_{plane}", sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.D0")
-    create_conn(gpio_x,gpio_y,"GPIO.IN1", x,y, "IOES.IO_IN1")
-    create_conn(gpio_x,gpio_y,"GPIO.IN2", x,y, "IOES.IO_IN2")
+            # D4 and D5 are from diagonal INMUX
+            if is_cpe(x-1,y-1):
+                self.create_conn(x-1,y-1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D4")
+            if is_cpe(x+1,y+1):
+                self.create_conn(x+1,y+1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D5")
 
-    if alt:
-        create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT3")
-        create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT4")
-    else:
-        create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT1")
-        create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT2")
+            # D6 and D7 are from alternate planes
+            alt = f"{alt_plane(0,p):02d}"
+            self.create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D6")
+            alt = f"{alt_plane(1,p):02d}"
+            self.create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D7")
 
-def create_pll():
-    create_conn(-2, 101, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
+    def create_sb(self, x,y):
+        x_0,y_0 = base_loc(x,y)
+        sb_type = get_sb_type(x,y)
 
-def create_in_die_connections(off_x, off_y):
-    global offset_x
-    global offset_y
-    offset_x = off_x
-    offset_y = off_y
-    for y in range(-2, max_row()+1):
-        for x in range(-2, max_col()+1):
+        for p in range(1,13):
+            plane = f"{p:02d}"
+            # Handling input D0
             if is_cpe(x,y):
-                create_cpe(x,y)
-                create_inmux(x,y)
-                if is_outmux(x,y):
-                    create_outmux(x,y)
-            if is_sb(x,y):
-                create_sb(x,y)
-            if is_edge_io(x,y):
-                create_io(x,y)
-    create_pll()
+                # Core section SBs are connected to CPE
+                if p < 9:
+                    # planes 1..8
+                    x_cpe = x_0 + (1 if (p-1) & 2 else 0)
+                    y_cpe = y_0 + (1 if (p-1) & 1 else 0)
+                    # alternate patterns for lower-left SB(1,1) and upper-right SB(2,2)
+                    out = [ 2, 1, 2, 1, 1, 2, 1, 2] if x & 1 else [ 1, 2, 1, 2, 2, 1, 2, 1]
+                    self.create_conn(x_cpe,y_cpe,f"CPE.OUT{out[p-1]}", x,y,f"{sb_type}.P{plane}.D0")
+                else:
+                    # planes 9..12
+                    self.create_conn(x,y,f"OM.P{plane}.Y", x,y,f"{sb_type}.P{plane}.D0")
+            # Handling GPIO connections is done in create_io
+            # Handling inputs D2_* till D7_*
+            distances = [2, 4, 8, 12, 16, 20] if is_sb_big(x,y) else [2, 4]
+            for i,distance in enumerate(distances):
+                for direction in range(4):
+                    sb_x, sb_y = x, y
+                    match direction:
+                        case 0 :
+                            sb_x -= distance
+                        case 1 :
+                            sb_y -= distance
+                        case 2 :
+                            sb_x += distance
+                        case 3 :
+                            sb_y += distance
+                    if is_sb(sb_x,sb_y):
+                        src  = f"{get_sb_type(sb_x,sb_y)}.P{plane}.Y{direction+1}"
+                        # Long distance signals are coming from SB_DRIVE
+                        if (distance>4):
+                            src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
+                        self.create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}")
 
-def get_connections():
-    return conn.items()
+            # Diagonal inputs
+            # X12 and X34 on edges are unconnected
+            if is_sb(x-1,y-1):
+                self.create_conn(x-1,y-1,f"{get_sb_type(x-1,y-1)}.P{plane}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X12")
+            if is_sb(x+1,y+1):
+                self.create_conn(x+1,y+1,f"{get_sb_type(x+1,y+1)}.P{plane}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X34")
+            self.create_conn(x,y,f"{get_sb_type(x,y)}.P{prev_plane(p):02d}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X14")
+            self.create_conn(x,y,f"{get_sb_type(x,y)}.P{next_plane(p):02d}.YDIAG", x,y,f"{get_sb_type(x,y)}.P{plane}.X23")
+
+    def create_outmux(self, x,y):
+        x_0,y_0 = base_loc(x,y)
+        for p in range(9,13):
+            plane = f"{p:02d}"
+            # alternating patters depending of plane and outmux position
+            outputs = [2, 2, 1, 1] if p % 2 == x & 1 else [1, 1, 2, 2]
+            self.create_conn(x_0,   y_0,   f"CPE.OUT{outputs[0]}", x,y, f"OM.P{plane}.D0")
+            self.create_conn(x_0,   y_0+1, f"CPE.OUT{outputs[1]}", x,y, f"OM.P{plane}.D1")
+            self.create_conn(x_0+1, y_0,   f"CPE.OUT{outputs[2]}", x,y, f"OM.P{plane}.D2")
+            self.create_conn(x_0+1, y_0+1, f"CPE.OUT{outputs[3]}", x,y, f"OM.P{plane}.D3")
+
+    def create_io(self, x,y):
+        cpe_x, cpe_y = gpio_x, gpio_y = sb_x, sb_y = x, y
+        alt = False
+        if is_edge_left(sb_x,sb_y):
+            output = "Y3"
+            cpe_x += 3
+            if is_sb(sb_x+1,sb_y):
+                sb_x += 1
+            else:
+                sb_x += 2
+                gpio_y -= 1
+                alt = True
+        elif is_edge_right(sb_x,sb_y):
+            output = "Y1"
+            cpe_x -= 3
+            if is_sb(sb_x-1,sb_y):
+                sb_x -= 1
+                gpio_y -= 1
+                alt = True
+            else:
+                sb_x -= 2
+        elif is_edge_bottom(sb_x,sb_y):
+            output = "Y4"
+            cpe_y += 3
+            if is_sb(sb_x,sb_y+1):
+                sb_y += 1
+            else:
+                sb_y += 2
+                gpio_x -= 1
+                alt = True
+        else:
+            output = "Y2"
+            cpe_y -= 3
+            if is_sb(sb_x,sb_y-1):
+                sb_y -= 1
+                gpio_x -= 1
+                alt = True
+            else:
+                sb_y -= 2
+
+        for p in range(1,13):
+            plane = f"{p:02d}"
+            self.create_conn(sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.{output}", x,y, f"IOES.ALTIN_{plane}")
+            self.create_conn(x,y, f"IOES.SB_IN_{plane}", sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.D0")
+        self.create_conn(gpio_x,gpio_y,"GPIO.IN1", x,y, "IOES.IO_IN1")
+        self.create_conn(gpio_x,gpio_y,"GPIO.IN2", x,y, "IOES.IO_IN2")
+
+        if alt:
+            self.create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT3")
+            self.create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT4")
+        else:
+            self.create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT1")
+            self.create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT2")
+
+    def create_pll(self):
+        self.create_conn(-2, 101, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
+
+    def create_in_die_connections(self, conn):
+        self.conn = conn
+        for y in range(-2, max_row()+1):
+            for x in range(-2, max_col()+1):
+                if is_cpe(x,y):
+                    self.create_cpe(x,y)
+                    self.create_inmux(x,y)
+                    if is_outmux(x,y):
+                        self.create_outmux(x,y)
+                if is_sb(x,y):
+                    self.create_sb(x,y)
+                if is_edge_io(x,y):
+                    self.create_io(x,y)
+        self.create_pll()
+
 

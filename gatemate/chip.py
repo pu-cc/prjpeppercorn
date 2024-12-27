@@ -17,6 +17,7 @@
 #
 
 import die
+from die import Die
 from dataclasses import dataclass
 from typing import List
 
@@ -28,12 +29,6 @@ class Pad:
     bel : str
     function : str
     bank : int
-
-@dataclass
-class Die:
-    name : str
-    die_x : int
-    die_y : int
 
 @dataclass
 class Chip:
@@ -59,10 +54,10 @@ class Chip:
         return die.get_tile_type(x_pos,y_pos)
     
     def get_connections(self):
-        die.clean_conn()
+        conn = dict()
         for d in self.dies:
-            die.create_in_die_connections(d.die_x * die.num_cols(), d.die_y * die.num_rows())
-        return die.get_connections()
+            d.create_in_die_connections(conn)
+        return conn.items()
     
     def get_package_pads(self):
         pads = []
