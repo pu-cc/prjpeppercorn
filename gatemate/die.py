@@ -732,6 +732,8 @@ class Die:
         self.offset_x = die_x * num_cols()
         self.offset_y = die_y * num_rows()
         self.io_pad_names = dict()
+        self.gpio_to_loc = dict()
+        self.conn = dict()
         for y in range(-2, max_row()+1):
             for x in range(-2, max_col()+1):
                 if is_gpio(x,y):
@@ -742,6 +744,7 @@ class Die:
                         self.io_pad_names[io.bank][io.port] = dict()
                     if io.num not in self.io_pad_names[io.bank][io.port]:
                         self.io_pad_names[io.bank][io.port][io.num] = dict()
+                    self.gpio_to_loc[f"GPIO_{io.bank}_{io.port}[{io.num}]"]  = Location(x + self.offset_x, y + self.offset_y)
                     self.io_pad_names[io.bank][io.port][io.num] = Location(x + self.offset_x, y + self.offset_y)
 
     def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst):
@@ -915,7 +918,19 @@ class Die:
             self.create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT2")
 
     def create_pll(self):
-        self.create_conn(-2, 101, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
+        # GPIO_W2_A[8]  CLK0
+        # GPIO_W2_A[7]  CLK1
+        # GPIO_W2_A[6]  CLK2
+        # GPIO_W2_A[5]  CLK3
+        # SER_CLK       SER_CLK
+        loc = self.gpio_to_loc["GPIO_W2_A[8]"]
+        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
+        loc = self.gpio_to_loc["GPIO_W2_A[7]"]
+        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK1")
+        loc = self.gpio_to_loc["GPIO_W2_A[6]"]
+        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK2")
+        loc = self.gpio_to_loc["GPIO_W2_A[5]"]
+        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK3")
 
     def create_in_die_connections(self, conn):
         self.conn = conn
