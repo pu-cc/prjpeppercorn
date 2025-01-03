@@ -166,6 +166,7 @@ class Pin:
     name : str
     dir  : PinType
     wire_type : str
+    use_alias_conn: bool = False
 
 @dataclass
 class Group:
@@ -249,8 +250,8 @@ PRIMITIVES_PINS = {
         Pin("OE"    , PinType.OUTPUT,"GPIO_WIRE"),
     ],
     "BUFG" : [
-        Pin("I"     , PinType.INPUT, "BUFG_WIRE"),
-        Pin("O"     , PinType.OUTPUT,"BUFG_WIRE"),
+        Pin("I"     , PinType.INPUT, "BUFG_WIRE", True),
+        Pin("O"     , PinType.OUTPUT,"BUFG_WIRE", True),
     ],
     "PLL" : [
         Pin("CLK_REF",             PinType.INPUT, "PLL_WIRE"),
@@ -326,6 +327,14 @@ def get_primitives_for_type(type):
 def get_primitive_pins(bel):
     return PRIMITIVES_PINS[bel]
 
+def get_pin_connection_name(prim, pin):
+    if prim.type == "BUFG":
+        if pin.dir == PinType.INPUT:
+            return f"GLBOUT.CLK_SEL_INT_{prim.z}"
+        else:
+            return f"GLBOUT.USR_GLB{prim.z}"
+    return f"{prim.name}.{pin.name}"
+
 def get_endpoints_for_type(type):
     wires = []
     def create_wire(name, type):
@@ -333,7 +342,8 @@ def get_endpoints_for_type(type):
 
     for prim in get_primitives_for_type(type):
         for pin in get_primitive_pins(prim.type):
-            create_wire(f"{prim.name}.{pin.name}", type=f"{pin.wire_type}")
+            if not pin.use_alias_conn:
+                create_wire(f"{prim.name}.{pin.name}", type=f"{pin.wire_type}")
 
     if "CPE" in type:
         for p in range(1,13):
@@ -931,6 +941,11 @@ class Die:
         self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK2")
         loc = self.gpio_to_loc["GPIO_W2_A[5]"]
         self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK3")
+
+        self.create_conn(1, 128, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "GLBOUT.USR_GLB0")
+        self.create_conn(1, 127, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "GLBOUT.USR_GLB1")
+        self.create_conn(1, 126, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "GLBOUT.USR_GLB2")
+        self.create_conn(1, 125, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "GLBOUT.USR_GLB3")
 
     def create_in_die_connections(self, conn):
         self.conn = conn
