@@ -442,15 +442,23 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
     add_word_settings("GLBOUT.GLB0", pos + 32, 3);
     add_word_settings("GLBOUT.USR_GLB0", pos + 32 + 3, 1);
     add_word_settings("GLBOUT.GLB0_EN", pos + 32 + 4, 1);
+    add_word_settings("GLBOUT.FB0", pos + 32 + 8, 2);
+    add_word_settings("GLBOUT.USR_FB0", pos + 32 + 10, 1);
     add_word_settings("GLBOUT.GLB1", pos + 48, 3);
     add_word_settings("GLBOUT.USR_GLB1", pos + 48 + 3, 1);
     add_word_settings("GLBOUT.GLB1_EN", pos + 48 + 4, 1);
+    add_word_settings("GLBOUT.FB1", pos + 48 + 8, 2);
+    add_word_settings("GLBOUT.USR_FB1", pos + 48 + 10, 1);
     add_word_settings("GLBOUT.GLB2", pos + 64, 3);
     add_word_settings("GLBOUT.USR_GLB2", pos + 64 + 3, 1);
     add_word_settings("GLBOUT.GLB2_EN", pos + 64 + 4, 1);
+    add_word_settings("GLBOUT.FB2", pos + 64 + 8, 2);
+    add_word_settings("GLBOUT.USR_FB2", pos + 64 + 10, 1);
     add_word_settings("GLBOUT.GBL3", pos + 80, 3);
     add_word_settings("GLBOUT.USR_GLB3", pos + 80 + 3, 1);
     add_word_settings("GLBOUT.GLB3_EN", pos + 80 + 4, 1);
+    add_word_settings("GLBOUT.FB3", pos + 80 + 8, 2);
+    add_word_settings("GLBOUT.USR_FB3", pos + 80 + 10, 1);
 
     pos = Die::STATUS_CFG_START * 8;
     add_word_settings("GPIO.BANK_S1", pos + 16, 1);
