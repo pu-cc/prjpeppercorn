@@ -138,7 +138,7 @@ void TileBitDatabase::add_sb_sml(int index, int start)
 void TileBitDatabase::add_sb_drive(int index, int start)
 {
     for (int i = 0; i < 4; i++)
-        add_word_settings(stringf("SB_DRIVE.P%02d.D%d", index, i), start + i, 1);
+        add_word_settings(stringf("SB_DRIVE.P%02d.D%d", index, i + 1), start + i, 1);
 }
 
 void TileBitDatabase::add_cpe(int index, int start)
