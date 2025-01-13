@@ -49,6 +49,20 @@ def is_sb_big(x,y):
             return False if (x+1) % 4 != (y+1) % 4 else True
     return False
 
+def is_sb_global_clock(x,y):
+    if is_sb_big(x,y):
+        if y>=1 and y<=128:
+            if x >= -1 and x<=0:
+                return True
+            if x >= 161 and x<=162:
+                return True
+        if x>=29 and x<=160:
+            if y >= -1 and y<=0:
+                return True
+            if y >= 129 and y<=130:
+                return True
+    return False
+
 def is_sb_sml(x,y):
     if (x>=-1 and x<=162 and y>=-1 and y<=130):
         if (x+1) % 2 == 1 and (y+1) % 2 == 1:
@@ -333,7 +347,7 @@ def get_pin_connection_name(prim, pin):
         if pin.dir == PinType.INPUT:
             return f"GLBOUT.CLK_SEL_INT_{prim.z}"
         else:
-            return f"GLBOUT.USR_GLB{prim.z}"
+            return f"GLBOUT.GLB{prim.z}"
     elif prim.type == "PLL":
         if pin.name == "CLK_REF":
             return f"CLKIN.CLK_REF_{prim.z - 4}"
@@ -569,8 +583,8 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_BIG.P{plane}.X12", f"SB_BIG.P{plane}.YDIAG", 3, 6, True)
             create_mux(f"SB_BIG.P{plane}.X23", f"SB_BIG.P{plane}.YDIAG", 3, 7, True)
 
-            for i in range(1,5):
-                create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, False, f"SB_DRIVE.P{plane}.D{i}")
+            #for i in range(1,5):
+            #    create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, False, f"SB_DRIVE.P{plane}.D{i}")
 
     if "SB_SML" in type:
         # SB_SML
@@ -654,7 +668,7 @@ def get_mux_connections_for_type(type):
         create_mux("GLBOUT.CLK_INT_0", "GLBOUT.CLK_SEL_INT_0", 1, 0, False, "GLBOUT.USR_GLB0", config=True)
         create_mux("GLBOUT.USR_GLB0", "GLBOUT.CLK_SEL_INT_0", 1, 1, False, "GLBOUT.USR_GLB0", config=True)
 
-        create_mux("GLBOUT.CLK_SEL_INT_0", "GLBOUT.GLB0", 1, 1, False, "GLBOUT.USR_GLB0_EN", config=True)
+        create_mux("GLBOUT.CLK_SEL_INT_0", "GLBOUT.GLB0", 1, 1, False, "GLBOUT.GLB0_EN", config=True)
 
         create_mux("GLBOUT.GLB0", "GLBOUT.FB_INT_0", 2, 0, False, "GLBOUT.FB0", config=True)
         create_mux("GLBOUT.GLB1", "GLBOUT.FB_INT_0", 2, 1, False, "GLBOUT.FB0", config=True)
@@ -677,7 +691,7 @@ def get_mux_connections_for_type(type):
         create_mux("GLBOUT.CLK_INT_1", "GLBOUT.CLK_SEL_INT_1", 1, 0, False, "GLBOUT.USR_GLB1", config=True)
         create_mux("GLBOUT.USR_GLB1", "GLBOUT.CLK_SEL_INT_1", 1, 1, False, "GLBOUT.USR_GLB1", config=True)
 
-        create_mux("GLBOUT.CLK_SEL_INT_1", "GLBOUT.GLB1", 1, 1, False, "GLBOUT.USR_GLB1_EN", config=True)
+        create_mux("GLBOUT.CLK_SEL_INT_1", "GLBOUT.GLB1", 1, 1, False, "GLBOUT.GLB1_EN", config=True)
 
         create_mux("GLBOUT.GLB0", "GLBOUT.FB_INT_1", 2, 0, False, "GLBOUT.FB1", config=True)
         create_mux("GLBOUT.GLB1", "GLBOUT.FB_INT_1", 2, 1, False, "GLBOUT.FB1", config=True)
@@ -700,7 +714,7 @@ def get_mux_connections_for_type(type):
         create_mux("GLBOUT.CLK_INT_2", "GLBOUT.CLK_SEL_INT_2", 1, 0, False, "GLBOUT.USR_GLB2", config=True)
         create_mux("GLBOUT.USR_GLB2", "GLBOUT.CLK_SEL_INT_2", 1, 1, False, "GLBOUT.USR_GLB2", config=True)
 
-        create_mux("GLBOUT.CLK_SEL_INT_2", "GLBOUT.GLB2", 1, 1, False, "GLBOUT.USR_GLB2_EN", config=True)
+        create_mux("GLBOUT.CLK_SEL_INT_2", "GLBOUT.GLB2", 1, 1, False, "GLBOUT.GLB2_EN", config=True)
 
         create_mux("GLBOUT.GLB0", "GLBOUT.FB_INT_2", 2, 0, False, "GLBOUT.FB2", config=True)
         create_mux("GLBOUT.GLB1", "GLBOUT.FB_INT_2", 2, 1, False, "GLBOUT.FB2", config=True)
@@ -722,7 +736,7 @@ def get_mux_connections_for_type(type):
         create_mux("GLBOUT.CLK_INT_3", "GLBOUT.CLK_SEL_INT_3", 1, 0, False, "GLBOUT.USR_GLB3", config=True)
         create_mux("GLBOUT.USR_GLB3", "GLBOUT.CLK_SEL_INT_3", 1, 1, False, "GLBOUT.USR_GLB3", config=True)
 
-        create_mux("GLBOUT.CLK_SEL_INT_3", "GLBOUT.GLB3", 1, 1, False, "GLBOUT.USR_GLB3_EN", config=True)
+        create_mux("GLBOUT.CLK_SEL_INT_3", "GLBOUT.GLB3", 1, 1, False, "GLBOUT.GLB3_EN", config=True)
 
         create_mux("GLBOUT.GLB0", "GLBOUT.FB_INT_3", 2, 0, False, "GLBOUT.FB3", config=True)
         create_mux("GLBOUT.GLB1", "GLBOUT.FB_INT_3", 2, 1, False, "GLBOUT.FB3", config=True)
@@ -920,6 +934,17 @@ class Die:
                         if (distance>4):
                             src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
                         self.create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}")
+                    else:
+                        if is_sb_global_clock(x,y) and (i+2)==7: # D7
+                            # Clock#1: p1, p5,p9
+                            # Clock#2: p2, p6,p10
+                            # Clock#3: p3, p7,p11
+                            # Clock#4: p4, p8,p12
+                            self.create_conn(PLL_X_POS, PLL_Y_POS, f"GLBOUT.GLB{(p-1) & 3}", x,y,f"{get_sb_type(x,y)}.P{plane}.D7_{direction+1}")
+
+            if is_sb_big(x,y):
+                for direction in range(4):
+                    self.create_conn(x,y, f"{get_sb_type(x,y)}.P{plane}.Y{direction+1}", x,y,f"SB_DRIVE.P{plane}.D{direction+1}.IN")
 
             # Diagonal inputs
             # X12 and X34 on edges are unconnected
