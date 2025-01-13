@@ -324,15 +324,6 @@ class BitstreamReadWriter
         insert_crc16();
     }
 
-    void write_cmd_pll_empty()
-    {
-        write_header(CMD_PLL, 12);
-        for (int i = 0; i < 12; i++)
-            write_byte(0);
-        insert_crc16();
-        write_nops(6);
-    }
-
     void write_cmd_pll(int index, std::vector<uint8_t> data, int size)
     {
         write_header(CMD_PLL, size);
@@ -675,8 +666,14 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
             pll_written = true;
         }
     }
-    if (!pll_written)
-        wr.write_cmd_pll_empty();
+    if (!pll_written) {
+        int size = Die::PLL_CFG_SIZE;
+        if (!die.is_clkin_cfg_empty())
+            size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE;
+        if (!die.is_glbout_cfg_empty())
+            size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE + Die::GLBOUT_CFG_SIZE;
+        wr.write_cmd_pll(0, die_config, size);
+    }
 
     // Write RAM configuration
     bool ram_used = false;
