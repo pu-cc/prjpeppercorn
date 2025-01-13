@@ -454,7 +454,7 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
     add_word_settings("GLBOUT.GLB2_EN", pos + 64 + 4, 1);
     add_word_settings("GLBOUT.FB2", pos + 64 + 8, 2);
     add_word_settings("GLBOUT.USR_FB2", pos + 64 + 10, 1);
-    add_word_settings("GLBOUT.GBL3", pos + 80, 3);
+    add_word_settings("GLBOUT.GLB3", pos + 80, 3);
     add_word_settings("GLBOUT.USR_GLB3", pos + 80 + 3, 1);
     add_word_settings("GLBOUT.GLB3_EN", pos + 80 + 4, 1);
     add_word_settings("GLBOUT.FB3", pos + 80 + 8, 2);
