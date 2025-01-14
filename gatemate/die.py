@@ -169,30 +169,30 @@ class PinType(Enum):
     OUTPUT = 1
     INOUT = 2
 
-@dataclass
+@dataclass(eq=True, order=True)
 class Primitive:
     name : str
     type : str
     z    : int
 
-@dataclass
+@dataclass(eq=True, order=True)
 class Pin:
     name : str
     dir  : PinType
     wire_type : str
     use_alias_conn: bool = False
 
-@dataclass
+@dataclass(eq=True, order=True)
 class Group:
     name : str
     type : str
 
-@dataclass
+@dataclass(eq=True, order=True)
 class Endpoint:
     name : str
     type : str
 
-@dataclass
+@dataclass(eq=True, order=True)
 class MUX:
     src : str
     dst : str
@@ -208,7 +208,7 @@ class Location:
     x : int
     y : int
 
-@dataclass
+@dataclass(eq=True, order=True)
 class Connection:
     x : int
     y : int

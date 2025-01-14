@@ -21,7 +21,7 @@ from die import Die
 from dataclasses import dataclass
 from typing import List, Dict
 
-@dataclass
+@dataclass(eq=True, order=True)
 class Pad:
     x : int
     y : int
