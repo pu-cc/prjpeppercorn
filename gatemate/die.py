@@ -351,6 +351,14 @@ def get_pin_connection_name(prim, pin):
     elif prim.type == "PLL":
         if pin.name == "CLK_REF":
             return f"CLKIN.CLK_REF_{prim.z - 4}"
+        elif pin.name == "CLK0":
+            return f"GLBOUT.CLK0_{prim.z - 4}"
+        elif pin.name == "CLK90":
+            return f"GLBOUT.CLK90_{prim.z - 4}"
+        elif pin.name == "CLK180":
+            return f"GLBOUT.CLK180_{prim.z - 4}"
+        elif pin.name == "CLK270":
+            return f"GLBOUT.CLK270_{prim.z - 4}"
         elif pin.name == "CLK_REF_OUT":
             return f"GLBOUT.CLK_REF_OUT{prim.z - 4}"
     return f"{prim.name}.{pin.name}"
