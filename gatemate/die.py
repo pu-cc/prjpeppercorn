@@ -49,20 +49,6 @@ def is_sb_big(x,y):
             return False if (x+1) % 4 != (y+1) % 4 else True
     return False
 
-def is_sb_global_clock(x,y):
-    if is_sb_big(x,y):
-        if y>=1 and y<=128:
-            if x >= -1 and x<=0:
-                return True
-            if x >= 161 and x<=162:
-                return True
-        if x>=29 and x<=160:
-            if y >= -1 and y<=0:
-                return True
-            if y >= 129 and y<=130:
-                return True
-    return False
-
 def is_sb_sml(x,y):
     if (x>=-1 and x<=162 and y>=-1 and y<=130):
         if (x+1) % 2 == 1 and (y+1) % 2 == 1:
@@ -942,13 +928,6 @@ class Die:
                         if (distance>4):
                             src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
                         self.create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}")
-                    else:
-                        if is_sb_global_clock(x,y) and (i+2)==7: # D7
-                            # Clock#1: p1, p5,p9
-                            # Clock#2: p2, p6,p10
-                            # Clock#3: p3, p7,p11
-                            # Clock#4: p4, p8,p12
-                            self.create_conn(PLL_X_POS, PLL_Y_POS, f"GLBOUT.GLB{(p-1) & 3}", x,y,f"{get_sb_type(x,y)}.P{plane}.D7_{direction+1}")
 
             if is_sb_big(x,y):
                 for direction in range(4):
@@ -1068,6 +1047,57 @@ class Die:
         self.create_conn(1, 114, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "PLL2.USR_SEL_A_B")
         self.create_conn(1, 113, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "PLL3.USR_SEL_A_B")
 
+    def global_mesh(self):
+        def global_mesh_conn(x,y,inp):
+            for p in range(1,13):
+                plane = f"{p:02d}"
+                if is_sb_big(x,y):
+                    # Clock#1: p1, p5,p9
+                    # Clock#2: p2, p6,p10
+                    # Clock#3: p3, p7,p11
+                    # Clock#4: p4, p8,p12
+                    self.create_conn(PLL_X_POS, PLL_Y_POS, f"GLBOUT.GLB{(p-1) & 3}", x,y,f"SB_BIG.P{plane}.{inp}")
+
+        # Connecting Global Mesh signals to Switch Boxes
+        # Left edge
+        for y in range(0,130+1):
+            x = 2 - (y % 4)
+            global_mesh_conn(x,y,"D7_1")
+        global_mesh_conn(-1,-1,"D7_1")
+
+        # Bottom edge
+        for x in range(0,162+1):
+            y = 2 - (x % 4)
+            global_mesh_conn(x,y,"D7_2")
+        global_mesh_conn(-1,-1,"D7_2")
+
+        # Right edge
+        for y in range(0,130+1):
+            x = 2 - (y % 4) + 160
+            global_mesh_conn(x,y,"D7_3")
+        global_mesh_conn(159,-1,"D7_3")
+
+        # Top edge
+        for x in range(0,162+1):
+            y = 2 - (x % 4) + 128
+            global_mesh_conn(x,y,"D7_4")
+        global_mesh_conn(-1,127,"D7_4")
+
+        # Connecting Global Mesh signals to CPEs
+        for m in range (0,3+1):
+            for n in range (0,7+1):
+                x0 = 33 + m * 32
+                y0 = 1 + n * 16
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x0 - 3, y0 + 10 ,f"CPE.RAM_I1")
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", x0 - 3, y0 + 11 ,f"CPE.RAM_I1")
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", x0 - 3, y0 + 12 ,f"CPE.RAM_I1")
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", x0 - 3, y0 + 13 ,f"CPE.RAM_I1")
+
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x0 + 2, y0 + 10 ,f"CPE.RAM_I2")
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x0 + 2, y0 + 11 ,f"CPE.RAM_I2")
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x0 + 2, y0 + 12 ,f"CPE.RAM_I2")
+                self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x0 + 2, y0 + 13 ,f"CPE.RAM_I2")
+
     def create_in_die_connections(self, conn):
         self.conn = conn
         for y in range(-2, max_row()+1):
@@ -1082,5 +1112,4 @@ class Die:
                 if is_edge_io(x,y):
                     self.create_io(x,y)
         self.create_pll()
-
-
+        self.global_mesh()
