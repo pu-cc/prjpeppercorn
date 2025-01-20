@@ -1047,6 +1047,37 @@ class Die:
         self.create_conn(1, 114, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "PLL2.USR_SEL_A_B")
         self.create_conn(1, 113, "CPE.RAM_O1", PLL_X_POS, PLL_Y_POS, "PLL3.USR_SEL_A_B")
 
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL0.USR_PLL_LOCKED", 1, 128, "CPE.RAM_I2")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL1.USR_PLL_LOCKED", 1, 127, "CPE.RAM_I2")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL2.USR_PLL_LOCKED", 1, 126, "CPE.RAM_I2")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL3.USR_PLL_LOCKED", 1, 125, "CPE.RAM_I2")
+
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL0.USR_PLL_LOCKED_STDY", 1, 124, "CPE.RAM_I2")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL1.USR_PLL_LOCKED_STDY", 1, 123, "CPE.RAM_I2")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL2.USR_PLL_LOCKED_STDY", 1, 122, "CPE.RAM_I2")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "PLL3.USR_PLL_LOCKED_STDY", 1, 121, "CPE.RAM_I2")
+
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK0_0", 39, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK90_0", 40, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK180_0", 41, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK270_0", 42, 128, "CPE.RAM_I1")
+
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK0_1", 43, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK90_1", 44, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK180_1", 45, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK270_1", 46, 128, "CPE.RAM_I1")
+
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK0_2", 47, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK90_2", 48, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK180_2", 49, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK270_2", 50, 128, "CPE.RAM_I1")
+
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK0_3", 51, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK90_3", 52, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK180_3", 53, 128, "CPE.RAM_I1")
+        self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.CLK270_3", 54, 128, "CPE.RAM_I1")
+
+
     def global_mesh(self):
         def global_mesh_conn(x,y,inp):
             for p in range(1,13):
@@ -1098,6 +1129,80 @@ class Die:
                 self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", x0 + 2, y0 + 12 , "CPE.RAM_I2")
                 self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", x0 + 2, y0 + 13 , "CPE.RAM_I2")
 
+    def edge_select(self):
+        # Left edge
+        for y in range(1,128+1):
+            self.create_conn(-2, y, "LES.CPE_CINX", 1, y ,"CPE.CINX")
+            self.create_conn(-2, y, "LES.CPE_PINX", 1, y ,"CPE.PINX")
+
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", -2, y, "LES.CLOCK0")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", -2, y, "LES.CLOCK1")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", -2, y, "LES.CLOCK2")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", -2, y, "LES.CLOCK3")
+
+            for p in range(1,9):
+                plane = f"{p:02d}"
+                sb_x = -1 if y % 2==1 else 0
+                self.create_conn(sb_x, y, f"{get_sb_type(sb_x,y)}.P{plane}.Y3", -2, y, f"LES.SB_Y3.P{p}")
+
+        # Bottom edge
+        for x in range(1,160+1):
+            self.create_conn(x, -2, "BES.CPE_CINY1", x, 1 ,"CPE.CINY1")
+            self.create_conn(x, -2, "BES.CPE_PINY1", x, 1 ,"CPE.PINY1")
+            self.create_conn(x, -2, "BES.CPE_CINY2", x, 1 ,"CPE.CINY2")
+            self.create_conn(x, -2, "BES.CPE_PINY2", x, 1 ,"CPE.PINY2")
+            if x>1:
+                self.create_conn(x-1, -2, "BES.CPE_CINY1", x, -2 ,"BES.P_CINY1")
+                self.create_conn(x-1, -2, "BES.CPE_PINY1", x, -2 ,"BES.P_PINY1")
+                self.create_conn(x-1, -2, "BES.CPE_CINY2", x, -2 ,"BES.P_CINY2")
+                self.create_conn(x-1, -2, "BES.CPE_PINY2", x, -2 ,"BES.P_PINY2")
+
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x, -2, "BES.CLOCK0")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", x, -2, "BES.CLOCK1")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", x, -2, "BES.CLOCK2")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", x, -2, "BES.CLOCK3")
+
+            for p in range(1,9):
+                plane = f"{p:02d}"
+                sb_y = -1 if x % 2==1 else 0
+                self.create_conn(x, sb_y, f"{get_sb_type(x,sb_y)}.P{plane}.Y4", x, -2, f"BES.SB_Y4.P{p}")
+
+        # Right edge
+        for y in range(1,128+1):
+            self.create_conn(160, y, "CPE.RAM_O1", 163, y ,"RES.CPE_RAM_O1")
+            self.create_conn(160, y, "CPE.RAM_O2", 163, y ,"RES.CPE_RAM_O2")
+            self.create_conn(160, y, "CPE.COUTX", 163, y ,"RES.CPE_COUTX")
+            self.create_conn(160, y, "CPE.POUTX", 163, y ,"RES.CPE_POUTX")
+
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", 163, y, "RES.CLOCK0")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", 163, y, "RES.CLOCK1")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", 163, y, "RES.CLOCK2")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", 163, y, "RES.CLOCK3")
+
+            for p in range(1,9):
+                plane = f"{p:02d}"
+                sb_x = 161 if y % 2==1 else 162
+                self.create_conn(sb_x, y, f"{get_sb_type(sb_x,y)}.P{plane}.Y1", 163, y, f"RES.SB_Y1.P{p}")
+
+        # Top edge
+        for x in range(28,160+1):
+            self.create_conn(x, 128 ,"CPE.RAM_O1", x, 131, "TES.CPE_RAM_O1")
+            self.create_conn(x, 128 ,"CPE.RAM_O2", x, 131, "TES.CPE_RAM_O2")
+            self.create_conn(x, 128 ,"CPE.COUTY1", x, 131, "TES.CPE_COUTY1")
+            self.create_conn(x, 128 ,"CPE.POUTY1", x, 131, "TES.CPE_POUTY1")
+            self.create_conn(x, 128 ,"CPE.COUTY2", x, 131, "TES.CPE_COUTY2")
+            self.create_conn(x, 128 ,"CPE.POUTY2", x, 131, "TES.CPE_POUTY2")
+
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x, 131, "TES.CLOCK0")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", x, 131, "TES.CLOCK1")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", x, 131, "TES.CLOCK2")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", x, 131, "TES.CLOCK3")
+
+            for p in range(1,9):
+                plane = f"{p:02d}"
+                sb_y = 129 if x % 2==1 else 130
+                self.create_conn(x, sb_y, f"{get_sb_type(x,sb_y)}.P{plane}.Y2", x, 131, f"TES.SB_Y2.P{p}")
+
     def create_in_die_connections(self, conn):
         self.conn = conn
         for y in range(-2, max_row()+1):
@@ -1113,3 +1218,4 @@ class Die:
                     self.create_io(x,y)
         self.create_pll()
         self.global_mesh()
+        self.edge_select()
