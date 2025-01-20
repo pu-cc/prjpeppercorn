@@ -1210,6 +1210,9 @@ class Die:
                 sb_y = 129 if x % 2==1 else 130
                 self.create_conn(x, sb_y, f"{get_sb_type(x,sb_y)}.P{plane}.Y2", x, 131, f"TES.SB_Y2.P{p}")
 
+    def misc_connections(self):
+        self.create_conn(1, 66 ,"USR_RSTN.USR_RSTN", 1, 66, "CPE.RAM_I2")
+
     def create_in_die_connections(self, conn):
         self.conn = conn
         for y in range(-2, max_row()+1):
@@ -1226,4 +1229,4 @@ class Die:
         self.create_pll()
         self.global_mesh()
         self.edge_select()
-        self.create_conn(1, 66 ,"USR_RSTN.USR_RSTN", 1, 66, "CPE.RAM_I2")
+        self.misc_connections()
