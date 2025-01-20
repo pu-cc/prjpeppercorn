@@ -268,6 +268,9 @@ PRIMITIVES_PINS = {
         Pin("USR_PLL_LOCKED_STDY", PinType.OUTPUT,"PLL_WIRE"),
         Pin("USR_PLL_LOCKED",      PinType.OUTPUT,"PLL_WIRE"),
     ],
+    "USR_RSTN" : [
+        Pin("USR_RSTN", PinType.OUTPUT,"USR_RSTN_WIRE"),
+    ],
 }
 
 def get_groups_for_type(type):
@@ -323,6 +326,8 @@ def get_primitives_for_type(type):
         primitives.append(Primitive("PLL1","PLL",5))
         primitives.append(Primitive("PLL2","PLL",6))
         primitives.append(Primitive("PLL3","PLL",7))
+    if "USR_RSTN" in type:
+        primitives.append(Primitive("USR_RSTN","USR_RSTN",1))
     return primitives
 
 def get_primitive_pins(bel):
@@ -782,6 +787,8 @@ def get_tile_types(x,y):
         val.append("PLL")
     if is_serdes(x,y):
         val.append("SERDES")
+    if x==1 and y==66:
+        val.append("USR_RSTN")
     return val
 
 def get_tile_type(x,y):
@@ -1219,3 +1226,4 @@ class Die:
         self.create_pll()
         self.global_mesh()
         self.edge_select()
+        self.create_conn(1, 66 ,"USR_RSTN.USR_RSTN", 1, 66, "CPE.RAM_I2")
