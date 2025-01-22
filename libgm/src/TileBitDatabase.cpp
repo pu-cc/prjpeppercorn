@@ -266,26 +266,89 @@ void TileBitDatabase::add_edge_io(int index, int start)
 
 void TileBitDatabase::add_right_edge(int index, int start)
 {
-    // 4 * 3 bits + 8 * 1 bit = 20 bits
-    add_word_settings(stringf("RES%d.INIT", index), start, 24);
+    add_word_settings(stringf("RES%d.SEL_MDIE1",  index), start + 0, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE2",  index), start + 1, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE3",  index), start + 2, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE4",  index), start + 3, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE5",  index), start + 4, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE6",  index), start + 5, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE7",  index), start + 6, 1);
+    add_word_settings(stringf("RES%d.SEL_MDIE8",  index), start + 7, 1);
+
+    add_word_settings(stringf("RES%d.SIG_SEL1",   index), start + 8 , 3);
+    add_word_settings(stringf("RES%d.SIG_SEL2",   index), start + 11, 3);
+    add_word_settings(stringf("RES%d.SIG_SEL3",   index), start + 14, 3);
+    add_word_settings(stringf("RES%d.SIG_SEL4",   index), start + 17, 3);
 }
 
 void TileBitDatabase::add_left_edge(int index, int start)
 {
-    // 4 * 3 bits + 2 * 2 bits + 2 * 2 bits = 20 bits
-    add_word_settings(stringf("LES%d.INIT", index), start, 24);
+    add_word_settings(stringf("LES%d.SB_Y3_SEL1", index), start + 0 , 3);
+    add_word_settings(stringf("LES%d.MDIE1_SEL1", index), start + 3 , 3);
+    add_word_settings(stringf("LES%d.CLOCK_SEL1", index), start + 6 , 2);
+
+    add_word_settings(stringf("LES%d.SB_Y3_SEL2", index), start + 8 , 3);
+    add_word_settings(stringf("LES%d.MDIE1_SEL2", index), start + 11, 3);
+    add_word_settings(stringf("LES%d.CLOCK_SEL2", index), start + 14, 2);
+
+    add_word_settings(stringf("LES%d.CINX_CONST", index), start + 16, 1);
+    add_word_settings(stringf("LES%d.CINX_SEL",   index), start + 17, 2);
+    
+    add_word_settings(stringf("LES%d.PINX_CONST", index), start + 19, 1);
+    add_word_settings(stringf("LES%d.PINX_SEL",   index), start + 20, 2);
 }
 
 void TileBitDatabase::add_top_edge(int index, int start)
 {
-    // 4 * 3 bits + 8 * 1 bit = 20 bits
-    add_word_settings(stringf("TES%d.INIT", index), start, 24);
+    add_word_settings(stringf("TES%d.SEL_MDIE1",  index), start + 0, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE2",  index), start + 1, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE3",  index), start + 2, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE4",  index), start + 3, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE5",  index), start + 4, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE6",  index), start + 5, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE7",  index), start + 6, 1);
+    add_word_settings(stringf("TES%d.SEL_MDIE8",  index), start + 7, 1);
+
+    add_word_settings(stringf("TES%d.SIG_SEL1",   index), start + 8 , 3);
+    add_word_settings(stringf("TES%d.SIG_SEL2",   index), start + 11, 3);
+    add_word_settings(stringf("TES%d.SIG_SEL3",   index), start + 14, 3);
+    add_word_settings(stringf("TES%d.SIG_SEL4",   index), start + 17, 3);
 }
 
 void TileBitDatabase::add_bottom_edge(int index, int start)
 {
-    // 8 * 3 bits + 8 * 2 bits + 4 * 1 bit = 44 bits
-    add_word_settings(stringf("BES%d.INIT", index), start, 48);
+    add_word_settings(stringf("BES%d.SB_Y4_SEL1", index), start + 0 , 3);
+    add_word_settings(stringf("BES%d.MDIE2_SEL1", index), start + 3 , 3);
+    add_word_settings(stringf("BES%d.CLOCK_SEL1", index), start + 6 , 2);
+
+    add_word_settings(stringf("BES%d.SB_Y4_SEL2", index), start + 8 , 3);
+    add_word_settings(stringf("BES%d.MDIE2_SEL2", index), start + 11, 3);
+    add_word_settings(stringf("BES%d.CLOCK_SEL2", index), start + 14, 2);
+
+    add_word_settings(stringf("BES%d.SB_Y4_SEL3", index), start + 16, 3);
+    add_word_settings(stringf("BES%d.MDIE2_SEL3", index), start + 19, 3);
+    add_word_settings(stringf("BES%d.CLOCK_SEL3", index), start + 22, 2);
+
+    add_word_settings(stringf("BES%d.SB_Y4_SEL4", index), start + 24, 3);
+    add_word_settings(stringf("BES%d.MDIE2_SEL4", index), start + 27, 3);
+    add_word_settings(stringf("BES%d.CLOCK_SEL4", index), start + 30, 2);
+
+    add_word_settings(stringf("BES%d.CINY1_CONST",index), start + 32, 1);
+    add_word_settings(stringf("BES%d.CINY1_SEL",  index), start + 33, 2);
+
+    add_word_settings(stringf("BES%d.PINY1_CONST",index), start + 35, 1);
+    add_word_settings(stringf("BES%d.PINY1_SEL",  index), start + 36, 2);
+
+    add_word_settings(stringf("BES%d.CINY2_CONST",index), start + 38, 1);
+    add_word_settings(stringf("BES%d.CINY2_SEL",  index), start + 39, 2);
+
+    add_word_settings(stringf("BES%d.PINY2_CONST",index), start + 41, 1);
+    add_word_settings(stringf("BES%d.PINY2_SEL",  index), start + 42, 2);
+
+    add_word_settings(stringf("BES%d.P_CINY1",    index), start + 44, 1);
+    add_word_settings(stringf("BES%d.P_PINY1",    index), start + 45, 1);
+    add_word_settings(stringf("BES%d.P_CINY2",    index), start + 46, 1);
+    add_word_settings(stringf("BES%d.P_PINY2",    index), start + 47, 1);
 }
 
 TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase(Die::LATCH_BLOCK_SIZE * 8)
