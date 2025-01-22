@@ -431,6 +431,13 @@ def get_endpoints_for_type(type):
             create_wire(f"LES.CLOCK{i}", type="LES_WIRE")
         create_wire("LES.CPE_CINX", type="LES_WIRE")
         create_wire("LES.CPE_PINX", type="LES_WIRE")
+        # Internal wires
+        create_wire("LES.SB_Y3_SEL1_int", type="LES_INT_WIRE")
+        create_wire("LES.MDIE1_SEL1_int", type="LES_INT_WIRE")
+        create_wire("LES.CLOCK_SEL1_int", type="LES_INT_WIRE")
+        create_wire("LES.SB_Y3_SEL2_int", type="LES_INT_WIRE")
+        create_wire("LES.MDIE1_SEL2_int", type="LES_INT_WIRE")
+        create_wire("LES.CLOCK_SEL2_int", type="LES_INT_WIRE")
 
     if "BES" in type:
         for p in range(1,9):
@@ -446,6 +453,23 @@ def get_endpoints_for_type(type):
         create_wire("BES.CPE_PINY1", type="BES_WIRE")
         create_wire("BES.CPE_CINY2", type="BES_WIRE")
         create_wire("BES.CPE_PINY2", type="BES_WIRE")
+        # Internal wires
+        create_wire("BES.SB_Y4_SEL1_int", type="BES_INT_WIRE")
+        create_wire("BES.MDIE2_SEL1_int", type="BES_INT_WIRE")
+        create_wire("BES.CLOCK_SEL1_int", type="BES_INT_WIRE")
+        create_wire("BES.SB_Y4_SEL2_int", type="BES_INT_WIRE")
+        create_wire("BES.MDIE2_SEL2_int", type="BES_INT_WIRE")
+        create_wire("BES.CLOCK_SEL2_int", type="BES_INT_WIRE")
+        create_wire("BES.SB_Y4_SEL3_int", type="BES_INT_WIRE")
+        create_wire("BES.MDIE2_SEL3_int", type="BES_INT_WIRE")
+        create_wire("BES.CLOCK_SEL3_int", type="BES_INT_WIRE")
+        create_wire("BES.SB_Y4_SEL4_int", type="BES_INT_WIRE")
+        create_wire("BES.MDIE2_SEL4_int", type="BES_INT_WIRE")
+        create_wire("BES.CLOCK_SEL4_int", type="BES_INT_WIRE")
+        create_wire("BES.CPE_CINY1_int", type="BES_INT_WIRE")
+        create_wire("BES.CPE_PINY1_int", type="BES_INT_WIRE")
+        create_wire("BES.CPE_CINY2_int", type="BES_INT_WIRE")
+        create_wire("BES.CPE_PINY2_int", type="BES_INT_WIRE")
 
     if "RES" in type:
         create_wire("RES.CPE_RAM_O1", type="RES_WIRE")
@@ -457,6 +481,11 @@ def get_endpoints_for_type(type):
             create_wire(f"RES.MDIE1.P{p}", type="RES_WIRE")
         for i in range(4):
             create_wire(f"RES.CLOCK{i}", type="RES_WIRE")
+        # Internal wires
+        create_wire("RES.SIG_SEL1_int", type="RES_INT_WIRE")
+        create_wire("RES.SIG_SEL2_int", type="RES_INT_WIRE")
+        create_wire("RES.SIG_SEL3_int", type="RES_INT_WIRE")
+        create_wire("RES.SIG_SEL4_int", type="RES_INT_WIRE")
 
     if "TES" in type:
         create_wire("TES.CPE_RAM_O1", type="TES_WIRE")
@@ -470,6 +499,11 @@ def get_endpoints_for_type(type):
             create_wire(f"TES.MDIE2.P{p}", type="TES_WIRE")
         for i in range(4):
             create_wire(f"TES.CLOCK{i}", type="TES_WIRE")
+        # Internal wires
+        create_wire("TES.SIG_SEL1_int", type="TES_INT_WIRE")
+        create_wire("TES.SIG_SEL2_int", type="TES_INT_WIRE")
+        create_wire("TES.SIG_SEL3_int", type="TES_INT_WIRE")
+        create_wire("TES.SIG_SEL4_int", type="TES_INT_WIRE")
 
     if "PLL" in type:
         # CLKIN
@@ -621,6 +655,93 @@ def get_mux_connections_for_type(type):
             io_in = 1 if p % 2 else 2
             create_mux(f"IOES.IO_IN{io_in}", f"IOES.SB_IN_{plane}", 1, 0, False)
             create_mux(f"IOES.ALTIN_{plane}", f"IOES.SB_IN_{plane}", 1, 1, False)
+
+    if "LES" in type:
+        for p in range(1,9):
+            create_mux(f"LES.SB_Y3.P{p}", "LES.SB_Y3_SEL1_int", 3, p-1, False, "LES.SB_Y3_SEL1")
+            create_mux(f"LES.MDIE1.P{p}", "LES.MDIE1_SEL1_int", 3, p-1, False, "LES.MDIE1_SEL1")
+            create_mux(f"LES.SB_Y3.P{p}", "LES.SB_Y3_SEL2_int", 3, p-1, False, "LES.SB_Y3_SEL2")
+            create_mux(f"LES.MDIE1.P{p}", "LES.MDIE1_SEL2_int", 3, p-1, False, "LES.MDIE1_SEL2")
+        for i in range(4):
+            create_mux(f"LES.CLOCK{i}", "LES.CLOCK_SEL1_int", 2, i, False, "LES.CLOCK_SEL1")
+            create_mux(f"LES.CLOCK{i}", "LES.CLOCK_SEL2_int", 2, i, False, "LES.CLOCK_SEL2")
+
+        create_mux("LES.SB_Y3_SEL1_int", "LES.CPE_CINX", 2, 1, False, "LES.CINX_SEL")
+        create_mux("LES.MDIE1_SEL1_int", "LES.CPE_CINX", 2, 2, False, "LES.CINX_SEL")
+        create_mux("LES.CLOCK_SEL1_int", "LES.CPE_CINX", 2, 3, False, "LES.CINX_SEL")
+
+        create_mux("LES.SB_Y3_SEL2_int", "LES.CPE_PINX", 2, 1, False, "LES.PINX_SEL")
+        create_mux("LES.MDIE1_SEL2_int", "LES.CPE_PINX", 2, 2, False, "LES.PINX_SEL")
+        create_mux("LES.CLOCK_SEL2_int", "LES.CPE_PINX", 2, 3, False, "LES.PINX_SEL")
+
+    if "BES" in type:
+        for p in range(1,9):
+            create_mux(f"BES.SB_Y4.P{p}", "BES.SB_Y4_SEL1_int", 3, p-1, False, "BES.SB_Y4_SEL1")
+            create_mux(f"BES.MDIE2.P{p}", "BES.MDIE2_SEL1_int", 3, p-1, False, "BES.MDIE2_SEL1")
+            create_mux(f"BES.SB_Y4.P{p}", "BES.SB_Y4_SEL2_int", 3, p-1, False, "BES.SB_Y4_SEL2")
+            create_mux(f"BES.MDIE2.P{p}", "BES.MDIE2_SEL2_int", 3, p-1, False, "BES.MDIE2_SEL2")
+            create_mux(f"BES.SB_Y4.P{p}", "BES.SB_Y4_SEL3_int", 3, p-1, False, "BES.SB_Y4_SEL3")
+            create_mux(f"BES.MDIE2.P{p}", "BES.MDIE2_SEL3_int", 3, p-1, False, "BES.MDIE2_SEL3")
+            create_mux(f"BES.SB_Y4.P{p}", "BES.SB_Y4_SEL4_int", 3, p-1, False, "BES.SB_Y4_SEL4")
+            create_mux(f"BES.MDIE2.P{p}", "BES.MDIE2_SEL4_int", 3, p-1, False, "BES.MDIE2_SEL4")
+        for i in range(4):
+            create_mux(f"BES.CLOCK{i}", "BES.CLOCK_SEL1_int", 2, i, False, "BES.CLOCK_SEL1")
+            create_mux(f"BES.CLOCK{i}", "BES.CLOCK_SEL2_int", 2, i, False, "BES.CLOCK_SEL2")
+            create_mux(f"BES.CLOCK{i}", "BES.CLOCK_SEL3_int", 2, i, False, "BES.CLOCK_SEL3")
+            create_mux(f"BES.CLOCK{i}", "BES.CLOCK_SEL4_int", 2, i, False, "BES.CLOCK_SEL4")
+
+        create_mux("BES.SB_Y4_SEL1_int", "BES.CPE_CINY1_int", 2, 1, False, "BES.CINY1_SEL")
+        create_mux("BES.MDIE2_SEL1_int", "BES.CPE_CINY1_int", 2, 2, False, "BES.CINY1_SEL")
+        create_mux("BES.CLOCK_SEL1_int", "BES.CPE_CINY1_int", 2, 3, False, "BES.CINY1_SEL")
+        create_mux("BES.SB_Y4_SEL2_int", "BES.CPE_PINY1_int", 2, 1, False, "BES.PINY1_SEL")
+        create_mux("BES.MDIE2_SEL2_int", "BES.CPE_PINY1_int", 2, 2, False, "BES.PINY1_SEL")
+        create_mux("BES.CLOCK_SEL2_int", "BES.CPE_PINY1_int", 2, 3, False, "BES.PINY1_SEL")
+        create_mux("BES.SB_Y4_SEL3_int", "BES.CPE_CINY2_int", 2, 1, False, "BES.CINY2_SEL")
+        create_mux("BES.MDIE2_SEL3_int", "BES.CPE_CINY2_int", 2, 2, False, "BES.CINY2_SEL")
+        create_mux("BES.CLOCK_SEL3_int", "BES.CPE_CINY2_int", 2, 3, False, "BES.CINY2_SEL")
+        create_mux("BES.SB_Y4_SEL4_int", "BES.CPE_PINY2_int", 2, 1, False, "BES.PINY2_SEL")
+        create_mux("BES.MDIE2_SEL4_int", "BES.CPE_PINY2_int", 2, 2, False, "BES.PINY2_SEL")
+        create_mux("BES.CLOCK_SEL4_int", "BES.CPE_PINY2_int", 2, 3, False, "BES.PINY2_SEL")
+
+        create_mux("BES.CPE_CINY1_int", "BES.CPE_CINY1",      1, 0, False, "BES.P_CINY1")
+        create_mux("BES.P_CINY1",       "BES.CPE_CINY1",      1, 1, False, "BES.P_CINY1")
+        create_mux("BES.CPE_PINY1_int", "BES.CPE_PINY1",      1, 0, False, "BES.P_PINY1")
+        create_mux("BES.P_PINY1",       "BES.CPE_PINY1",      1, 1, False, "BES.P_PINY1")
+        create_mux("BES.CPE_CINY2_int", "BES.CPE_CINY2",      1, 0, False, "BES.P_CINY2")
+        create_mux("BES.P_CINY2",       "BES.CPE_CINY2",      1, 1, False, "BES.P_CINY2")
+        create_mux("BES.CPE_PINY2_int", "BES.CPE_PINY2",      1, 0, False, "BES.P_PINY2")
+        create_mux("BES.P_PINY2",       "BES.CPE_PINY2",      1, 1, False, "BES.P_PINY2")
+
+    if "RES" in type:
+        for sel in range(4):
+            create_mux("RES.CPE_RAM_O1", f"RES.SIG_SEL{sel+1}_int", 3, 0, False, f"RES.SIG_SEL{sel+1}")
+            create_mux("RES.CPE_RAM_O2", f"RES.SIG_SEL{sel+1}_int", 3, 1, False, f"RES.SIG_SEL{sel+1}")
+            create_mux("RES.CPE_COUTX",  f"RES.SIG_SEL{sel+1}_int", 3, 2, False, f"RES.SIG_SEL{sel+1}")
+            create_mux("RES.CPE_POUTX",  f"RES.SIG_SEL{sel+1}_int", 3, 3, False, f"RES.SIG_SEL{sel+1}")
+            for i in range(4):
+                create_mux(f"RES.CLOCK{i}", f"RES.SIG_SEL{sel+1}_int", 3, 4 + i, False, f"RES.SIG_SEL{sel+1}")
+
+        for p in range(1,9):
+            create_mux(f"RES.SB_Y1.P{p}", f"RES.MDIE1.P{p}", 1, 0, False, f"RES.SEL_MDIE{p}")
+            sel = (p - 1) // 2 + 1
+            create_mux(f"RES.SIG_SEL{sel}_int", f"RES.MDIE1.P{p}", 1, 1, False, f"RES.SEL_MDIE{p}")
+
+    if "TES" in type:
+        for sel in range(4):
+            create_mux("TES.CPE_RAM_O1", f"TES.SIG_SEL{sel+1}_int", 3, 0, False, f"TES.SIG_SEL{sel+1}")
+            create_mux("TES.CPE_RAM_O2", f"TES.SIG_SEL{sel+1}_int", 3, 1, False, f"TES.SIG_SEL{sel+1}")
+            create_mux("TES.CPE_COUTY1", f"TES.SIG_SEL{sel+1}_int", 3, 2, False, f"TES.SIG_SEL{sel+1}")
+            create_mux("TES.CPE_POUTY1", f"TES.SIG_SEL{sel+1}_int", 3, 3, False, f"TES.SIG_SEL{sel+1}")
+            create_mux("TES.CPE_COUTY2", f"TES.SIG_SEL{sel+1}_int", 3, 4, False, f"TES.SIG_SEL{sel+1}")
+            create_mux("TES.CPE_POUTY2", f"TES.SIG_SEL{sel+1}_int", 3, 5, False, f"TES.SIG_SEL{sel+1}")
+            clk = 0 if sel < 2 else 2
+            create_mux(f"TES.CLOCK{clk+0}", f"TES.SIG_SEL{sel+1}_int", 3, 6, False, f"TES.SIG_SEL{sel+1}")
+            create_mux(f"TES.CLOCK{clk+1}", f"TES.SIG_SEL{sel+1}_int", 3, 7, False, f"TES.SIG_SEL{sel+1}")
+
+        for p in range(1,9):
+            create_mux(f"TES.SB_Y2.P{p}", f"TES.MDIE2.P{p}", 1, 0, False, f"TES.SEL_MDIE{p}")
+            sel = (p - 1) // 2 + 1
+            create_mux(f"TES.SIG_SEL{sel}_int", f"TES.MDIE2.P{p}", 1, 1, False, f"TES.SEL_MDIE{p}")
 
     if "PLL" in type:
         # CLKIN
