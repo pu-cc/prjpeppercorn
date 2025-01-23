@@ -60,6 +60,14 @@ class Chip:
         y_pos = (y + 2) % die.num_rows() - 2
         return die.get_tile_type(x_pos,y_pos)
     
+    def get_tile_info(self,x,y):
+        x_pos = (x + 2) % die.num_cols() - 2
+        y_pos = (y + 2) % die.num_rows() - 2
+        x_die = (x + 2) // die.num_cols()
+        y_die = (y + 2) // die.num_rows()
+        die_num = x_die + y_die * self.die_width
+        return die.get_tile_info(die_num, x_pos, y_pos)
+
     def get_connections(self):
         conn = dict()
         for d in self.dies.values():

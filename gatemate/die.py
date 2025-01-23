@@ -200,6 +200,12 @@ class Connection:
     y : int
     name : str
 
+@dataclass(eq=True, order=True)
+class TileInfo:
+    die : int
+    bit_x : int
+    bit_y : int
+    prim_index : int
 
 PRIMITIVES_PINS = {
     "CPE": [
@@ -925,6 +931,33 @@ def get_tile_type_list():
             tt.add(get_tile_type(x,y))
 
     return tt
+
+def get_bitstream_tile(x, y):
+    # Edge blocks are bit bigger
+    if x == -2:
+        x += 1
+    if x == max_col():
+        x -= 1
+    if y == -2:
+        y += 1
+    if y == max_row():
+        y -= 1
+    return (x + 1) // 2, (y + 1) // 2
+
+def get_tile_info(d,x,y):
+    bx, by = get_bitstream_tile(x,y)
+    pos = 0
+    if is_cpe(x,y):
+        pos = ((x+1) % 2) * 2 + ((y+1) % 2) + 1
+    if is_edge_top(x,y):
+        pos = (x - 1) % 2 + 1
+    if is_edge_bottom(x,y):
+        pos = (x - 1) % 2 + 1
+    if is_edge_left(x,y):
+        pos = (y - 1) % 2 + 1
+    if is_edge_right(x,y):
+        pos = (y - 1) % 2 + 1
+    return TileInfo(d, bx, by, pos)
 
 def alt_plane(dir,plane):
     alt = [[5, 6, 7, 8, 1, 2, 3, 4,11,12, 9,10],
