@@ -991,7 +991,7 @@ class Die:
                         self.io_pad_names[io.bank][io.port] = dict()
                     if io.num not in self.io_pad_names[io.bank][io.port]:
                         self.io_pad_names[io.bank][io.port][io.num] = dict()
-                    self.gpio_to_loc[f"GPIO_{io.bank}_{io.port}[{io.num}]"]  = Location(x + self.offset_x, y + self.offset_y)
+                    self.gpio_to_loc[f"GPIO_{io.bank}_{io.port}[{io.num}]"]  = Location(x, y)
                     self.io_pad_names[io.bank][io.port][io.num] = Location(x + self.offset_x, y + self.offset_y)
 
     def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst):
