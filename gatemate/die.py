@@ -403,6 +403,7 @@ def get_endpoints_for_type(type):
             for i in range(1,5):
                 create_wire(f"SB_DRIVE.P{plane}.D{i}.IN", type="SB_DRIVE_WIRE")
                 create_wire(f"SB_DRIVE.P{plane}.D{i}.OUT", type="SB_DRIVE_WIRE")
+                create_wire(f"SB_DRIVE.P{plane}.D{i}.OUT_NOINV", type="SB_DRIVE_INT_WIRE")
 
     if "SB_SML" in type:
         for p in range(1,13):
@@ -622,8 +623,9 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_BIG.P{plane}.X12", f"SB_BIG.P{plane}.YDIAG", 3, 6, True)
             create_mux(f"SB_BIG.P{plane}.X23", f"SB_BIG.P{plane}.YDIAG", 3, 7, True)
 
-            #for i in range(1,5):
-            #    create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, False, f"SB_DRIVE.P{plane}.D{i}")
+            for i in range(1,5):
+                create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, True, f"SB_DRIVE.P{plane}.D{i}")
+                create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT_NOINV", 1, 1, False, f"SB_DRIVE.P{plane}.D{i}")
 
     if "SB_SML" in type:
         # SB_SML
@@ -1086,8 +1088,16 @@ class Die:
                     if is_sb(sb_x,sb_y):
                         src  = f"{get_sb_type(sb_x,sb_y)}.P{plane}.Y{direction+1}"
                         # Long distance signals are coming from SB_DRIVE
-                        if (distance>4):
-                            src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
+                        if distance > 4:
+                            t1x, t1y = (sb_x+16-1) // 8, (sb_y+16-1) // 8
+                            t2x, t2y = (x+16-1) // 8, (y+16-1) // 8
+                            # depending on distance there are additional inverters
+                            # that signal is passing through each 8x8 tile
+                            dist = abs(t1x-t2x) + abs(t1y-t2y)
+                            if dist % 2 == 1:
+                                src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT"
+                            else:
+                                src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT_NOINV"
                         self.create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}")
 
             if is_sb_big(x,y):
