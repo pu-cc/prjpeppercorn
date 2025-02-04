@@ -853,9 +853,9 @@ def get_mux_connections_for_type(type):
         create_mux("GLBOUT.USR_FB2", "GLBOUT.CLK_FB2",  1, 1, False, "GLBOUT.USR_FB2", config=True)
 
         create_mux("GLBOUT.CLK_REF_OUT3", "GLBOUT.CLK_INT_3", 3, 0, False, "GLBOUT.GLB3", config=True)
-        create_mux("GLBOUT.CLK270_1", "GLBOUT.CLK_INT_3", 3, 1, False, "GLBOUT.GLB3", config=True)
-        create_mux("GLBOUT.CLK270_2", "GLBOUT.CLK_INT_3", 3, 2, False, "GLBOUT.GLB3", config=True)
-        create_mux("GLBOUT.CLK270_3", "GLBOUT.CLK_INT_3", 3, 3, False, "GLBOUT.GLB3", config=True)
+        create_mux("GLBOUT.CLK270_0", "GLBOUT.CLK_INT_3", 3, 1, False, "GLBOUT.GLB3", config=True)
+        create_mux("GLBOUT.CLK270_1", "GLBOUT.CLK_INT_3", 3, 2, False, "GLBOUT.GLB3", config=True)
+        create_mux("GLBOUT.CLK270_2", "GLBOUT.CLK_INT_3", 3, 3, False, "GLBOUT.GLB3", config=True)
         create_mux("GLBOUT.CLK0_3", "GLBOUT.CLK_INT_3", 3, 4, False, "GLBOUT.GLB3", config=True)
         create_mux("GLBOUT.CLK90_3", "GLBOUT.CLK_INT_3", 3, 5, False, "GLBOUT.GLB3", config=True)
         create_mux("GLBOUT.CLK180_3", "GLBOUT.CLK_INT_3", 3, 6, False, "GLBOUT.GLB3", config=True)
@@ -1184,6 +1184,8 @@ class Die:
         # GPIO_W2_A[6]  CLK2
         # GPIO_W2_A[5]  CLK3
         # SER_CLK       SER_CLK
+        # GPIO_S3_B[8]  SPI_CLK
+        # GPIO_S3_A[5]  JTAG_CLK
         loc = self.gpio_to_loc["GPIO_W2_A[8]"]
         self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
         loc = self.gpio_to_loc["GPIO_W2_A[7]"]
