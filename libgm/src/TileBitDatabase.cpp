@@ -494,6 +494,7 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
         pos += 96;
     }
 
+    // CLKIN matrix
     add_word_settings("CLKIN.REF0", pos + 0, 3);
     add_word_settings("CLKIN.REF0_INV", pos + 3, 1);
     add_word_settings("CLKIN.REF1", pos + 8, 3);
@@ -502,26 +503,37 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
     add_word_settings("CLKIN.REF2_INV", pos + 16 + 3, 1);
     add_word_settings("CLKIN.REF3", pos + 24, 3);
     add_word_settings("CLKIN.REF3_INV", pos + 24 + 3, 1);
-    add_word_settings("GLBOUT.GLB0", pos + 32, 3);
-    add_word_settings("GLBOUT.USR_GLB0", pos + 32 + 3, 1);
-    add_word_settings("GLBOUT.GLB0_EN", pos + 32 + 4, 1);
-    add_word_settings("GLBOUT.FB0", pos + 32 + 8, 2);
-    add_word_settings("GLBOUT.USR_FB0", pos + 32 + 10, 1);
-    add_word_settings("GLBOUT.GLB1", pos + 48, 3);
-    add_word_settings("GLBOUT.USR_GLB1", pos + 48 + 3, 1);
-    add_word_settings("GLBOUT.GLB1_EN", pos + 48 + 4, 1);
-    add_word_settings("GLBOUT.FB1", pos + 48 + 8, 2);
-    add_word_settings("GLBOUT.USR_FB1", pos + 48 + 10, 1);
-    add_word_settings("GLBOUT.GLB2", pos + 64, 3);
-    add_word_settings("GLBOUT.USR_GLB2", pos + 64 + 3, 1);
-    add_word_settings("GLBOUT.GLB2_EN", pos + 64 + 4, 1);
-    add_word_settings("GLBOUT.FB2", pos + 64 + 8, 2);
-    add_word_settings("GLBOUT.USR_FB2", pos + 64 + 10, 1);
-    add_word_settings("GLBOUT.GLB3", pos + 80, 3);
-    add_word_settings("GLBOUT.USR_GLB3", pos + 80 + 3, 1);
-    add_word_settings("GLBOUT.GLB3_EN", pos + 80 + 4, 1);
-    add_word_settings("GLBOUT.FB3", pos + 80 + 8, 2);
-    add_word_settings("GLBOUT.USR_FB3", pos + 80 + 10, 1);
+
+    pos += 32;
+    // GLBOUT matrix
+    add_word_settings("GLBOUT.GLB0", pos + 0, 3);
+    add_word_settings("GLBOUT.USR_GLB0", pos + 3, 1);
+    add_word_settings("GLBOUT.GLB0_EN", pos + 4, 1);
+    // bits 5-7 not used
+    add_word_settings("GLBOUT.FB0", pos + 8, 2);
+    add_word_settings("GLBOUT.USR_FB0", pos + 10, 1);
+    // bits 11-15 not used
+    add_word_settings("GLBOUT.GLB1", pos + 16, 3);
+    add_word_settings("GLBOUT.USR_GLB1", pos + 19, 1);
+    add_word_settings("GLBOUT.GLB1_EN", pos + 20, 1);
+    // bits 21-23 not used
+    add_word_settings("GLBOUT.FB1", pos + 24, 2);
+    add_word_settings("GLBOUT.USR_FB1", pos + 26, 1);
+    // bits 27-31 not used
+    add_word_settings("GLBOUT.GLB2", pos + 32, 3);
+    add_word_settings("GLBOUT.USR_GLB2", pos + 35, 1);
+    add_word_settings("GLBOUT.GLB2_EN", pos + 36, 1);
+    // bits 37-39 not used
+    add_word_settings("GLBOUT.FB2", pos + 40, 2);
+    add_word_settings("GLBOUT.USR_FB2", pos + 42, 1);
+    // bits 43-47 not used
+    add_word_settings("GLBOUT.GLB3", pos + 48, 3);
+    add_word_settings("GLBOUT.USR_GLB3", pos + 51, 1);
+    add_word_settings("GLBOUT.GLB3_EN", pos + 52, 1);
+    // bits 53-55 not used
+    add_word_settings("GLBOUT.FB3", pos + 56, 2);
+    add_word_settings("GLBOUT.USR_FB3", pos + 58, 1);
+    // bits 59-63 not used
 
     pos = Die::STATUS_CFG_START * 8;
     add_word_settings("GPIO.BANK_S1", pos + 16, 1);
@@ -540,16 +552,17 @@ ConfigBitDatabase::ConfigBitDatabase() : BaseBitDatabase(Die::DIE_CONFIG_SIZE * 
     for (int i = 0; i < Die::MAX_PLL; i++) {
         add_word_settings(stringf("PLL%d.PLL_RST", i), pos + 0, 1);
         add_word_settings(stringf("PLL%d.PLL_EN", i), pos + 1, 1);
-        add_word_settings(stringf("PLL%d.AUTN", i), pos + 2, 1);
+        add_word_settings(stringf("PLL%d.PLL_AUTN", i), pos + 2, 1);
         add_word_settings(stringf("PLL%d.SET_SEL", i), pos + 3, 1);
         add_word_settings(stringf("PLL%d.USR_SET", i), pos + 4, 1);
         add_word_settings(stringf("PLL%d.USR_CLK_REF", i), pos + 5, 1);
         add_word_settings(stringf("PLL%d.CLK_OUT_EN", i), pos + 6, 1);
         add_word_settings(stringf("PLL%d.LOCK_REQ", i), pos + 7, 1);
 
-        add_word_settings(stringf("PLL%d.AUTN_C", i), pos + 8 + 0, 3);
+        add_word_settings(stringf("PLL%d.AUTN_CT_I", i), pos + 8 + 0, 3);
         add_word_settings(stringf("PLL%d.CLK180_DOUB", i), pos + 8 + 3, 1);
         add_word_settings(stringf("PLL%d.CLK270_DOUB", i), pos + 8 + 4, 1);
+        // bits 6 and 7 are unused
         add_word_settings(stringf("PLL%d.USR_CLK_OUT", i), pos + 8 + 7, 1);
         pos += 16;
     }
