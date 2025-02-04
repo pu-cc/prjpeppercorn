@@ -264,7 +264,7 @@ PRIMITIVES_PINS = {
         Pin("CLK_REF",             PinType.INPUT, "PLL_WIRE", True),
         Pin("USR_CLK_REF",         PinType.INPUT, "PLL_WIRE"),
         Pin("USR_SEL_A_B",         PinType.INPUT, "PLL_WIRE"),
-        Pin("CLK_FEEDBACK",        PinType.INPUT, "PLL_WIRE"),
+        Pin("CLK_FEEDBACK",        PinType.INPUT, "PLL_WIRE", True),
         Pin("USR_LOCKED_STDY_RST", PinType.INPUT, "PLL_WIRE"),
         Pin("CLK0",                PinType.OUTPUT,"PLL_WIRE"),
         Pin("CLK90",               PinType.OUTPUT,"PLL_WIRE"),
@@ -358,6 +358,8 @@ def get_pin_connection_name(prim, pin):
             return f"GLBOUT.CLK270_{prim.z - 4}"
         elif pin.name == "CLK_REF_OUT":
             return f"GLBOUT.CLK_REF_OUT{prim.z - 4}"
+        elif pin.name == "CLK_FEEDBACK":
+            return f"GLBOUT.CLK_FB{prim.z - 4}"
     return f"{prim.name}.{pin.name}"
 
 def get_endpoints_for_type(type):
