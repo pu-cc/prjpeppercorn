@@ -985,6 +985,7 @@ class Die:
         self.io_pad_names = dict()
         self.gpio_to_loc = dict()
         self.conn = dict()
+        self.rev_conn = dict()
         for y in range(-2, max_row()+1):
             for x in range(-2, max_col()+1):
                 if is_gpio(x,y):
@@ -1000,14 +1001,32 @@ class Die:
 
     def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst):
         key_val = f"{src_x + self.offset_x}/{src_y + self.offset_y}/{src}"
-        key  = Connection(src_x + self.offset_x, src_y +self. offset_y, src)
+        key  = Connection(src_x + self.offset_x, src_y + self.offset_y, src)
         item = Connection(dst_x + self.offset_x, dst_y + self.offset_y, dst)
         if key_val not in self.conn:
             self.conn[key_val] = list()
             self.conn[key_val].append(key)
         self.conn[key_val].append(item)
+        if "CPE.RAM_I" in dst:
+            rev_key_val = f"{dst_x + self.offset_x}/{dst_y + self.offset_y}/{dst}"
+            if rev_key_val not in self.rev_conn:
+                self.rev_conn[rev_key_val] = list()
+                self.rev_conn[rev_key_val].append(item)
+            self.rev_conn[rev_key_val].append(key)
         if self.debug_conn:
             print(f"({src_x + self.offset_x},{src_y}) {src} => ({dst_x + self.offset_x},{dst_y + self.offset_y}) {dst}")
+
+    def get_connections_for(self, src_x,src_y, src):
+        key_val = f"{src_x + self.offset_x}/{src_y + self.offset_y}/{src}"
+        if key_val in self.conn:
+            return self.conn[key_val]
+        return list()
+
+    def get_connections_to(self, dst_x, dst_y, dst):
+        rev_key_val = f"{dst_x + self.offset_x}/{dst_y + self.offset_y}/{dst}"
+        if rev_key_val in self.rev_conn:
+            return self.rev_conn[rev_key_val]
+        return list()
 
     def create_cpe(self, x,y):
         self.create_conn(x,y,"IM.P01.Y", x,y,"CPE.IN1")
