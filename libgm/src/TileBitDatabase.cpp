@@ -155,46 +155,46 @@ void TileBitDatabase::add_cpe(int index, int start)
 
     add_word_settings(stringf("CPE%d.INIT_L30", index), start + 28, 4);
 
-    add_word_settings(stringf("CPE%d.I1", index), start + 32, 1);
-    add_word_settings(stringf("CPE%d.I2", index), start + 33, 1);
-    add_word_settings(stringf("CPE%d.I3", index), start + 34, 1);
-    add_word_settings(stringf("CPE%d.I4", index), start + 35, 1);
+    add_word_settings(stringf("CPE%d.C_I1", index), start + 32, 1);
+    add_word_settings(stringf("CPE%d.C_I2", index), start + 33, 1);
+    add_word_settings(stringf("CPE%d.C_I3", index), start + 34, 1);
+    add_word_settings(stringf("CPE%d.C_I4", index), start + 35, 1);
 
-    add_word_settings(stringf("CPE%d.FUNCTION", index), start + 36, 3);
-    add_word_settings(stringf("CPE%d.COMP", index), start + 39, 1);
-    add_word_settings(stringf("CPE%d.COMP_I", index), start + 40, 1);
-    add_word_settings(stringf("CPE%d.HORIZ", index), start + 41, 1);
-    add_word_settings(stringf("CPE%d.SELX", index), start + 42, 1);
-    add_word_settings(stringf("CPE%d.SELY1", index), start + 43, 1);
-    add_word_settings(stringf("CPE%d.SELY2", index), start + 44, 1);
-    add_word_settings(stringf("CPE%d.SEL_C", index), start + 45, 1);
-    add_word_settings(stringf("CPE%d.SEL_P", index), start + 46, 1);
-    add_word_settings(stringf("CPE%d.Y12", index), start + 47, 1);
-    add_word_settings(stringf("CPE%d.CX_I", index), start + 48, 1);
-    add_word_settings(stringf("CPE%d.CY1_I", index), start + 49, 1);
-    add_word_settings(stringf("CPE%d.CY2_I", index), start + 50, 1);
-    add_word_settings(stringf("CPE%d.PX_I", index), start + 51, 1);
-    add_word_settings(stringf("CPE%d.PY1_I", index), start + 52, 1);
-    add_word_settings(stringf("CPE%d.PY2_I", index), start + 53, 1);
-    add_word_settings(stringf("CPE%d.C_P", index), start + 54, 1);
-    add_word_settings(stringf("CPE%d.2D_IN", index), start + 55, 1);
-    add_word_settings(stringf("CPE%d.SN", index), start + 56, 3);
-    add_word_settings(stringf("CPE%d.O1", index), start + 59, 2);
-    add_word_settings(stringf("CPE%d.O2", index), start + 61, 2);
-    add_word_settings(stringf("CPE%d.BR", index), start + 63, 1);
+    add_word_settings(stringf("CPE%d.C_FUNCTION", index), start + 36, 3);
+    add_word_settings(stringf("CPE%d.C_COMP", index), start + 39, 1);
+    add_word_settings(stringf("CPE%d.C_COMP_I", index), start + 40, 1);
+    add_word_settings(stringf("CPE%d.C_HORIZ", index), start + 41, 1);
+    add_word_settings(stringf("CPE%d.C_SELX", index), start + 42, 1);
+    add_word_settings(stringf("CPE%d.C_SELY1", index), start + 43, 1);
+    add_word_settings(stringf("CPE%d.C_SELY2", index), start + 44, 1);
+    add_word_settings(stringf("CPE%d.C_SEL_C", index), start + 45, 1);
+    add_word_settings(stringf("CPE%d.C_SEL_P", index), start + 46, 1);
+    add_word_settings(stringf("CPE%d.C_Y12", index), start + 47, 1);
+    add_word_settings(stringf("CPE%d.C_CX_I", index), start + 48, 1);
+    add_word_settings(stringf("CPE%d.C_CY1_I", index), start + 49, 1);
+    add_word_settings(stringf("CPE%d.C_CY2_I", index), start + 50, 1);
+    add_word_settings(stringf("CPE%d.C_PX_I", index), start + 51, 1);
+    add_word_settings(stringf("CPE%d.C_PY1_I", index), start + 52, 1);
+    add_word_settings(stringf("CPE%d.C_PY2_I", index), start + 53, 1);
+    add_word_settings(stringf("CPE%d.C_C_P", index), start + 54, 1);
+    add_word_settings(stringf("CPE%d.C_2D_IN", index), start + 55, 1);
+    add_word_settings(stringf("CPE%d.C_SN", index), start + 56, 3);
+    add_word_settings(stringf("CPE%d.C_O1", index), start + 59, 2);
+    add_word_settings(stringf("CPE%d.C_O2", index), start + 61, 2);
+    add_word_settings(stringf("CPE%d.C_BR", index), start + 63, 1);
 
-    add_word_settings(stringf("CPE%d.CLK", index), start + 64, 2);
-    add_word_settings(stringf("CPE%d.EN", index), start + 66, 2);
-    add_word_settings(stringf("CPE%d.R", index), start + 68, 2);
-    add_word_settings(stringf("CPE%d.S", index), start + 70, 2);
-    add_word_settings(stringf("CPE%d.RAM_I1", index), start + 72, 1);
-    add_word_settings(stringf("CPE%d.RAM_I2", index), start + 73, 1);
-    add_word_settings(stringf("CPE%d.RAM_O1", index), start + 74, 1);
-    add_word_settings(stringf("CPE%d.RAM_O2", index), start + 75, 1);
-    add_word_settings(stringf("CPE%d.L_D", index), start + 76, 1);
-    add_word_settings(stringf("CPE%d.EN_SR", index), start + 77, 1);
-    add_word_settings(stringf("CPE%d.CLKSEL", index), start + 78, 1);
-    add_word_settings(stringf("CPE%d.ENSEL", index), start + 79, 1);
+    add_word_settings(stringf("CPE%d.C_CLK", index), start + 64, 2);
+    add_word_settings(stringf("CPE%d.C_EN", index), start + 66, 2);
+    add_word_settings(stringf("CPE%d.C_RES", index), start + 68, 2);
+    add_word_settings(stringf("CPE%d.C_SET", index), start + 70, 2);
+    add_word_settings(stringf("CPE%d.C_RAM_I1", index), start + 72, 1);
+    add_word_settings(stringf("CPE%d.C_RAM_I2", index), start + 73, 1);
+    add_word_settings(stringf("CPE%d.C_RAM_O1", index), start + 74, 1);
+    add_word_settings(stringf("CPE%d.C_RAM_O2", index), start + 75, 1);
+    add_word_settings(stringf("CPE%d.C_L_D", index), start + 76, 1);
+    add_word_settings(stringf("CPE%d.C_EN_SR", index), start + 77, 1);
+    add_word_settings(stringf("CPE%d.C_CLKSEL", index), start + 78, 1);
+    add_word_settings(stringf("CPE%d.C_ENSEL", index), start + 79, 1);
 }
 
 void TileBitDatabase::add_ff_init(int index, int start)
