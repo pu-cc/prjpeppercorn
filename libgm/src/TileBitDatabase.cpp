@@ -183,10 +183,11 @@ void TileBitDatabase::add_cpe(int index, int start)
     add_word_settings(stringf("CPE%d.C_O2", index), start + 61, 2);
     add_word_settings(stringf("CPE%d.C_BR", index), start + 63, 1);
 
-    add_word_settings(stringf("CPE%d.C_CLK", index), start + 64, 2);
-    add_word_settings(stringf("CPE%d.C_EN", index), start + 66, 2);
-    add_word_settings(stringf("CPE%d.C_RES", index), start + 68, 2);
-    add_word_settings(stringf("CPE%d.C_SET", index), start + 70, 2);
+    add_word_settings(stringf("CPE%d.C_CPE_CLK", index), start + 64, 2);
+    add_word_settings(stringf("CPE%d.C_CPE_EN", index), start + 66, 2);
+    add_word_settings(stringf("CPE%d.C_CPE_RES", index), start + 68, 2);
+    add_word_settings(stringf("CPE%d.C_CPE_SET", index), start + 70, 2);
+
     add_word_settings(stringf("CPE%d.C_RAM_I1", index), start + 72, 1);
     add_word_settings(stringf("CPE%d.C_RAM_I2", index), start + 73, 1);
     add_word_settings(stringf("CPE%d.C_RAM_O1", index), start + 74, 1);
