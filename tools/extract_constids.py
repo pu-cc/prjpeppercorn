@@ -32,6 +32,8 @@ def parse_line(item,fout):
     elif line[0] in ["input", "output" ,"inout"]:
         items = " ".join(line[1:]).strip().split(",")
         for it in items:
+            if "=" in it:
+                it = it[:it.find("=")].strip()
             name = it.split(" ")[-1].strip()
             if len(name)>0:
                 export_name(name, fout)
