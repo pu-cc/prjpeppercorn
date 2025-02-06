@@ -85,10 +85,11 @@ class Chip:
             for bank in banks:
                 for p in ["A","B"]:
                     for num in range(9):
-                        loc = self.dies[bank.die].io_pad_names[bank.bank][p][num]
+                        d = self.dies[bank.die]
+                        loc = d.io_pad_names[bank.bank][p][num]
                         pad_name = f"IO_{name}_{p}{num}"
                         if pad_name not in not_exist:
-                            pads.append(Pad(loc.x,loc.y,pad_name,"GPIO","",0))
+                            pads.append(Pad(loc.x + d.offset_x,loc.y + d.offset_y,pad_name,"GPIO","",0))
         return pads
 
 CCGM1_DEVICES = {

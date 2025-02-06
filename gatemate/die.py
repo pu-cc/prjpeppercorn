@@ -997,7 +997,7 @@ class Die:
                     if io.num not in self.io_pad_names[io.bank][io.port]:
                         self.io_pad_names[io.bank][io.port][io.num] = dict()
                     self.gpio_to_loc[f"GPIO_{io.bank}_{io.port}[{io.num}]"]  = Location(x, y)
-                    self.io_pad_names[io.bank][io.port][io.num] = Location(x + self.offset_x, y + self.offset_y)
+                    self.io_pad_names[io.bank][io.port][io.num] = Location(x, y)
 
     def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst):
         key_val = f"{src_x + self.offset_x}/{src_y + self.offset_y}/{src}"
@@ -1397,8 +1397,23 @@ class Die:
                 sb_y = 129 if x % 2==1 else 130
                 self.create_conn(x, sb_y, f"{get_sb_type(x,sb_y)}.P{plane}.Y2", x, 131, f"TES.SB_Y2.P{p}")
 
+    def connect_ddr_i(self, x, y, out, bank):
+        for port in ['A','B']:
+            for num in range(0,9):
+                loc = self.io_pad_names[bank][port][num]
+                self.create_conn(x, y , f"CPE.RAM_O{out}", loc.x, loc.y, "GPIO.DDR")
+
     def misc_connections(self):
         self.create_conn(1, 66 ,"USR_RSTN.USR_RSTN", 1, 66, "CPE.RAM_I2")
+        self.connect_ddr_i(97,128,1,'N1')
+        self.connect_ddr_i(97,128,2,'N2')
+        self.connect_ddr_i(160,65,1,'E1')
+        self.connect_ddr_i(160,65,2,'E2')
+        self.connect_ddr_i(1,65,1,'W1')
+        self.connect_ddr_i(1,65,2,'W2')
+        self.connect_ddr_i(96,1,1,'S1')
+        self.connect_ddr_i(96,1,2,'S2')
+        self.connect_ddr_i(48,1,1,'S3')
 
     def create_in_die_connections(self, conn):
         self.conn = conn
