@@ -373,6 +373,14 @@ def get_pin_connection_name(prim, pin):
         match pin.name:
             case "OUT":
                 return "CPE.OUT2"
+            case "IN1":
+                return "CPE.IN1_int"
+            case "IN2":
+                return "CPE.IN2_int"
+            case "IN3":
+                return "CPE.IN3_int"
+            case "IN4":
+                return "CPE.IN4_int"
             case "RAM_O":
                 return "CPE.RAM_O2"
             case "RAM_I":
@@ -384,13 +392,13 @@ def get_pin_connection_name(prim, pin):
             case "OUT":
                 return "CPE.OUT1"
             case "IN1":
-                return "CPE.IN5"
+                return "CPE.IN5_int"
             case "IN2":
-                return "CPE.IN6"
+                return "CPE.IN6_int"
             case "IN3":
-                return "CPE.IN7"
+                return "CPE.IN7_int"
             case "IN4":
-                return "CPE.IN8"
+                return "CPE.IN8_int"
             case "RAM_O":
                 return "CPE.RAM_O1"
             case "RAM_I":
@@ -420,6 +428,14 @@ def get_endpoints_for_type(type):
         create_wire("CPE.IN6"    , type="CPE_WIRE_L")
         create_wire("CPE.IN7"    , type="CPE_WIRE_L")
         create_wire("CPE.IN8"    , type="CPE_WIRE_L")
+        create_wire("CPE.IN1_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN2_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN3_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN4_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN5_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN6_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN7_int", type="CPE_WIRE_INT")
+        create_wire("CPE.IN8_int", type="CPE_WIRE_INT")
         create_wire("CPE.CLK"    , type="CPE_WIRE_L")
         create_wire("CPE.EN"     , type="CPE_WIRE_L")
         create_wire("CPE.SR"     , type="CPE_WIRE_L")
@@ -658,6 +674,12 @@ def get_mux_connections_for_type(type):
 
     if "CPE" in type:
         # CPE
+        for i in range(1,9):
+            create_mux(f"CPE.IN{i}", f"CPE.IN{i}_int", 0, 0, False, None, False)
+        create_mux("CPE.PINY1", "CPE.IN2_int", 1, 1, False, "CPE.C_I1")
+        create_mux("CPE.CINX",  "CPE.IN4_int", 1, 1, False, "CPE.C_I2")
+        create_mux("CPE.PINY1", "CPE.IN6_int", 1, 1, False, "CPE.C_I3")
+        create_mux("CPE.PINX",  "CPE.IN8_int", 1, 1, False, "CPE.C_I4")
         for p in range(1,13):
             plane = f"{p:02d}"
             for i in range(8):
