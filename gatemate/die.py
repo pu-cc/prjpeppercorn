@@ -23,6 +23,8 @@ PLL_X_POS = 33
 PLL_Y_POS = 131
 SERDES_X_POS = 1
 SERDES_Y_POS = 121
+CTRL_X_POS = -2
+CTRL_Y_POS = -2
 
 def max_row():
     return 131
@@ -149,6 +151,9 @@ def is_pll(x,y):
 
 def is_serdes(x,y):
     return x==SERDES_X_POS and y==SERDES_Y_POS
+
+def is_cfg_ctrl(x,y):
+    return x==CTRL_X_POS and y==CTRL_Y_POS
 
 def base_loc(x,y):
     return (((x-1) & ~1) + 1, ((y-1) & ~1) + 1)
@@ -287,6 +292,20 @@ PRIMITIVES_PINS = {
     ],
     "USR_RSTN" : [
         Pin("USR_RSTN", PinType.OUTPUT,"USR_RSTN_WIRE"),
+    ],
+    "CFG_CTRL" : [
+        Pin("DATA[7]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[6]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[5]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[4]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[3]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[2]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[1]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("DATA[0]", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("CLK", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("EN", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("VALID", PinType.OUTPUT,"CFG_CTRL_WIRE"),
+        Pin("RECFG", PinType.OUTPUT,"CFG_CTRL_WIRE"),
     ],
     "RAM" : [
         Pin("C_ADDRA[0]", PinType.INPUT,"RAM_WIRE"),
@@ -1441,8 +1460,9 @@ def get_primitives_for_type(type):
         primitives.append(Primitive("PLL1","PLL",5))
         primitives.append(Primitive("PLL2","PLL",6))
         primitives.append(Primitive("PLL3","PLL",7))
-    if "USR_RSTN" in type:
-        primitives.append(Primitive("USR_RSTN","USR_RSTN",2))
+    if "CFG_CTRL" in type:
+        primitives.append(Primitive("CFG_CTRL","CFG_CTRL",2))
+        primitives.append(Primitive("USR_RSTN","USR_RSTN",3))
     return primitives
 
 def get_primitive_pins(bel):
@@ -2106,8 +2126,8 @@ def get_tile_types(x,y):
         val.append("PLL")
     if is_serdes(x,y):
         val.append("SERDES")
-    if x==1 and y==66:
-        val.append("USR_RSTN")
+    if is_cfg_ctrl(x,y):
+        val.append("CFG_CTRL")
     if is_ram(x,y):
         val.append("RAM")
     return val
@@ -2598,7 +2618,23 @@ class Die:
                 self.create_conn(x, y , f"CPE.RAM_O{out}", loc.x, loc.y, "GPIO.DDR")
 
     def misc_connections(self):
-        self.create_conn(1, 66 ,"USR_RSTN.USR_RSTN", 1, 66, "CPE.RAM_I2")
+        self.create_conn(1, 16, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[7]")
+        self.create_conn(1, 15, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[6]")
+        self.create_conn(1, 14, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[5]")
+        self.create_conn(1, 13, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[4]")
+        self.create_conn(1, 12, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[3]")
+        self.create_conn(1, 11, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[2]")
+        self.create_conn(1, 10, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[1]")
+        self.create_conn(1,  9, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.DATA[0]")
+
+        self.create_conn(1,  6, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.CLK")
+        self.create_conn(1,  7, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.EN")
+        self.create_conn(1,  8, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.VALID")
+
+        self.create_conn(1,  5, "CPE.RAM_O1", CTRL_X_POS, CTRL_Y_POS, "CFG_CTRL.RECFG")
+
+        self.create_conn(CTRL_X_POS, CTRL_Y_POS ,"USR_RSTN.USR_RSTN", 1, 66, "CPE.RAM_I2")
+
         self.connect_ddr_i(97,128,1,'N1')
         self.connect_ddr_i(97,128,2,'N2')
         self.connect_ddr_i(160,65,1,'E1')

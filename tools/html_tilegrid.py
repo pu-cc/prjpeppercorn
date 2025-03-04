@@ -53,6 +53,8 @@ def get_colour(ttype):
             colour = "#FF7ABE"
         case "SERDES":
             colour = "#64FF65"
+        case "CFG_CTRL":
+            colour = "#999999"
         case _:
             colour = "#FFFFFF"
     return colour
