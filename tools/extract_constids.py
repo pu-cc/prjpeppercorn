@@ -12,7 +12,7 @@ parser.add_argument('-o', '--outfile', dest='outfile', type=argparse.FileType('w
                     help="output HTML file")
 
 def export_name(name,fout):
-    if name not in consts:
+    if name not in consts and "[" not in name:
         print(f"X({name})", file=fout)
         consts.add(name)
     else:
