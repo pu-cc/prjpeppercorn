@@ -2076,6 +2076,10 @@ class Die:
         else:
             self.create_conn(cpe_x, cpe_y, "CPE.RAM_O1", gpio_x,gpio_y,"GPIO.OUT1")
             self.create_conn(cpe_x, cpe_y, "CPE.RAM_O2", gpio_x,gpio_y,"GPIO.OUT2")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", gpio_x, gpio_y, "GPIO.CLOCK1")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", gpio_x, gpio_y, "GPIO.CLOCK2")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", gpio_x, gpio_y, "GPIO.CLOCK3")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", gpio_x, gpio_y, "GPIO.CLOCK4")
 
     def create_pll(self):
         # GPIO_W2_A[8]  CLK0
