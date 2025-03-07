@@ -1093,9 +1093,9 @@ PRIMITIVES_PINS = {
     "SERDES" : [
         Pin("TX_DETECT_RX_I", PinType.INPUT,"SERDES_WIRE"),
         Pin("PLL_RESET_I", PinType.INPUT,"SERDES_WIRE"),
-        Pin("CLK_REG_I", PinType.INPUT,"SERDES_WIRE"),
-        Pin("CLK_CORE_TX_I", PinType.INPUT,"SERDES_WIRE"),
-        Pin("CLK_CORE_RX_I", PinType.INPUT,"SERDES_WIRE"),
+        Pin("REGFILE_CLK_I", PinType.INPUT,"SERDES_WIRE"),
+        Pin("TX_CLK_I", PinType.INPUT,"SERDES_WIRE"),
+        Pin("RX_CLK_I", PinType.INPUT,"SERDES_WIRE"),
         Pin("REGFILE_WE_I", PinType.INPUT,"SERDES_WIRE"),
         Pin("REGFILE_EN_I", PinType.INPUT,"SERDES_WIRE"),
         Pin("TX_RESET_I", PinType.INPUT,"SERDES_WIRE"),
@@ -1376,16 +1376,16 @@ PRIMITIVES_PINS = {
         Pin("RX_DATA_O[0]", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("TX_DETECT_RX_DONE_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("TX_DETECT_RX_PRESENT_O", PinType.OUTPUT,"SERDES_WIRE"),
-        Pin("CLK_CORE_RX_O", PinType.OUTPUT,"SERDES_WIRE"),
-        Pin("CLK_CORE_PLL_O", PinType.OUTPUT,"SERDES_WIRE"),
+        Pin("RX_CLK_O", PinType.OUTPUT,"SERDES_WIRE"),
+        Pin("PLL_CLK_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("TX_BUF_ERR_O", PinType.OUTPUT,"SERDES_WIRE"),
-        Pin("TX_RESETDONE_O", PinType.OUTPUT,"SERDES_WIRE"),
+        Pin("TX_RESET_DONE_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("REGFILE_RDY_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("RX_PRBS_ERR_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("RX_BUF_ERR_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("RX_BYTE_IS_ALIGNED_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("RX_BYTE_REALIGN_O", PinType.OUTPUT,"SERDES_WIRE"),
-        Pin("RX_RESETDONE_O", PinType.OUTPUT,"SERDES_WIRE"),
+        Pin("RX_RESET_DONE_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("RX_EI_EN_O", PinType.OUTPUT,"SERDES_WIRE"),
         Pin("LOOPBACK_I[2]", PinType.INPUT,"SERDES_WIRE"),
         Pin("LOOPBACK_I[1]", PinType.INPUT,"SERDES_WIRE"),
@@ -1396,8 +1396,8 @@ PRIMITIVES_PINS = {
         Pin("RX_PRBS_SEL_I[2]", PinType.INPUT,"SERDES_WIRE"),
         Pin("RX_PRBS_SEL_I[1]", PinType.INPUT,"SERDES_WIRE"),
         Pin("RX_PRBS_SEL_I[0]", PinType.INPUT,"SERDES_WIRE"),
-        Pin("TX_POWERDOWN_N_I", PinType.INPUT,"SERDES_WIRE"),
-        Pin("RX_POWERDOWN_N_I", PinType.INPUT,"SERDES_WIRE"),
+        Pin("TX_POWER_DOWN_N_I", PinType.INPUT,"SERDES_WIRE"),
+        Pin("RX_POWER_DOWN_N_I", PinType.INPUT,"SERDES_WIRE"),
         Pin("TX_ELEC_IDLE_I", PinType.INPUT,"SERDES_WIRE"),
     ],
 }
@@ -2648,9 +2648,9 @@ class Die:
     def create_serdes(self, x, y):
         self.create_conn(x+6,y+6,"CPE.RAM_O1", x,y,"SERDES.TX_DETECT_RX_I")
         self.create_conn(x+6,y+5,"CPE.RAM_O2", x,y,"SERDES.PLL_RESET_I")
-        self.create_conn(x+6,y+5,"CPE.RAM_O1", x,y,"SERDES.CLK_REG_I")
-        self.create_conn(x+6,y+4,"CPE.RAM_O2", x,y,"SERDES.CLK_CORE_TX_I")
-        self.create_conn(x+6,y+4,"CPE.RAM_O1", x,y,"SERDES.CLK_CORE_RX_I")
+        self.create_conn(x+6,y+5,"CPE.RAM_O1", x,y,"SERDES.REGFILE_CLK_I")
+        self.create_conn(x+6,y+4,"CPE.RAM_O2", x,y,"SERDES.TX_CLK_I")
+        self.create_conn(x+6,y+4,"CPE.RAM_O1", x,y,"SERDES.RX_CLK_I")
         self.create_conn(x+6,y+3,"CPE.RAM_O2", x,y,"SERDES.REGFILE_WE_I")
         self.create_conn(x+6,y+3,"CPE.RAM_O1", x,y,"SERDES.REGFILE_EN_I")
         self.create_conn(x+6,y+2,"CPE.RAM_O2", x,y,"SERDES.TX_RESET_I")
@@ -2931,16 +2931,16 @@ class Die:
         self.create_conn(x,y,"SERDES.RX_DATA_O[0]", x+23,y+0,"CPE.RAM_I2")
         self.create_conn(x,y,"SERDES.TX_DETECT_RX_DONE_O", x+24,y+6,"CPE.RAM_I2")
         self.create_conn(x,y,"SERDES.TX_DETECT_RX_PRESENT_O", x+24,y+6,"CPE.RAM_I1")
-        self.create_conn(x,y,"SERDES.CLK_CORE_RX_O", x+24,y+5,"CPE.RAM_I2")
-        self.create_conn(x,y,"SERDES.CLK_CORE_PLL_O", x+24,y+5,"CPE.RAM_I1")
+        self.create_conn(x,y,"SERDES.RX_CLK_O", x+24,y+5,"CPE.RAM_I2")
+        self.create_conn(x,y,"SERDES.PLL_CLK_O", x+24,y+5,"CPE.RAM_I1")
         self.create_conn(x,y,"SERDES.TX_BUF_ERR_O", x+24,y+4,"CPE.RAM_I2")
-        self.create_conn(x,y,"SERDES.TX_RESETDONE_O", x+24,y+4,"CPE.RAM_I1")
+        self.create_conn(x,y,"SERDES.TX_RESET_DONE_O", x+24,y+4,"CPE.RAM_I1")
         self.create_conn(x,y,"SERDES.REGFILE_RDY_O", x+24,y+3,"CPE.RAM_I2")
         self.create_conn(x,y,"SERDES.RX_PRBS_ERR_O", x+24,y+3,"CPE.RAM_I1")
         self.create_conn(x,y,"SERDES.RX_BUF_ERR_O", x+24,y+2,"CPE.RAM_I2")
         self.create_conn(x,y,"SERDES.RX_BYTE_IS_ALIGNED_O", x+24,y+2,"CPE.RAM_I1")
         self.create_conn(x,y,"SERDES.RX_BYTE_REALIGN_O", x+24,y+1,"CPE.RAM_I2")
-        self.create_conn(x,y,"SERDES.RX_RESETDONE_O", x+24,y+1,"CPE.RAM_I1")
+        self.create_conn(x,y,"SERDES.RX_RESET_DONE_O", x+24,y+1,"CPE.RAM_I1")
         self.create_conn(x,y,"SERDES.RX_EI_EN_O", x+24,y+0,"CPE.RAM_I2")
         self.create_conn(x+25,y+5,"CPE.RAM_O1", x,y,"SERDES.LOOPBACK_I[2]")
         self.create_conn(x+25,y+5,"CPE.RAM_O2", x,y,"SERDES.LOOPBACK_I[1]")
@@ -2951,8 +2951,8 @@ class Die:
         self.create_conn(x+25,y+1,"CPE.RAM_O1", x,y,"SERDES.RX_PRBS_SEL_I[2]")
         self.create_conn(x+25,y+1,"CPE.RAM_O2", x,y,"SERDES.RX_PRBS_SEL_I[1]")
         self.create_conn(x+25,y+0,"CPE.RAM_O2", x,y,"SERDES.RX_PRBS_SEL_I[0]")
-        self.create_conn(x+25,y+4,"CPE.RAM_O1", x,y,"SERDES.TX_POWERDOWN_N_I")
-        self.create_conn(x+25,y+2,"CPE.RAM_O1", x,y,"SERDES.RX_POWERDOWN_N_I")
+        self.create_conn(x+25,y+4,"CPE.RAM_O1", x,y,"SERDES.TX_POWER_DOWN_N_I")
+        self.create_conn(x+25,y+2,"CPE.RAM_O1", x,y,"SERDES.RX_POWER_DOWN_N_I")
         self.create_conn(x+25,y+0,"CPE.RAM_O1", x,y,"SERDES.TX_ELEC_IDLE_I")
 
     def create_ram(self, x, y):
