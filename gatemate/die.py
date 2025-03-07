@@ -2641,9 +2641,9 @@ class Die:
         self.connect_ddr_i(160,65,2,'E2')
         self.connect_ddr_i(1,65,1,'W1')
         self.connect_ddr_i(1,65,2,'W2')
-        self.connect_ddr_i(96,1,1,'S1')
-        self.connect_ddr_i(96,1,2,'S2')
-        self.connect_ddr_i(48,1,1,'S3')
+        self.connect_ddr_i(97,1,1,'S1')
+        self.connect_ddr_i(97,1,2,'S2')
+        self.connect_ddr_i(49,1,1,'S3')
 
     def create_serdes(self, x, y):
         self.create_conn(x+6,y+6,"CPE.RAM_O1", x,y,"SERDES.TX_DETECT_RX_I")
