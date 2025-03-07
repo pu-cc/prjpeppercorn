@@ -661,7 +661,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
             wr.write_cmd_pll(i * 2, die_config, size);
             if (cfg_b) {
                 wr.write_cmd_spll(1 << i | 1 << (i + 4));
-                wr.write_cmd_pll(i * 2, die_config, size);
+                wr.write_cmd_pll(i * 2 + 1, die_config, size);
             }
             pll_written = true;
         }
