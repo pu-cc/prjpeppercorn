@@ -263,7 +263,8 @@ PRIMITIVES_PINS = {
         Pin("OUT3"  , PinType.INPUT, "GPIO_WIRE"),
         Pin("OUT4"  , PinType.INPUT, "GPIO_WIRE"),
         Pin("DDR"   , PinType.INPUT, "GPIO_WIRE"),
-        Pin("RESET" , PinType.INPUT, "GPIO_WIRE"),
+        # Reset is global but no control over it
+        #Pin("RESET" , PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK1", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK2", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK3", PinType.INPUT, "GPIO_WIRE"),
