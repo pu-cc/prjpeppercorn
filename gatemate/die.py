@@ -269,9 +269,6 @@ PRIMITIVES_PINS = {
         Pin("CLOCK2", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK3", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK4", PinType.INPUT, "GPIO_WIRE"),
-        Pin("DI"    , PinType.INPUT, "GPIO_WIRE"),
-        Pin("DO"    , PinType.OUTPUT,"GPIO_WIRE"),
-        Pin("OE"    , PinType.OUTPUT,"GPIO_WIRE"),
     ],
     "BUFG" : [
         Pin("I"     , PinType.INPUT, "BUFG_WIRE", True),
