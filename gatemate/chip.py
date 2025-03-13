@@ -77,6 +77,19 @@ class Chip:
     def get_packages(self):
         return self.packages
 
+    def get_bank_number(self, bank):
+        match bank:
+            case 'N1' : return 0
+            case 'N2' : return 1
+            case 'E1' : return 2
+            case 'E2' : return 3
+            case 'W1' : return 4
+            case 'W2' : return 5
+            case 'S1' : return 6
+            case 'S2' : return 7
+            case 'S3' : return 8
+            case _ : return -1
+
     def get_package_pads(self, package):
         pads = []
         pkg = self.packages[package]
@@ -89,7 +102,7 @@ class Chip:
                         loc = d.io_pad_names[bank.bank][p][num]
                         pad_name = f"IO_{name}_{p}{num}"
                         if pad_name not in not_exist:
-                            pads.append(Pad(loc.x + d.offset_x,loc.y + d.offset_y,pad_name,"GPIO","",0))
+                            pads.append(Pad(loc.x + d.offset_x,loc.y + d.offset_y,pad_name,"GPIO","",self.get_bank_number(bank.bank)))
         return pads
 
 CCGM1_DEVICES = {
