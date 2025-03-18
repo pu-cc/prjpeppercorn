@@ -29,6 +29,7 @@ class Pad:
     bel : str
     function : str
     bank : int
+    flags : int
 
 @dataclass
 class Bank:
@@ -101,8 +102,12 @@ class Chip:
                         d = self.dies[bank.die]
                         loc = d.io_pad_names[bank.bank][p][num]
                         pad_name = f"IO_{name}_{p}{num}"
+                        flags = 0
+                        # mark clock sources
+                        if bank.bank == "W2" and p == "A" and num in [5,6,7,8]:
+                            flags = 1
                         if pad_name not in not_exist:
-                            pads.append(Pad(loc.x + d.offset_x,loc.y + d.offset_y,pad_name,"GPIO","",self.get_bank_number(bank.bank)))
+                            pads.append(Pad(loc.x + d.offset_x,loc.y + d.offset_y,pad_name,"GPIO","",self.get_bank_number(bank.bank),flags))
         return pads
 
 CCGM1_DEVICES = {
