@@ -58,7 +58,7 @@ std::string ChipConfig::to_string() const
             std::ios_base::fmtflags f(ss.flags());
             for (size_t i = 0; i < bram.second.size(); i++) {
                 ss << std::setw(2) << std::setfill('0') << std::hex << (int)bram.second.at(i);
-                if (i % 32 == 31)
+                if (i % 40 == 39)
                     ss << std::endl;
                 else
                     ss << " ";
