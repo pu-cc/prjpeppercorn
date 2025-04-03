@@ -463,10 +463,10 @@ RamBitDatabase::RamBitDatabase() : BaseBitDatabase(Die::RAM_BLOCK_SIZE * 8)
     add_word_settings("RAM_cfg_inversion_b1", 20 * 8 + 1, 3);
     add_word_settings("RAM_cfg_ecc_enable", 20 * 8 + 4, 2);
     add_word_settings("RAM_cfg_dyn_stat_select", 20 * 8 + 6, 2);
-    add_word_settings("RAM_cfg_fifo_sync_enable", 21 * 8, 1);
-    add_word_settings("RAM_cfg_almost_empty_offset", 21 * 8 + 1, 15);
-    add_word_settings("RAM_cfg_fifo_async_enable", 23 * 8, 1);
-    add_word_settings("RAM_cfg_almost_full_offset", 23 * 8 + 1, 15);
+    add_word_settings("RAM_cfg_almost_empty_offset", 21 * 8, 15);
+    add_word_settings("RAM_cfg_fifo_sync_enable", 22 * 8 + 7, 1);
+    add_word_settings("RAM_cfg_almost_full_offset", 23 * 8, 15);
+    add_word_settings("RAM_cfg_fifo_async_enable", 24 * 8 + 7, 1);
     add_word_settings("RAM_cfg_sram_delay", 25 * 8, 6);
     add_word_settings("RAM_cfg_datbm_sel", 26 * 8, 4);
     add_word_settings("RAM_cfg_cascade_enable", 26 * 8 + 4, 2);
