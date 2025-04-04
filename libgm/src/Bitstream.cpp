@@ -625,6 +625,22 @@ Chip Bitstream::deserialise_chip()
             // Skip bytes
             rd.skip_bytes(3);
             break;
+
+        case CMD_SERDES:
+            BITSTREAM_DEBUG("CMD_SERDES");
+            if (length != 186)
+                BITSTREAM_FATAL("SERDES data does not match size", rd.get_offset());
+            // Check header CRC
+            check_crc(rd);
+
+            // Read data block
+            rd.get_vector(block, length);
+            die.write_serdes_cfg(block);
+
+            // Check data CRC
+            check_crc(rd);
+            break;
+
         default:
             BITSTREAM_FATAL("Unhandled command 0x" << std::hex << std::setw(2) << std::setfill('0') << int(cmd),
                             rd.get_offset());
@@ -774,7 +790,12 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
 
     uint8_t cfg_stat = CFG_DONE | CFG_STOP | CFG_CPE_RESET;
     // cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
-    // cfg_stat |= CFG_SERDES;
+    if (!die.is_serdes_cfg_empty()) {
+        cfg_stat |= CFG_SERDES;
+        wr.write_header(CMD_SERDES, die.get_serdes_config().size());
+        wr.write_bytes(die.get_serdes_config());
+        wr.insert_crc16();
+    }
 
     wr.write_cmd_chg_status(cfg_stat, die_config);
     return Bitstream(wr.get());

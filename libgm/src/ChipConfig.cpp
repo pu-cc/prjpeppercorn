@@ -38,6 +38,13 @@ std::string ChipConfig::to_string() const
             ss << std::endl;
         }
     }
+    for (const auto &ser : serdes) {
+        if (!ser.second.empty()) {
+            ss << ".serdes " << ser.first << " " << std::endl;
+            ss << ser.second;
+            ss << std::endl;
+        }
+    }
     for (const auto &tile : tiles) {
         if (!tile.second.empty()) {
             ss << ".tile " << tile.first.die << " " << tile.first.x << " " << tile.first.y << std::endl;
@@ -85,6 +92,12 @@ ChipConfig ChipConfig::from_string(const std::string &config)
             TileConfig tc;
             ss >> tc;
             cc.configs.emplace(die, tc);
+        } else if (verb == ".serdes") {
+            int die;
+            ss >> die;
+            TileConfig tc;
+            ss >> tc;
+            cc.serdes.emplace(die, tc);
         } else if (verb == ".tile") {
             CfgLoc loc;
             ss >> loc.die;
@@ -156,6 +169,11 @@ Chip ChipConfig::to_chip() const
             const TileConfig &cfg = configs.at(d);
             die.write_die_cfg(cfg_db.config_to_data(cfg));
         }
+        SerdesBitDatabase ser_db;
+        if (serdes.count(d)) {
+            const TileConfig &cfg = serdes.at(d);
+            die.write_serdes_cfg(ser_db.config_to_data(cfg));
+        }
     }
 
     return chip;
@@ -193,6 +211,8 @@ ChipConfig ChipConfig::from_chip(const Chip &chip)
         }
         ConfigBitDatabase cfg_db;
         cc.configs.emplace(d, cfg_db.data_to_config(die.get_die_config()));
+        SerdesBitDatabase ser_db;
+        cc.serdes.emplace(d, ser_db.data_to_config(die.get_serdes_config()));
     }
     return cc;
 }

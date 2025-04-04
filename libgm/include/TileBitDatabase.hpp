@@ -49,7 +49,7 @@ class BaseBitDatabase
     std::vector<uint8_t> config_to_data(const TileConfig &cfg);
 
   protected:
-    void add_word_settings(const std::string &name, int start, int end);
+    void add_word_settings(const std::string &name, int start, int len);
     void add_unknowns();
     std::vector<uint8_t> bits_to_bytes(std::vector<bool> &bits);
 
@@ -86,6 +86,12 @@ class RamBitDatabase : public BaseBitDatabase
 {
   public:
     RamBitDatabase();
+};
+
+class SerdesBitDatabase : public BaseBitDatabase
+{
+  public:
+    SerdesBitDatabase();
 };
 
 class ConfigBitDatabase : public BaseBitDatabase

@@ -47,6 +47,7 @@ class Die
     static constexpr int DIE_CONFIG_SIZE = STATUS_CFG_START + STATUS_CFG_SIZE;
     static constexpr int FF_INIT_RESET = 2;
     static constexpr int FF_INIT_SET = 3;
+    static constexpr int SERDES_CFG_SIZE = 186;
 
   public:
     explicit Die();
@@ -66,24 +67,28 @@ class Die
     bool is_glbout_cfg_empty() const;
     bool is_status_cfg_empty() const;
     bool is_using_cfg_gpios() const;
+    bool is_serdes_cfg_empty() const;
 
     void write_latch(int x, int y, const std::vector<uint8_t> &data);
     void write_ram(int x, int y, const std::vector<uint8_t> &data);
     void write_ram_data(int x, int y, const std::vector<uint8_t> &data, uint16_t addr);
     void write_pll_select(uint8_t select, const std::vector<uint8_t> &data);
     void write_die_cfg(const std::vector<uint8_t> &data) { die_cfg = data; }
+    void write_serdes_cfg(const std::vector<uint8_t> &data) { serdes_cfg = data; }
     void write_ff_init(int x, int y, uint8_t data);
     void write_status(const std::vector<uint8_t> &data);
 
     const std::vector<uint8_t> get_latch_config(int x, int y) const { return latch.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_config(int x, int y) const { return ram.at(std::make_pair(x, y)); }
     const std::vector<uint8_t> get_ram_data(int x, int y) const { return ram_data.at(std::make_pair(x, y)); }
+    const std::vector<uint8_t> get_serdes_config() const { return serdes_cfg; }
     const std::vector<uint8_t> get_die_config() const { return die_cfg; }
 
   private:
     std::map<std::pair<int, int>, std::vector<uint8_t>> latch;    // Config latches
     std::map<std::pair<int, int>, std::vector<uint8_t>> ram;      // Config RAM
     std::map<std::pair<int, int>, std::vector<uint8_t>> ram_data; // RAM data content FRAM
+    std::vector<uint8_t> serdes_cfg;                              // Config for SERDES
     std::vector<uint8_t> die_cfg;                                 // Config for all PLLs, CLKIN and GLBOUT
 };
 

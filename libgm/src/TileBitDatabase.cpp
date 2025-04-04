@@ -54,17 +54,17 @@ bool is_array_empty(std::vector<bool> &array)
 BaseBitDatabase::BaseBitDatabase(int num_bits) : num_bits(num_bits), known_bits(num_bits, false) {}
 BaseBitDatabase::~BaseBitDatabase() {}
 
-void BaseBitDatabase::add_word_settings(const std::string &name, int start, int end)
+void BaseBitDatabase::add_word_settings(const std::string &name, int start, int len)
 {
     if (words.find(name) != words.end())
         throw DatabaseConflictError(fmt("word " << name << " already exists in DB"));
 
-    for (int i = start; i < start + end; i++) {
+    for (int i = start; i < start + len; i++) {
         if (known_bits[i])
             throw DatabaseConflictError(fmt("bit " << i << " for word " << name << " already mapped"));
         known_bits[i] = true;
     }
-    words[name] = {start, start + end};
+    words[name] = {start, start + len};
 }
 
 void BaseBitDatabase::add_unknowns()
@@ -422,6 +422,13 @@ TileBitDatabase::TileBitDatabase(const int x, const int y) : BaseBitDatabase(Die
         pos += 3;
     }
     add_unknowns();
+}
+
+SerdesBitDatabase::SerdesBitDatabase() : BaseBitDatabase(Die::SERDES_CFG_SIZE * 8)
+{
+    for (int i = 0; i < Die::SERDES_CFG_SIZE/2; i++) {
+        add_word_settings(stringf("REG_%02X",i), i*16, 16);
+    }
 }
 
 RamBitDatabase::RamBitDatabase() : BaseBitDatabase(Die::RAM_BLOCK_SIZE * 8)

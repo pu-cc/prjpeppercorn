@@ -37,6 +37,7 @@ Die::Die()
             ram_data[std::make_pair(x, y)] = std::vector<u_int8_t>();
         }
     }
+    serdes_cfg = std::vector<u_int8_t>(SERDES_CFG_SIZE, 0x00);
     die_cfg = std::vector<u_int8_t>(DIE_CONFIG_SIZE, 0x00);
 }
 
@@ -88,6 +89,14 @@ bool Die::is_status_cfg_empty() const
     // First two bytes contain status change commands
     for (int i = 2; i < STATUS_CFG_SIZE; i++)
         if (die_cfg[i + pos] != 0x00)
+            return false;
+    return true;
+}
+
+bool Die::is_serdes_cfg_empty() const
+{
+    for (int i = 0; i < SERDES_CFG_SIZE; i++)
+        if (serdes_cfg[i] != 0x00)
             return false;
     return true;
 }
