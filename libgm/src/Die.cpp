@@ -26,19 +26,19 @@ Die::Die()
 {
     for (int y = 0; y < MAX_ROWS; y++) {
         for (int x = 0; x < MAX_COLS; x++) {
-            latch[std::make_pair(x, y)] = std::vector<u_int8_t>();
+            latch[std::make_pair(x, y)] = std::vector<uint8_t>();
             latch[std::make_pair(x, y)].reserve(LATCH_BLOCK_SIZE);
         }
     }
     for (int y = 0; y < MAX_RAM_ROWS; y++) {
         for (int x = 0; x < MAX_RAM_COLS; x++) {
-            ram[std::make_pair(x, y)] = std::vector<u_int8_t>();
+            ram[std::make_pair(x, y)] = std::vector<uint8_t>();
             ram[std::make_pair(x, y)].reserve(RAM_BLOCK_SIZE);
-            ram_data[std::make_pair(x, y)] = std::vector<u_int8_t>();
+            ram_data[std::make_pair(x, y)] = std::vector<uint8_t>();
         }
     }
-    serdes_cfg = std::vector<u_int8_t>(SERDES_CFG_SIZE, 0x00);
-    die_cfg = std::vector<u_int8_t>(DIE_CONFIG_SIZE, 0x00);
+    serdes_cfg = std::vector<uint8_t>(SERDES_CFG_SIZE, 0x00);
+    die_cfg = std::vector<uint8_t>(DIE_CONFIG_SIZE, 0x00);
 }
 
 bool Die::is_latch_empty(int x, int y) const { return latch.at(std::make_pair(x, y)).empty(); }
