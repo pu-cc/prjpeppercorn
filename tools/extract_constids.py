@@ -19,7 +19,9 @@ def export_name(name,fout):
         print(f"//X({name})", file=fout)
 
 def parse_line(item,fout):
-    line = item.strip().split(" ")
+    line = item.strip().split()
+    if len(line)==0:
+        return
     if line[0] == "module":
         name = line[1].split("(")[0]
         print(f"// primitive {name}", file=fout)
