@@ -23,6 +23,8 @@ from dataclasses import dataclass
 from typing import List, Dict
 from timing import decompress_timing
 
+DATABASE_VERSION = 1.1
+
 @dataclass(eq=True, order=True)
 class Pad:
     x : int
@@ -205,6 +207,9 @@ CCGM1_DEVICES = {
                                 ]
                 }),
 }
+
+def get_version():
+    return DATABASE_VERSION
 
 def get_all_devices():
     return CCGM1_DEVICES
