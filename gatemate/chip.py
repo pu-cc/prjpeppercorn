@@ -480,4 +480,10 @@ def get_timings(name):
 
     #val["del_preplace"] = convert_delay(timing_data.timing_delays.del_preplace.val)
 
+    for i1 in range(42):  # [1..42]
+        d = timing_data.timing_delays.del_CPE_timing_mod[i1]
+        if d.name == "": # not used
+            continue
+        val[d.name] = convert_delay(d.val)
+
     return val
