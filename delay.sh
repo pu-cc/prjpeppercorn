@@ -1,16 +1,16 @@
 #!/bin/bash
 
 set -e
-ARCHIVE="cc-toolchain-linux.tar.gz"
+ARCHIVE="gatemate-timings-latest.tar.gz"
 
 rm -rf delay
 mkdir -p delay
 
-wget -O "$ARCHIVE" "https://colognechip.com/downloads/cc-toolchain-linux.tar.gz"
+wget -O "$ARCHIVE" "https://colognechip.com/downloads/gatemate-timings-latest.tar.gz"
 
 tar --extract \
     --file="$ARCHIVE" \
     --wildcards \
-    --strip-components=3 \
+    --strip-components=1 \
     --directory=delay \
-    'cc-toolchain-linux/bin/p_r/*.dly'
+    'gatemate-timings-latest/*.dly'
