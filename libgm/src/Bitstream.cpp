@@ -58,6 +58,18 @@ static constexpr const uint8_t CFG_CPE_RESET = 0x10;
 static constexpr const uint8_t CFG_FILL_RAM = 0x20;
 static constexpr const uint8_t CFG_SERDES = 0x40;
 
+static const std::vector<std::pair<std::string, uint8_t>> crc_modes = {
+    {"check",  0x00},
+    {"ignore", 0x01},
+    {"unused", 0x02}
+};
+
+static const std::vector<std::pair<std::string, std::vector<uint8_t>>> spi_modes = {
+    {"single", {}},
+    {"dual",   {0x50, 0x21, 0x18, 0x3B}},
+    {"quad",   {0xF0, 0x23, 0x18, 0x6B}}
+};
+
 static const uint16_t crc_table_x25[256] = {
         0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48, 0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5,
         0xe97e, 0xf8f7, 0x1081, 0x0108, 0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e, 0x9cc9, 0x8d40, 0xbfdb, 0xae52,
@@ -262,6 +274,21 @@ class BitstreamReadWriter
         insert_crc16();
         write_nops(4);
         write_byte(0x33);
+        write_nops(4);
+    }
+
+    void write_cmd_cfgmode(uint8_t crcmode, std::vector<uint8_t> spimode)
+    {
+        write_header(CMD_CFGMODE, spimode.size() > 0 ? 6 : 1);
+        write_byte(0xFF); // crc retries
+        write_byte(crcmode); // crc error behaviour
+        if (spimode.size() > 0) {
+            write_byte(spimode[0]); // spi io width
+            write_byte(spimode[1]); // spi dummy cycles
+            write_byte(spimode[2]); // flash address field length
+            write_byte(spimode[3]); // flash READ command
+        }
+        insert_crc16();
         write_nops(4);
     }
 
@@ -767,7 +794,7 @@ bool is_edge_location(int x, int y)
     return ((x == 0) || (x == Die::MAX_COLS - 1) || (y == 0) || (y == Die::MAX_ROWS - 1));
 }
 
-Bitstream Bitstream::serialise_chip(const Chip &chip)
+Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string, std::string> options)
 {
     BitstreamReadWriter wr;
     for (int d = chip.get_max_die() - 1; d >= 0; d--) {
@@ -805,6 +832,34 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
             }
         }
         wr.write_cmd_path(0x10);
+
+        bool change_crc = false;
+        auto crcmode = crc_modes.begin();
+        if (options.count("crcmode")) {
+            change_crc = true;
+            crcmode = find_if(crc_modes.begin(), crc_modes.end(), [&](const std::pair<std::string, uint8_t> &fp){
+                return fp.first == options.at("crcmode");
+            });
+            if (crcmode == crc_modes.end()) {
+                throw std::runtime_error("bad crcmode option " + options.at("crcmode"));
+            }
+        }
+
+        bool change_spi = false;
+        auto spimode = spi_modes.begin();
+        if (options.count("spimode")) {
+            change_spi = true;
+            spimode = find_if(spi_modes.begin(), spi_modes.end(), [&](const std::pair<std::string, std::vector<uint8_t>> &fp){
+                return fp.first == options.at("spimode");
+            });
+            if (spimode == spi_modes.end()) {
+                throw std::runtime_error("bad spimode option " + options.at("spimode"));
+            }
+        }
+
+        if (change_crc || change_spi) {
+            wr.write_cmd_cfgmode(uint8_t(crcmode->second), std::vector<uint8_t>(spimode->second));
+        }
 
         uint8_t d2d = die.get_d2d_config();
         if (d2d)

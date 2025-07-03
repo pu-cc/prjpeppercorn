@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
     po::options_description options("Allowed options");
     options.add_options()("help,h", "show help");
     options.add_options()("verbose,v", "verbose output");
+    options.add_options()("crcmode", po::value<std::string>(), "CRC error behaviour (check, ignore, unused)");
+    options.add_options()("spimode", po::value<std::string>(), "SPI Mode to use (single, dual, quad)");
     po::positional_options_description pos;
     options.add_options()("input", po::value<std::string>()->required(), "input textual configuration");
     pos.add("input", 1);
@@ -77,6 +79,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::map<std::string, std::string> bitopts;
+
+    if (vm.count("crcmode")) {
+        bitopts["crcmode"] = vm["crcmode"].as<std::string>();
+    }
+
+    if (vm.count("spimode")) {
+        bitopts["spimode"] = vm["spimode"].as<std::string>();
+    }
+
+    if (vm.count("background")) {
+    }
+
     std::string textcfg((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
 
     ChipConfig cc;
@@ -88,7 +103,7 @@ int main(int argc, char *argv[])
     }
 
     Chip c = cc.to_chip();
-    Bitstream b = Bitstream::serialise_chip(c);
+    Bitstream b = Bitstream::serialise_chip(c, bitopts);
     if (vm.count("bit")) {
         std::ofstream bit_file(vm["bit"].as<std::string>(), std::ios::binary);
         if (!bit_file) {
