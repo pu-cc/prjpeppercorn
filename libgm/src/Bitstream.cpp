@@ -279,7 +279,7 @@ class BitstreamReadWriter
 
     void write_cmd_cfgmode(uint8_t crcmode, std::vector<uint8_t> spimode)
     {
-        write_header(CMD_CFGMODE, spimode.size() > 0 ? 6 : 1);
+        write_header(CMD_CFGMODE, spimode.size() > 0 ? 6 : 2);
         write_byte(0xFF); // crc retries
         write_byte(crcmode); // crc error behaviour
         if (spimode.size() > 0) {
