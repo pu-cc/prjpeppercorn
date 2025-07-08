@@ -362,7 +362,7 @@ CMD_CFGMODE
 ------------
 
 .. list-table::
-   :widths: 10 40
+   :widths: 10 10 40
    :header-rows: 1
 
    * - Byte
@@ -377,19 +377,19 @@ CMD_CFGMODE
    * - 2
      - 0..1
      - SPI bus IO width for `cmd` (0: single, 1: dual, 3: quad)
-   * - 2
+   * - 
      - 2..3
      - SPI bus IO width for `addr` (0: single, 1: dual, 3: quad)
-   * - 2
+   * - 
      - 4..5
      - SPI bus IO width for `mode` (0: single, 1: dual, 3: quad)
-   * - 2
+   * - 
      - 6..7
      - SPI bus IO width for `txdata` (0: single, 1: dual, 3: quad)
    * - 3
      - 0..1
      - SPI bus IO width for `rxdata` (0: single, 1: dual, 3: quad)
-   * - 3
+   * - 
      - 2..7
      - Number of dummy cycles between `addr` and `rxdata`
    * - 4
