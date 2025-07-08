@@ -114,7 +114,9 @@ class BitstreamReadWriter
 
     std::vector<uint8_t> data;
     std::vector<uint8_t>::iterator iter;
+    bool crc_unused = false;
     Crc16 crc16;
+
 
     // Return a single byte and update CRC
     inline uint8_t get_byte()
@@ -240,6 +242,8 @@ class BitstreamReadWriter
     // Insert the calculated CRC16 into the bitstream
     void insert_crc16()
     {
+        if (crc_unused)
+            return;
         uint16_t actual_crc = crc16.get_crc16();
         write_byte(uint8_t((actual_crc) & 0xFF));
         write_byte(uint8_t((actual_crc >> 8) & 0xFF));
@@ -290,6 +294,9 @@ class BitstreamReadWriter
         }
         insert_crc16();
         write_nops(4);
+        if (crcmode == 0x02) {
+            crc_unused = true;
+        }
     }
 
     void write_cmd_spll(uint8_t data)
