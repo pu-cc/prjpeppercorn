@@ -39,7 +39,7 @@ class Bitstream
   public:
     static Bitstream read(std::istream &in);
     // Serialise a Chip back to a bitstream
-    static Bitstream serialise_chip(const Chip &chip);
+    static Bitstream serialise_chip(const Chip &chip, const std::map<std::string, std::string> options);
 
     // Deserialise a bitstream to a Chip
     Chip deserialise_chip();

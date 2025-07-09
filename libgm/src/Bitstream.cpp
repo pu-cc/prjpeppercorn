@@ -58,6 +58,17 @@ static constexpr const uint8_t CFG_CPE_RESET = 0x10;
 static constexpr const uint8_t CFG_FILL_RAM = 0x20;
 static constexpr const uint8_t CFG_SERDES = 0x40;
 
+static const std::vector<std::pair<std::string, uint8_t>> crc_modes = {
+        {"check", 0x00},  // Check CRC
+        {"ignore", 0x01}, // Ignore added CRC
+        {"unused", 0x02}  // CRC is unused
+};
+
+static const std::vector<std::pair<std::string, std::vector<uint8_t>>> spi_modes = {
+        {"single", {}},                     // Single SPI mode
+        {"dual", {0x50, 0x21, 0x18, 0x3B}}, // Dual SPI mode
+        {"quad", {0xF0, 0x23, 0x18, 0x6B}}  // Quad SPI mode
+};
 static const uint16_t crc_table_x25[256] = {
         0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48, 0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5,
         0xe97e, 0xf8f7, 0x1081, 0x0108, 0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e, 0x9cc9, 0x8d40, 0xbfdb, 0xae52,
@@ -102,6 +113,7 @@ class BitstreamReadWriter
 
     std::vector<uint8_t> data;
     std::vector<uint8_t>::iterator iter;
+    bool crc_unused = false;
     Crc16 crc16;
 
     // Return a single byte and update CRC
@@ -208,26 +220,15 @@ class BitstreamReadWriter
     // Get the offset into the bitstream
     size_t get_offset() { return size_t(distance(data.begin(), iter)); }
 
-    // Check the calculated CRC16 against an actual CRC16, expected in the next 2
-    // bytes
-    void check_crc16()
-    {
-        uint8_t crc_bytes[2];
-        uint16_t actual_crc = crc16.get_crc16();
-        get_bytes(crc_bytes, 2);
-        // cerr << hex << int(crc_bytes[0]) << " " << int(crc_bytes[1]) << endl;
-        uint16_t exp_crc = (crc_bytes[0] << 8) | crc_bytes[1];
-        if (actual_crc != exp_crc) {
-            std::ostringstream err;
-            err << "crc fail, calculated 0x" << std::hex << actual_crc << " but expecting 0x" << exp_crc;
-            throw BitstreamParseError(err.str(), get_offset());
-        }
-        crc16.reset_crc16();
-    }
+    void set_crc_unused(bool val) { crc_unused = val; }
+
+    bool get_crc_unused() { return crc_unused; }
 
     // Insert the calculated CRC16 into the bitstream
     void insert_crc16()
     {
+        if (crc_unused)
+            return;
         uint16_t actual_crc = crc16.get_crc16();
         write_byte(uint8_t((actual_crc) & 0xFF));
         write_byte(uint8_t((actual_crc >> 8) & 0xFF));
@@ -263,6 +264,24 @@ class BitstreamReadWriter
         write_nops(4);
         write_byte(0x33);
         write_nops(4);
+    }
+
+    void write_cmd_cfgmode(uint8_t crcmode, std::vector<uint8_t> spimode)
+    {
+        write_header(CMD_CFGMODE, spimode.size() > 0 ? 6 : 2);
+        write_byte(0xFF);    // crc retries
+        write_byte(crcmode); // crc error behaviour
+        if (spimode.size() > 0) {
+            write_byte(spimode[0]); // spi io width
+            write_byte(spimode[1]); // spi dummy cycles
+            write_byte(spimode[2]); // flash address field length
+            write_byte(spimode[3]); // flash READ command
+        }
+        insert_crc16();
+        write_nops(4);
+        if (crcmode == 0x02) {
+            crc_unused = true;
+        }
     }
 
     void write_cmd_spll(uint8_t data)
@@ -362,6 +381,8 @@ class BitstreamReadWriter
 
 void check_crc(BitstreamReadWriter &rd)
 {
+    if (rd.get_crc_unused())
+        return;
     uint16_t actual_crc = rd.crc16.get_crc16();
     uint16_t exp_crc = rd.get_crc(); // crc
     if (actual_crc != exp_crc) {
@@ -427,11 +448,14 @@ int Bitstream::determine_size(int *max_die_x, int *max_die_y)
             rd.get_vector(block, length);
             // Check data CRC
             check_crc(rd);
+            // Set CRC flag
+            if (cmd == CMD_CFGMODE)
+                rd.set_crc_unused(block[1] == 0x02);
             // Skip bytes
             if (cmd == CMD_SLAVE_MODE)
                 rd.skip_bytes(3);
             if (cmd == CMD_CFGMODE)
-                rd.skip_bytes(3);
+                rd.skip_bytes(4);
             if (cmd == CMD_PLL)
                 rd.skip_bytes(6);
             if (cmd == CMD_CHG_STATUS)
@@ -725,7 +749,7 @@ Chip Bitstream::deserialise_chip()
         case CMD_CFGMODE:
             BITSTREAM_DEBUG("CMD_CFGMODE");
             if (length > 20)
-                BITSTREAM_FATAL("PLL data longer than expected", rd.get_offset());
+                BITSTREAM_FATAL("CFGMODE data longer than expected", rd.get_offset());
             // Check header CRC
             check_crc(rd);
 
@@ -734,8 +758,10 @@ Chip Bitstream::deserialise_chip()
             // Check data CRC
             check_crc(rd);
 
+            rd.set_crc_unused(block[1] == 0x02);
+
             // Skip bytes
-            rd.skip_bytes(3);
+            rd.skip_bytes(4);
             break;
 
         case CMD_SERDES:
@@ -767,7 +793,7 @@ bool is_edge_location(int x, int y)
     return ((x == 0) || (x == Die::MAX_COLS - 1) || (y == 0) || (y == Die::MAX_ROWS - 1));
 }
 
-Bitstream Bitstream::serialise_chip(const Chip &chip)
+Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string, std::string> options)
 {
     BitstreamReadWriter wr;
     for (int d = chip.get_max_die() - 1; d >= 0; d--) {
@@ -805,6 +831,35 @@ Bitstream Bitstream::serialise_chip(const Chip &chip)
             }
         }
         wr.write_cmd_path(0x10);
+
+        bool change_crc = false;
+        auto crcmode = crc_modes.begin();
+        if (options.count("crcmode")) {
+            change_crc = true;
+            crcmode = find_if(crc_modes.begin(), crc_modes.end(), [&](const std::pair<std::string, uint8_t> &fp) {
+                return fp.first == options.at("crcmode");
+            });
+            if (crcmode == crc_modes.end()) {
+                throw std::runtime_error("bad crcmode option " + options.at("crcmode"));
+            }
+        }
+
+        bool change_spi = false;
+        auto spimode = spi_modes.begin();
+        if (options.count("spimode")) {
+            change_spi = true;
+            spimode = find_if(spi_modes.begin(), spi_modes.end(),
+                              [&](const std::pair<std::string, std::vector<uint8_t>> &fp) {
+                                  return fp.first == options.at("spimode");
+                              });
+            if (spimode == spi_modes.end()) {
+                throw std::runtime_error("bad spimode option " + options.at("spimode"));
+            }
+        }
+
+        if (change_crc || change_spi) {
+            wr.write_cmd_cfgmode(uint8_t(crcmode->second), std::vector<uint8_t>(spimode->second));
+        }
 
         uint8_t d2d = die.get_d2d_config();
         if (d2d)

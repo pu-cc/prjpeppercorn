@@ -361,6 +361,44 @@ CMD_JUMP
 CMD_CFGMODE
 ------------
 
+.. list-table::
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Byte
+     - Bit
+     - Description
+   * - 0
+     - 
+     - Number of CRC retries
+   * - 1
+     - 
+     - CRC error behaviour (0: checked, 1: ignored, 2: unused)
+   * - 2
+     - 0..1
+     - SPI bus IO width for `cmd` (0: single, 1: dual, 3: quad)
+   * - 
+     - 2..3
+     - SPI bus IO width for `addr` (0: single, 1: dual, 3: quad)
+   * - 
+     - 4..5
+     - SPI bus IO width for `mode` (0: single, 1: dual, 3: quad)
+   * - 
+     - 6..7
+     - SPI bus IO width for `txdata` (0: single, 1: dual, 3: quad)
+   * - 3
+     - 0..1
+     - SPI bus IO width for `rxdata` (0: single, 1: dual, 3: quad)
+   * - 
+     - 2..7
+     - Number of dummy cycles between `addr` and `rxdata`
+   * - 4
+     - 
+     - Flash `addr` field length
+   * - 5
+     - 
+     - Flash `READ` command
+
 .. warning::
     This command have data after payload, and it consists of 3 NOP bytes ``0x00 0x00 0x00``.
 
