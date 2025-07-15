@@ -5,6 +5,7 @@
 	(uuid "5a7723f7-3f6f-437e-b958-e402b06d3f54")
 	(paper "A3")
 	(title_block
+		(rev "4")
 		(company "YosysHQ")
 	)
 	(lib_symbols)
@@ -45,7 +46,7 @@
 		(instances
 			(project "prjpeppercorn"
 				(path "/5a7723f7-3f6f-437e-b958-e402b06d3f54"
-					(page "2")
+					(page "7")
 				)
 			)
 		)

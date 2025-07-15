@@ -430,7 +430,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "warning",
+      "pin_to_pin": "error",
       "power_pin_not_driven": "error",
       "same_local_global_label": "warning",
       "similar_label_and_power": "warning",
@@ -614,16 +614,16 @@
       "Root"
     ],
     [
-      "cb769740-e0a9-4f3d-b622-ba158089ec4b",
-      "Cologne Processing Element"
-    ],
-    [
       "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
-      "C_FUNCTION=0"
+      "C_FUNCTION=0 or 6"
     ],
     [
       "c7e1e454-4a3a-497b-82a6-da398b72cabb",
-      "C_FUNCTION=1"
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
     ],
     [
       "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
@@ -634,8 +634,8 @@
       "C_FUNCTION=5"
     ],
     [
-      "7870fc3a-1ee9-4a55-a2a2-8f09313f282c",
-      "C_FUNCTION=6"
+      "cb769740-e0a9-4f3d-b622-ba158089ec4b",
+      "Cologne Processing Element"
     ]
   ],
   "text_variables": {}
