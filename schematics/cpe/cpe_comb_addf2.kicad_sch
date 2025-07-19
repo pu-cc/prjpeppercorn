@@ -3597,7 +3597,7 @@
 		)
 		(uuid "2781b8f5-c8d3-41fc-ac95-dfe5197e0ec5")
 	)
-	(text "C_FUNCTION = 2: ADDF2\n\nThis provides a 2-bit full adder.\n\nThe addition is performed in propagate/generate style.\n\nC_FUNCTION = 3: MULT\n\nThis provides a 2x2-bit Booth multiplier.\n\nThe dedicated logic performs multiplication by B[1], while\nmultiplication by B[0] is performed within the soft logic.\n\n(These functions differ by how they set up the downstream\ncarry and propagation lines; from this part of the logic\nthey function identically, thus have been grouped together)"
+	(text "C_FUNCTION = 2: ADDF2\n\nThis provides a 2-bit full adder.\n\nThe addition is performed in propagate/generate style.\n\nSetting C_HORIZ configures the adder to propagate carries\nhorizontally, rather than vertically. This feature isn't\nimplemented in p_r or nextpnr because horizontal carries\nhave twice the propagation delay of vertical carries.\n\nC_FUNCTION = 3: MULT\n\nThis provides a 2x2-bit Booth multiplier.\n\nThe dedicated logic performs multiplication by B[1], while\nmultiplication by B[0] is performed within the soft logic.\n\n(These functions differ by how they set up the downstream\ncarry and propagation lines; from this part of the logic\nthey function identically, thus have been grouped together)"
 		(exclude_from_sim no)
 		(at 76.2 177.8 0)
 		(effects
