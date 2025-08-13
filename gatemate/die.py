@@ -357,8 +357,11 @@ PRIMITIVES_PINS = {
         Pin("COUTY2" ,PinType.OUTPUT, "CPE_WIRE", True),
         Pin("POUTY2" ,PinType.OUTPUT, "CPE_WIRE", True),
     ],
+    "IOSEL" : [
+        Pin("GPIO_OUT", PinType.OUTPUT,"GPIO_WIRE"),
+        Pin("GPIO_EN" , PinType.OUTPUT,"GPIO_WIRE"),
+        Pin("GPIO_IN" , PinType.INPUT, "GPIO_WIRE"),
 
-    "GPIO" : [
         Pin("IN1"   , PinType.OUTPUT,"GPIO_WIRE"),
         Pin("IN2"   , PinType.OUTPUT,"GPIO_WIRE"),
         Pin("OUT1"  , PinType.INPUT, "GPIO_WIRE"),
@@ -372,6 +375,12 @@ PRIMITIVES_PINS = {
         Pin("CLOCK2", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK3", PinType.INPUT, "GPIO_WIRE"),
         Pin("CLOCK4", PinType.INPUT, "GPIO_WIRE"),
+    ],
+    "GPIO" : [
+        Pin("Y",      PinType.INPUT, "GPIO_WIRE"),
+        Pin("T",      PinType.INPUT, "GPIO_WIRE"),
+        Pin("A",      PinType.OUTPUT,"GPIO_WIRE"),
+
         # PAD wires
         Pin("I",      PinType.INPUT, "GPIO_WIRE"),
         Pin("O",      PinType.OUTPUT,"GPIO_WIRE"),
@@ -1427,6 +1436,7 @@ def get_primitives_for_type(type):
         primitives.append(Primitive("SERDES","SERDES",10))
     if "GPIO" in type:
         primitives.append(Primitive("GPIO","GPIO",0))
+        primitives.append(Primitive("IOSEL","IOSEL",1))
     if "PLL" in type:
         primitives.append(Primitive("CLKIN","CLKIN",0))
         primitives.append(Primitive("GLBOUT","GLBOUT",1))
@@ -2358,7 +2368,7 @@ def get_pins_constraint(type_name, prim_name, prim_type):
         val.append(PinConstr("TX_POWER_DOWN_N_I", 25, 4, RAM_OUTPUT, 1))
         val.append(PinConstr("RX_POWER_DOWN_N_I", 25, 2, RAM_OUTPUT, 1))
         val.append(PinConstr("TX_ELEC_IDLE_I", 25, 0, RAM_OUTPUT, 1))
-    elif prim_type=="GPIO":
+    elif prim_type=="IOSEL":
         if "LES" in type_name:
             val.append(PinConstr("OUT4", 3, 1, RAM_OUTPUT, 2))
             val.append(PinConstr("OUT3", 3, 1, RAM_OUTPUT, 1))
@@ -2845,8 +2855,12 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_SML.P{plane}.Y4_int",    f"SB_SML.P{plane}.Y4",    1, 1, True, f"SB_SML.P{plane}.Y4_INT", False, delay="del_dummy")
             create_mux(f"SB_SML.P{plane}.YDIAG_int", f"SB_SML.P{plane}.YDIAG", 1, 1, True, f"SB_SML.P{plane}.YDIAG_INT", False, delay="del_dummy")
 
-    #if "GPIO" in type:
-    #    # GPIO
+    if "GPIO" in type:
+        # GPIO
+        create_mux("IOSEL.GPIO_OUT", "GPIO.A",        1, 0, False, visible=False, delay="del_dummy")
+        create_mux("IOSEL.GPIO_EN",  "GPIO.T",        1, 0, False, visible=False, delay="del_dummy")
+        create_mux("GPIO.Y",         "IOSEL.GPIO_IN", 1, 0, False, visible=False, delay="del_dummy")
+
     if "IOES" in type:
         # IOES
         for p in range(1,13):
@@ -3300,15 +3314,15 @@ class Die:
             plane = f"{p:02d}"
             self.create_conn(sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.{output}", x,y, f"IOES.ALTIN_{plane}")
             self.create_conn(x,y, f"IOES.SB_IN_{plane}", sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.D0")
-        self.create_conn(gpio_x,gpio_y,"GPIO.IN1", x,y, "IOES.IO_IN1")
-        self.create_conn(gpio_x,gpio_y,"GPIO.IN2", x,y, "IOES.IO_IN2")
+        self.create_conn(gpio_x,gpio_y,"IOSEL.IN1", x,y, "IOES.IO_IN1")
+        self.create_conn(gpio_x,gpio_y,"IOSEL.IN2", x,y, "IOES.IO_IN2")
 
         if not alt:
-            self.create_ram_io_conn("GPIO", "GPIO", x, y)
-            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", gpio_x, gpio_y, "GPIO.CLOCK1", "del_GLBOUT_IO_SEL")
-            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", gpio_x, gpio_y, "GPIO.CLOCK2", "del_GLBOUT_IO_SEL")
-            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", gpio_x, gpio_y, "GPIO.CLOCK3", "del_GLBOUT_IO_SEL")
-            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", gpio_x, gpio_y, "GPIO.CLOCK4", "del_GLBOUT_IO_SEL")
+            self.create_ram_io_conn("IOSEL", "IOSEL", x, y)
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", gpio_x, gpio_y, "IOSEL.CLOCK1", "del_GLBOUT_IO_SEL")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", gpio_x, gpio_y, "IOSEL.CLOCK2", "del_GLBOUT_IO_SEL")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", gpio_x, gpio_y, "IOSEL.CLOCK3", "del_GLBOUT_IO_SEL")
+            self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB3", gpio_x, gpio_y, "IOSEL.CLOCK4", "del_GLBOUT_IO_SEL")
 
     def create_pll(self):
         # GPIO_W2_A[8]  CLK0
@@ -3319,13 +3333,13 @@ class Die:
         # GPIO_S3_B[8]  SPI_CLK
         # GPIO_S3_A[5]  JTAG_CLK
         loc = self.gpio_to_loc["GPIO_W2_A[8]"]
-        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
+        self.create_conn(loc.x, loc.y, "IOSEL.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK0")
         loc = self.gpio_to_loc["GPIO_W2_A[7]"]
-        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK1")
+        self.create_conn(loc.x, loc.y, "IOSEL.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK1")
         loc = self.gpio_to_loc["GPIO_W2_A[6]"]
-        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK2")
+        self.create_conn(loc.x, loc.y, "IOSEL.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK2")
         loc = self.gpio_to_loc["GPIO_W2_A[5]"]
-        self.create_conn(loc.x, loc.y, "GPIO.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK3")
+        self.create_conn(loc.x, loc.y, "IOSEL.IN1", PLL_X_POS, PLL_Y_POS, "CLKIN.CLK3")
 
         self.create_ram_io_conn("GLBOUT", "GLBOUT", PLL_X_POS, PLL_Y_POS)
 
@@ -3463,7 +3477,7 @@ class Die:
         for port in ['A','B']:
             for num in range(0,9):
                 loc = self.io_pad_names[bank][port][num]
-                self.create_conn(x, y , f"CPE.RAM_O{out}", loc.x, loc.y, "GPIO.DDR")
+                self.create_conn(x, y , f"CPE.RAM_O{out}", loc.x, loc.y, "IOSEL.DDR")
         self.ddr_i[bank] = Location(x+self.offset_x,y+self.offset_y,2-out)
 
     def misc_connections(self):
