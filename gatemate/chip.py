@@ -352,8 +352,8 @@ def get_timings(name):
                     name = f"edge_xy{i1-2}_s{i2+1}_{inputs[i3]}_{outputs[i4]}"
                     val[name] = convert_delay(d)
 
-    inputs = [ 'CLOCK0','CLOCK1','CLOCK2','CLOCK3','OUT1_I','OUT2_I','OUT3_I','OUT4_I','GPIO_IN','RESET','DDR_I']
-    outputs = [ 'IN1_O','IN2_O','GPIO_OUT','GPIO_EN' ]
+    inputs = [ 'CLOCK0','CLOCK1','CLOCK2','CLOCK3','OUT1','OUT2','OUT3','OUT4','GPIO_IN','RESET','DDR']
+    outputs = [ 'IN1','IN2','GPIO_OUT','GPIO_EN' ]
 
     for i1 in range(11):  # [1..11]
         for i2 in range(4):  # [1..4]
@@ -364,8 +364,8 @@ def get_timings(name):
             val[name] = convert_delay(d)
 
     
-    inputs = [ 'CLK0_I','CLK1_I','CLK2_I','CLK3_I','SERDES_CLK','SPI_CLK','JTAG_CLK']
-    outputs = [ 'CLK_OUT0','CLK_OUT1','CLK_OUT2','CLK_OUT3' ]
+    inputs = [ 'CLK0','CLK1','CLK2','CLK3','SER_CLK','SPI_CLK','JTAG_CLK']
+    outputs = [ 'CLK_REF0','CLK_REF1','CLK_REF2','CLK_REF3' ]
     for i1 in range(7): # [1..7]
         for i2 in range(4): # [1..4]
             d = timing_data.CLKIN_del_arr[i1][i2]
@@ -374,13 +374,13 @@ def get_timings(name):
             name = f"clkin_{inputs[i1]}_{outputs[i2]}"
             val[name] = convert_delay(d)
 
-    inputs = [ 'CLK0_0','CLK90_0','CLK180_0','CLK270_0','CLKREF_0',
-               'CLK0_1','CLK90_1','CLK180_1','CLK270_1','CLKREF_1',
-               'CLK0_2','CLK90_2','CLK180_2','CLK270_2','CLKREF_2',
-               'CLK0_3','CLK90_3','CLK180_3','CLK270_3','CLKREF_3',
-               'U_CLK0','U_CLK1','U_CLK2','U_CLK3',
-               'U_FB0', 'U_FB1', 'U_FB2', 'U_FB3' ]
-    outputs = [ 'CLOCK0','CLOCK1','CLOCK2','CLOCK3',
+    inputs = [ 'CLK0_0','CLK90_0','CLK180_0','CLK270_0','CLK_REF_OUT0',
+               'CLK0_1','CLK90_1','CLK180_1','CLK270_1','CLK_REF_OUT1',
+               'CLK0_2','CLK90_2','CLK180_2','CLK270_2','CLK_REF_OUT2',
+               'CLK0_3','CLK90_3','CLK180_3','CLK270_3','CLK_REF_OUT3',
+               'USR_GLB0','USR_GLB1','USR_GLB2','USR_GLB3',
+               'USR_FB0', 'USR_FB1', 'USR_FB2', 'USR_FB3' ]
+    outputs = [ 'GLB0','GLB1','GLB2','GLB3',
                 'CLK_FB0','CLK_FB1','CLK_FB2','CLK_FB3']
     for i1 in range(28): # [1..28]
         for i2 in range(8): # [1..8]
@@ -390,7 +390,7 @@ def get_timings(name):
             name = f"glbout_{inputs[i1]}_{outputs[i2]}"
             val[name] = convert_delay(d)
     # All feedback delays calculated are same, we just take one
-    val["glbout_FEEDBACK_delay"] = val["glbout_CLK0_0_CLK_FB0"] - val["glbout_CLK0_0_CLOCK0"]
+    val["glbout_FEEDBACK_delay"] = val["glbout_CLK0_0_CLK_FB0"] - val["glbout_CLK0_0_GLB0"]
 
     inputs = ['clk_ref_i','clock_core0_i','adpll_enable_i','adpll_status_read_i','locked_steady_reset_i','autn_en_i','reset_n_i']
     outputs = ['clk_core0_o','clk_core90_o','clk_core180_o','clk_core270_o', 'pll_locked_o', 'pll_locked_steady_o']
