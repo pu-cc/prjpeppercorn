@@ -340,9 +340,9 @@ PRIMITIVES_PINS = {
         Pin("COMPOUT",PinType.OUTPUT, "CPE_WIRE", True),
     ],
     "CPE_CPLINES": [
-        Pin("OUT1"   ,PinType.OUTPUT, "CPE_WIRE", True),
-        Pin("OUT2"   ,PinType.OUTPUT, "CPE_WIRE", True),
-        Pin("COMPOUT",PinType.OUTPUT, "CPE_WIRE", True),
+        Pin("OUT1"   ,PinType.INPUT, "CPE_WIRE", True),
+        Pin("OUT2"   ,PinType.INPUT, "CPE_WIRE", True),
+        Pin("COMPOUT",PinType.INPUT, "CPE_WIRE", True),
 
         Pin("CINX"   ,PinType.INPUT,  "CPE_WIRE", True),
         Pin("PINX"   ,PinType.INPUT,  "CPE_WIRE", True),
