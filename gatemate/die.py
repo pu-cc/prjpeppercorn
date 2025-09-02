@@ -16,6 +16,7 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+import re
 from enum import Enum
 from dataclasses import dataclass
 
@@ -102,8 +103,11 @@ def is_edge_io(x,y):
     if (y==max_row() and x>=101 and x<=136): # IO Bank N2/EB
         return True
 
-def is_ram(x,y):
+def is_ram_u(x,y):
     return x in [33,65,97,129] and y in [1,17,33,49,65,81,97,113]
+
+def is_ram_l(x,y):
+    return x in [33,65,97,129] and y in [1+8,17+8,33+8,49+8,65+8,81+8,97+8,113+8]
 
 def get_full_tile_loc_str(x,y):
     tile_x = ((x-1)+16) % 8 + 1
@@ -242,6 +246,269 @@ class TileInfo:
     tile_x : int
     tile_y : int
     prim_index : int
+
+
+RAM_HALF_PINS =  [
+    Pin("CLKA[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("CLKA[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ENA[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ENA[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("GLWEA[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("GLWEA[1]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("CLKB[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("CLKB[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ENB[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ENB[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("GLWEB[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("GLWEB[1]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("WEA[0]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[2]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[3]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[4]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[5]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[6]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[7]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[8]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[9]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[10]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[11]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[12]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[13]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[14]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[15]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[16]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[17]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[18]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEA[19]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("WEB[0]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[2]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[3]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[4]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[5]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[6]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[7]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[8]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[9]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[10]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[11]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[12]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[13]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[14]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[15]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[16]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[17]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[18]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("WEB[19]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("ADDRA0[0]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[2]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[3]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[4]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[5]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[6]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[7]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[8]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[9]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[10]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[11]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[12]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[13]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[14]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRA0[15]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[1]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[2]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[3]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[4]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[5]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[6]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[7]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[8]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[9]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[10]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[11]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[12]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[13]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[14]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRA0X[15]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("ADDRB0[0]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[2]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[3]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[4]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[5]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[6]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[7]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[8]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[9]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[10]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[11]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[12]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[13]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[14]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("ADDRB0[15]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[0]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[1]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[2]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[3]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[4]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[5]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[6]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[7]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[8]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[9]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[10]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[11]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[12]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[13]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[14]", PinType.INPUT,"RAM_WIRE", True),
+    #Pin("ADDRB0X[15]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("DIA[0]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[2]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[3]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[4]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[5]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[6]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[7]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[8]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[9]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[10]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[11]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[12]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[13]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[14]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[15]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[16]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[17]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[18]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIA[19]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("DIB[0]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[1]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[2]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[3]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[4]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[5]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[6]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[7]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[8]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[9]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[10]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[11]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[12]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[13]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[14]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[15]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[16]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[17]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[18]", PinType.INPUT,"RAM_WIRE", True),
+    Pin("DIB[19]", PinType.INPUT,"RAM_WIRE", True),
+
+    Pin("DOA[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[1]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[1]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[3]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[3]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[4]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[4]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[5]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[5]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[6]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[6]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[7]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[7]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[8]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[8]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[9]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[9]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[10]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[10]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[11]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[11]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[12]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[12]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[13]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[13]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[14]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[14]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[15]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[15]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[16]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[16]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[17]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[17]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOA[18]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[18]", PinType.OUTPUT,"RAM_WIRE, True),
+    Pin("DOA[19]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOAX[19]", PinType.OUTPUT,"RAM_WIRE", True),
+
+    Pin("DOB[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[1]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[1]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[3]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[3]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[4]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[4]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[5]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[5]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[6]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[6]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[7]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[7]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[8]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[8]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[9]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[9]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[10]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[10]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[11]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[11]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[12]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[12]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[13]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[13]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[14]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[14]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[15]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[15]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[16]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[16]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[17]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[17]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[18]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[18]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("DOB[19]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("DOBX[19]", PinType.OUTPUT,"RAM_WIRE", True),
+
+    Pin("ECC1B_ERRA[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("ECC1B_ERRA[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("ECC1B_ERRB[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("ECC1B_ERRB[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("ECC2B_ERRA[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("ECC2B_ERRA[2]", PinType.OUTPUT,"RAM_WIRE", True),
+    Pin("ECC2B_ERRB[0]", PinType.OUTPUT,"RAM_WIRE", True),
+    #Pin("ECC2B_ERRB[2]", PinType.OUTPUT,"RAM_WIRE", True),
+
+    Pin("CLOCK1", PinType.INPUT,"RAM_WIRE", True),
+    Pin("CLOCK2", PinType.INPUT,"RAM_WIRE", True),
+    Pin("CLOCK3", PinType.INPUT,"RAM_WIRE", True),
+    Pin("CLOCK4", PinType.INPUT,"RAM_WIRE", True),
+]
 
 PRIMITIVES_PINS = {
     "CPE_LT_U": [
@@ -1068,6 +1335,8 @@ PRIMITIVES_PINS = {
         Pin("CLOCK3", PinType.INPUT,"RAM_WIRE"),
         Pin("CLOCK4", PinType.INPUT,"RAM_WIRE"),
     ],
+    "RAM_HALF_U" : RAM_HALF_PINS,
+    "RAM_HALF_L" : RAM_HALF_PINS,
     "SERDES" : [
         Pin("TX_DETECT_RX_I", PinType.INPUT,"SERDES_WIRE"),
         Pin("PLL_RESET_I", PinType.INPUT,"SERDES_WIRE"),
@@ -1430,8 +1699,11 @@ def get_primitives_for_type(type):
         primitives.append(Primitive("CPE_COMP","CPE_COMP",6))
         primitives.append(Primitive("CPE_CPLINES","CPE_CPLINES",7))
         primitives.append(Primitive("CPE_LT_FULL","CPE_LT_FULL",8))
-    if "RAM" in type:
+    if "RAM_U" in type:
         primitives.append(Primitive("RAM","RAM",10))
+        primitives.append(Primitive("RAM_HALF_U","RAM_HALF_U",11))
+    if "RAM_L" in type:
+        primitives.append(Primitive("RAM_HALF_L","RAM_HALF_L",12))
     if "SERDES" in type:
         primitives.append(Primitive("SERDES","SERDES",10))
     if "GPIO" in type:
@@ -2059,6 +2331,261 @@ def get_pins_constraint(type_name, prim_name, prim_type):
         val.append(PinConstr("FRD_ADDRX[14]", -5, 7, RAM_INPUT, 1))
         val.append(PinConstr("FRD_ADDR[15]", -6, 7, RAM_INPUT, 2))
         val.append(PinConstr("FRD_ADDRX[15]", -5, 7, RAM_INPUT, 2))
+    elif prim_type == "RAM_HALF_U" or prim_type == "RAM_HALF_L":
+        val.append(PinConstr("CLKA[0]", -6, 0, RAM_OUTPUT, 1))
+        #val.append(PinConstr("CLKA[1]", -3, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("ENA[0]", -6, 1, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ENA[1]", -3, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("GLWEA[0]", -6, 0, RAM_OUTPUT, 2))
+        #val.append(PinConstr("GLWEA[1]", -3, 0, RAM_OUTPUT, 2))
+
+        val.append(PinConstr("CLKB[0]", 2, 0, RAM_OUTPUT, 1))
+        #val.append(PinConstr("CLKB[1]", 5, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("ENB[0]", 2, 1, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ENB[1]", 5, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("GLWEB[0]", 2, 0, RAM_OUTPUT, 2))
+        #val.append(PinConstr("GLWEB[1]", 5, 0, RAM_OUTPUT, 2))
+
+        val.append(PinConstr("WEA[0]", -2, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[1]", -2, 0, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[2]", -2, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[3]", -2, 1, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[4]", -2, 2, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[5]", -2, 2, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[6]", -2, 3, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[7]", -2, 3, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[8]", -2, 4, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[9]", -2, 4, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[10]", -2, 5, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[11]", -2, 5, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[12]", -2, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[13]", -2, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[14]", -2, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[15]", -2, 7, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[16]", -4, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[17]", -4, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEA[18]", -4, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEA[19]", -4, 7, RAM_OUTPUT, 2))
+
+        val.append(PinConstr("WEB[0]", 0, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[1]", 0, 0, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[2]", 0, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[3]", 0, 1, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[4]", 0, 2, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[5]", 0, 2, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[6]", 0, 3, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[7]", 0, 3, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[8]", 0, 4, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[9]", 0, 4, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[10]", 0, 5, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[11]", 0, 5, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[12]", 0, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[13]", 0, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[14]", 0, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[15]", 0, 7, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[16]", 2, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[17]", 2, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("WEB[18]", 2, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("WEB[19]", 2, 7, RAM_OUTPUT, 2))
+
+        val.append(PinConstr("ADDRA0[0]", -5, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[1]", -5, 0, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[2]", -5, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[3]", -5, 1, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[4]", -5, 2, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[5]", -5, 2, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[6]", -5, 3, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[7]", -5, 3, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[8]", -5, 4, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[9]", -5, 4, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[10]", -5, 5, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[11]", -5, 5, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[12]", -5, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[13]", -5, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRA0[14]", -5, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRA0[15]", -5, 7, RAM_OUTPUT, 2))
+        #val.append(PinConstr("ADDRA0X[0]", -5, 0, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[1]", -4, 0, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[2]", -5, 1, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[3]", -4, 1, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[4]", -5, 2, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[5]", -4, 2, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[6]", -5, 3, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[7]", -4, 3, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[8]", -5, 4, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[9]", -4, 4, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[10]", -5, 5, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[11]", -4, 5, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[12]", -6, 6, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[13]", -5, 6, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[14]", -6, 7, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRA0X[15]", -5, 7, RAM_OUTPUT, 1))
+
+        val.append(PinConstr("ADDRB0[0]", 4, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[1]", 4, 0, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[2]", 4, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[3]", 4, 1, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[4]", 4, 2, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[5]", 4, 2, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[6]", 4, 3, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[7]", 4, 3, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[8]", 4, 4, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[9]", 4, 4, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[10]", 4, 5, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[11]", 4, 5, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[12]", 4, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[13]", 4, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("ADDRB0[14]", 4, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("ADDRB0[15]", 4, 7, RAM_OUTPUT, 2))
+        #val.append(PinConstr("ADDRB0X[0]", 3, 0, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[1]", 4, 0, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[2]", 3, 1, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[3]", 4, 1, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[4]", 3, 2, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[5]", 4, 2, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[6]", 3, 3, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[7]", 4, 3, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[8]", 3, 4, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[9]", 4, 4, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[10]", 3, 5, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[11]", 4, 5, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[12]", 4, 6, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[13]", 5, 6, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[14]", 4, 7, RAM_OUTPUT, 1))
+        #val.append(PinConstr("ADDRB0X[15]", 5, 7, RAM_OUTPUT, 1))
+        
+        val.append(PinConstr("DIA[0]", -1, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[1]", -1, 0, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[2]", -1, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[3]", -1, 1, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[4]", -1, 2, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[5]", -1, 2, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[6]", -1, 3, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[7]", -1, 3, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[8]", -1, 4, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[9]", -1, 4, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[10]", -1, 5, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[11]", -1, 5, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[12]", -1, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[13]", -1, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[14]", -1, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[15]", -1, 7, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[16]", -3, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[17]", -3, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIA[18]", -3, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIA[19]", -3, 7, RAM_OUTPUT, 2))
+
+        val.append(PinConstr("DIB[0]", 1, 0, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[1]", 1, 0, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[2]", 1, 1, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[3]", 1, 1, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[4]", 1, 2, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[5]", 1, 2, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[6]", 1, 3, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[7]", 1, 3, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[8]", 1, 4, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[9]", 1, 4, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[10]", 1, 5, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[11]", 1, 5, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[12]", 1, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[13]", 1, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[14]", 1, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[15]", 1, 7, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[16]", 3, 6, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[17]", 3, 6, RAM_OUTPUT, 2))
+        val.append(PinConstr("DIB[18]", 3, 7, RAM_OUTPUT, 1))
+        val.append(PinConstr("DIB[19]", 3, 7, RAM_OUTPUT, 2))
+
+        val.append(PinConstr("DOA[0]", -1, 0, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[0]", -2, 0, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[1]", -1, 0, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[1]", -1, 0, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[2]", -1, 1, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[2]", -2, 1, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[3]", -1, 1, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[3]", -1, 1, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[4]", -1, 2, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[4]", -2, 2, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[5]", -1, 2, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[5]", -1, 2, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[6]", -1, 3, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[6]", -2, 3, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[7]", -1, 3, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[7]", -1, 3, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[8]", -1, 4, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[8]", -2, 4, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[9]", -1, 4, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[9]", -1, 4, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[10]", -1, 5, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[10]", -2, 5, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[11]", -1, 5, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[11]", -1, 5, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[12]", -1, 6, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[12]", -2, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[13]", -1, 6, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[13]", -1, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[14]", -1, 7, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[14]", -2, 7, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[15]", -1, 7, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[15]", -1, 7, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[16]", -3, 6, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[16]", -4, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[17]", -3, 6, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[17]", -3, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[18]", -3, 7, RAM_INPUT, 1))
+        #val.append(PinConstr("DOAX[18]", -4, 7, RAM_INPUT, 2))
+        val.append(PinConstr("DOA[19]", -3, 7, RAM_INPUT, 2))
+#        val.append(PinConstr("DOAX[19]", -3, 7, RAM_INPUT, 2))
+        
+        val.append(PinConstr("DOB[0]", 1, 0, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[0]", 0, 0, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[1]", 1, 0, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[1]", 1, 0, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[2]", 1, 1, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[2]", 0, 1, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[3]", 1, 1, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[3]", 1, 1, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[4]", 1, 2, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[4]", 0, 2, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[5]", 1, 2, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[5]", 1, 2, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[6]", 1, 3, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[6]", 0, 3, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[7]", 1, 3, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[7]", 1, 3, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[8]", 1, 4, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[8]", 0, 4, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[9]", 1, 4, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[9]", 1, 4, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[10]", 1, 5, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[10]", 0, 5, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[11]", 1, 5, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[11]", 1, 5, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[12]", 1, 6, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[12]", 0, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[13]", 1, 6, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[13]", 1, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[14]", 1, 7, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[14]", 0, 7, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[15]", 1, 7, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[15]", 1, 7, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[16]", 3, 6, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[16]", 2, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[17]", 3, 6, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[17]", 3, 6, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[18]", 3, 7, RAM_INPUT, 1))
+        #val.append(PinConstr("DOBX[18]", 2, 7, RAM_INPUT, 2))
+        val.append(PinConstr("DOB[19]", 3, 7, RAM_INPUT, 2))
+#        val.append(PinConstr("DOBX[19]", 3, 7, RAM_INPUT, 2))
+
+        val.append(PinConstr("ECC1B_ERRA[0]", -4, 0, RAM_INPUT, 1))
+        #val.append(PinConstr("ECC1B_ERRA[2]", 5, 0, RAM_INPUT, 1))
+        val.append(PinConstr("ECC1B_ERRB[0]", -4, 1, RAM_INPUT, 1))
+        #val.append(PinConstr("ECC1B_ERRB[2]", 5, 1, RAM_INPUT, 1))
+        val.append(PinConstr("ECC2B_ERRA[0]", -4, 0, RAM_INPUT, 2))
+        #val.append(PinConstr("ECC2B_ERRA[2]", 5, 0, RAM_INPUT, 2))
+        val.append(PinConstr("ECC2B_ERRB[0]", -4, 1, RAM_INPUT, 2))
+        #val.append(PinConstr("ECC2B_ERRB[2]", 5, 1, RAM_INPUT, 2))
     elif prim_type=="SERDES":
         val.append(PinConstr("TX_DETECT_RX_I", 6, 6, RAM_OUTPUT, 1))
         val.append(PinConstr("PLL_RESET_I", 6, 5, RAM_OUTPUT, 2))
@@ -2540,6 +3067,26 @@ def get_pin_connection_name(prim, pin):
                 return "CPE.COMPOUT_IN_int"
             case _:
                 return f"CPE.{pin.name}"
+    elif prim.type == "RAM_HALF_U":
+        return f"RAM.{pin.name}"
+    elif prim.type == "RAM_HALF_L":
+        match = re.match(r"([A-Za-z0-9_]+)\[(\d+)\]$", pin.name.strip())
+        if not match:
+            return f"RAM.{pin.name}"
+        
+        base, index = match.group(1), int(match.group(2))
+        if base in ("CLKA", "CLKB", "ENA", "ENB", "GLWEA", "GLWEB"):
+            return f"RAM.{base}[{index + 2}]"
+        elif base in ("ADDRA0"):
+            return f"RAM.ADDRA1[{index}]"
+        elif base in ("ADDRB0"):
+            return f"RAM.ADDRB1[{index}]"
+        elif base in ("ECC1B_ERRA", "ECC1B_ERRB", "ECC2B_ERRA", "ECC2B_ERRB"):
+            return f"RAM.{base}[{index + 1}]"
+        elif base in ("WEA", "WEB", "DIA", "DIB", "DOA", "DOB"):
+            return f"RAM.{base}[{index + 20}]"
+        else:
+            return f"RAM.{pin.name}"
     return f"{prim.name}.{pin.name}"
 
 def get_endpoints_for_type(type):
@@ -2617,6 +3164,30 @@ def get_endpoints_for_type(type):
                 for i in range(4):
                     create_wire(f"OM.P{plane}.D{i}", type="OM_WIRE")
                 create_wire(f"OM.P{plane}.Y", type="OM_WIRE")
+
+    if "RAM_L" in type:
+        create_wire("RAM.CLKA[2]" , type="RAM_WIRE")
+        create_wire("RAM.CLKB[2]" , type="RAM_WIRE")
+        create_wire("RAM.ENA[2]" , type="RAM_WIRE")
+        create_wire("RAM.ENB[2]" , type="RAM_WIRE")
+        create_wire("RAM.GLWEA[2]" , type="RAM_WIRE")
+        create_wire("RAM.GLWEB[2]" , type="RAM_WIRE")
+        for i in range(0,16+1):
+            create_wire(f"RAM.ADDRA1[{i}]" , type="RAM_WIRE")
+            create_wire(f"RAM.ADDRB1[{i}]" , type="RAM_WIRE")
+        for i in range(20,40):
+            create_wire(f"RAM.WEA[{i}]" , type="RAM_WIRE")
+            create_wire(f"RAM.WEB[{i}]" , type="RAM_WIRE")
+            create_wire(f"RAM.DIA[{i}]" , type="RAM_WIRE")
+            create_wire(f"RAM.DIB[{i}]" , type="RAM_WIRE")
+            create_wire(f"RAM.DOA[{i}]" , type="RAM_WIRE")
+            create_wire(f"RAM.DOB[{i}]" , type="RAM_WIRE")
+        for i in range(1,5):
+            create_wire(f"RAM.CLOCK{i}" , type="RAM_WIRE")
+        create_wire("RAM.ECC1B_ERRA[1]" , type="RAM_WIRE")
+        create_wire("RAM.ECC1B_ERRB[1]" , type="RAM_WIRE")
+        create_wire("RAM.ECC2B_ERRA[1]" , type="RAM_WIRE")
+        create_wire("RAM.ECC2B_ERRB[1]" , type="RAM_WIRE")
 
     if "SB_BIG" in type:
         for p in range(1,13):
@@ -3019,8 +3590,10 @@ def get_tile_types(x,y):
         val.append("SERDES")
     if is_cfg_ctrl(x,y):
         val.append("CFG_CTRL")
-    if is_ram(x,y):
-        val.append("RAM")
+    if is_ram_u(x,y):
+        val.append("RAM_U")
+    if is_ram_l(x,y):
+        val.append("RAM_L")
     return val
 
 def get_tile_type(x,y):
@@ -3499,6 +4072,9 @@ class Die:
 
     def create_ram(self, x, y):
         self.create_ram_io_conn("RAM", "RAM", x, y)
+        # No actuall need for connections to RAMI/O
+        # for halfs, they create conflicts and we
+        # later anyway merge to full RAM
         self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB0", x, y, "RAM.CLOCK1")
         self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB1", x, y, "RAM.CLOCK2")
         self.create_conn(PLL_X_POS, PLL_Y_POS, "GLBOUT.GLB2", x, y, "RAM.CLOCK3")
@@ -3517,7 +4093,7 @@ class Die:
                     self.create_sb(x,y)
                 if is_edge_io(x,y):
                     self.create_io(x,y)
-                if is_ram(x,y):
+                if is_ram_u(x,y):
                     self.create_ram(x,y)
                 if is_serdes(x,y):
                     self.create_serdes(x,y)
