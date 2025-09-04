@@ -1346,7 +1346,6 @@ PRIMITIVES_PINS = {
         Pin("CLOCK3", PinType.INPUT,"RAM_WIRE"),
         Pin("CLOCK4", PinType.INPUT,"RAM_WIRE"),
     ],
-    "RAM_HALF_U" : RAM_HALF_PINS,
     "RAM_HALF_L" : RAM_HALF_PINS,
     "SERDES" : [
         Pin("TX_DETECT_RX_I", PinType.INPUT,"SERDES_WIRE"),
@@ -1713,9 +1712,8 @@ def get_primitives_for_type(type):
         primitives.append(Primitive("CPE_BRIDGE","CPE_BRIDGE",9))
     if "RAM_U" in type:
         primitives.append(Primitive("RAM","RAM",10))
-        primitives.append(Primitive("RAM_HALF_U","RAM_HALF_U",11))
     if "RAM_L" in type:
-        primitives.append(Primitive("RAM_HALF_L","RAM_HALF_L",12))
+        primitives.append(Primitive("RAM_HALF_L","RAM_HALF_L",11))
     if "SERDES" in type:
         primitives.append(Primitive("SERDES","SERDES",10))
     if "GPIO" in type:
@@ -2343,7 +2341,7 @@ def get_pins_constraint(type_name, prim_name, prim_type):
         val.append(PinConstr("FRD_ADDRX[14]", -5, 7, RAM_INPUT, 1))
         val.append(PinConstr("FRD_ADDR[15]", -6, 7, RAM_INPUT, 2))
         val.append(PinConstr("FRD_ADDRX[15]", -5, 7, RAM_INPUT, 2))
-    elif prim_type == "RAM_HALF_U" or prim_type == "RAM_HALF_L":
+    elif prim_type == "RAM_HALF_L":
         val.append(PinConstr("CLKA[0]", -6, 0, RAM_OUTPUT, 1))
         #val.append(PinConstr("CLKA[1]", -3, 0, RAM_OUTPUT, 1))
         val.append(PinConstr("ENA[0]", -6, 1, RAM_OUTPUT, 1))
@@ -3101,8 +3099,6 @@ def get_pin_connection_name(prim, pin):
                 return "CPE.COMPOUT_IN_int"
             case _:
                 return f"CPE.{pin.name}"
-    elif prim.type == "RAM_HALF_U":
-        return f"RAM.{pin.name}"
     elif prim.type == "RAM_HALF_L":
         match = re.match(r"([A-Za-z0-9_]+)\[(\d+)\]$", pin.name.strip())
         if not match:
