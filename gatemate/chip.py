@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import List, Dict
 from timing import decompress_timing
 
-DATABASE_VERSION = 1.6
+DATABASE_VERSION = 1.7
 
 @dataclass(eq=True, order=True)
 class Pad:
