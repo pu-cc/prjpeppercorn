@@ -3224,6 +3224,7 @@ def get_endpoints_for_type(type):
         for p in range(1,13):
             plane = f"{p:02d}"
             create_wire(f"SB_BIG.P{plane}.D0", type="SB_BIG_WIRE")
+            create_wire(f"SB_BIG.P{plane}.D0_IO", type="SB_BIG_WIRE")
             for i in range(1,5):
                 create_wire(f"SB_BIG.P{plane}.D2_{i}", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.D3_{i}", type="SB_BIG_WIRE")
@@ -3231,6 +3232,7 @@ def get_endpoints_for_type(type):
                 create_wire(f"SB_BIG.P{plane}.D5_{i}", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.D6_{i}", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.D7_{i}", type="SB_BIG_WIRE")
+                create_wire(f"SB_BIG.P{plane}.D7_{i}_CLK", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.Y{i}", type="SB_BIG_WIRE")
 
             create_wire(f"SB_BIG.P{plane}.YDIAG", type="SB_BIG_WIRE")
@@ -3248,6 +3250,7 @@ def get_endpoints_for_type(type):
         for p in range(1,13):
             plane = f"{p:02d}"
             create_wire(f"SB_SML.P{plane}.D0", type="SB_SML_WIRE")
+            create_wire(f"SB_SML.P{plane}.D0_IO", type="SB_SML_WIRE")
             for i in range(1,5):
                 create_wire(f"SB_SML.P{plane}.D2_{i}", type="SB_SML_WIRE")
                 create_wire(f"SB_SML.P{plane}.D3_{i}", type="SB_SML_WIRE")
@@ -3460,6 +3463,9 @@ def get_mux_connections_for_type(type):
 
                 create_direct(f"SB_BIG.P{plane}.Y{i}", f"SB_DRIVE.P{plane}.D{i}.IN",delay="del_dummy")
 
+            create_direct(f"SB_BIG.P{plane}.D0_IO", f"SB_BIG.P{plane}.D0",delay="del_dummy")
+            for i in range(1,5):
+                create_direct(f"SB_BIG.P{plane}.D7_{i}_CLK", f"SB_BIG.P{plane}.D7_{i}",delay="del_dummy")
     if "SB_SML" in type:
         # SB_SML
         for p in range(1,13):
@@ -3487,6 +3493,8 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_SML.P{plane}.Y3_int",    f"SB_SML.P{plane}.Y3",    1, 1, True, f"SB_SML.P{plane}.Y3_INT", False, delay="del_dummy")
             create_mux(f"SB_SML.P{plane}.Y4_int",    f"SB_SML.P{plane}.Y4",    1, 1, True, f"SB_SML.P{plane}.Y4_INT", False, delay="del_dummy")
             create_mux(f"SB_SML.P{plane}.YDIAG_int", f"SB_SML.P{plane}.YDIAG", 1, 1, True, f"SB_SML.P{plane}.YDIAG_INT", False, delay="del_dummy")
+
+            create_direct(f"SB_SML.P{plane}.D0_IO", f"SB_SML.P{plane}.D0",delay="del_dummy")
 
     if "GPIO" in type:
         # GPIO
@@ -3926,7 +3934,7 @@ class Die:
         for p in range(1,13):
             plane = f"{p:02d}"
             self.create_conn(sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.{output}", x,y, f"IOES.ALTIN_{plane}")
-            self.create_conn(x,y, f"IOES.SB_IN_{plane}", sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.D0")
+            self.create_conn(x,y, f"IOES.SB_IN_{plane}", sb_x,sb_y,f"{get_sb_type(sb_x,sb_y)}.P{plane}.D0_IO")
         self.create_conn(gpio_x,gpio_y,"IOSEL.IN1", x,y, "IOES.IO_IN1")
         self.create_conn(gpio_x,gpio_y,"IOSEL.IN2", x,y, "IOES.IO_IN2")
 
@@ -3970,7 +3978,7 @@ class Die:
                     # Clock#2: p2, p6,p10
                     # Clock#3: p3, p7,p11
                     # Clock#4: p4, p8,p12
-                    self.create_conn(PLL_X_POS, PLL_Y_POS, f"GLBOUT.GLB{(p-1) & 3}", x,y,f"SB_BIG.P{plane}.{inp}", "del_GLBOUT_sb_big")
+                    self.create_conn(PLL_X_POS, PLL_Y_POS, f"GLBOUT.GLB{(p-1) & 3}", x,y,f"SB_BIG.P{plane}.{inp}_CLK", "del_GLBOUT_sb_big")
 
         # Connecting Global Mesh signals to Switch Boxes
         # Left edge
