@@ -107,8 +107,8 @@ class Chip:
 
     def create_conn(self, conn, src_x,src_y, src, dst_x, dst_y, dst, delay=""):
         key_val = f"{src_x}/{src_y}/{src}"
-        key  = Connection(src_x, src_y, src, "")
-        item = Connection(dst_x, dst_y, dst, delay)
+        key  = Connection(src_x, src_y, src, "",   False)
+        item = Connection(dst_x, dst_y, dst, delay,True)
         if key_val not in conn:
             conn[key_val] = list()
             conn[key_val].append(key)
