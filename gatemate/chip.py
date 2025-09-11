@@ -105,7 +105,7 @@ class Chip:
         die_num = x_die + y_die * self.die_width
         return die.get_tile_info(die_num, x_pos, y_pos)
 
-    def create_conn(self, conn, src_x,src_y, src, dst_x, dst_y, dst, delay=""):
+    def create_conn(self, conn, src_x,src_y, src, dst_x, dst_y, dst, delay="del_dummy"):
         key_val = f"{src_x}/{src_y}/{src}"
         key  = Connection(src_x, src_y, src, "",   False)
         item = Connection(dst_x, dst_y, dst, delay,True)

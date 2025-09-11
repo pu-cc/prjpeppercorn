@@ -3752,7 +3752,7 @@ class Die:
                     self.gpio_to_loc[f"GPIO_{io.bank}_{io.port}[{io.num}]"]  = Location(x, y, 0)
                     self.io_pad_names[io.bank][io.port][io.num] = Location(x, y, 0)
 
-    def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst, delay=""):
+    def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst, delay="del_dummy"):
         key_val = f"{src_x + self.offset_x}/{src_y + self.offset_y}/{src}"
         key  = Connection(src_x + self.offset_x, src_y + self.offset_y, src, ""   , False)
         item = Connection(dst_x + self.offset_x, dst_y + self.offset_y, dst, delay, True)
