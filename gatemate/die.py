@@ -3382,25 +3382,26 @@ def get_mux_connections_for_type(type):
         for i in range(1,9):
             create_mux(f"CPE.IN{i}_int", "CPE.MUXOUT_int", 3, i-1, False, "CPE.C_SN")
 
-        create_direct("IM.P01.Y","CPE.IN1")
-        create_direct("IM.P02.Y","CPE.IN2")
-        create_direct("IM.P03.Y","CPE.IN3")
-        create_direct("IM.P04.Y","CPE.IN4")
-        create_direct("IM.P05.Y","CPE.IN5")
-        create_direct("IM.P06.Y","CPE.IN6")
-        create_direct("IM.P07.Y","CPE.IN7")
-        create_direct("IM.P08.Y","CPE.IN8")
-        create_direct("IM.P09.Y","CPE.CLK")
-        create_direct("IM.P10.Y","CPE.EN")
-        create_direct("IM.P11.Y","CPE.SR")
+        delay = f"im_{get_tile_loc_str(1,1)}"
+        create_direct("IM.P01.Y","CPE.IN1",f"{delay}_p1_d0_path2")
+        create_direct("IM.P02.Y","CPE.IN2",f"{delay}_p2_d0_path2")
+        create_direct("IM.P03.Y","CPE.IN3",f"{delay}_p3_d0_path2")
+        create_direct("IM.P04.Y","CPE.IN4",f"{delay}_p4_d0_path2")
+        create_direct("IM.P05.Y","CPE.IN5",f"{delay}_p5_d0_path2")
+        create_direct("IM.P06.Y","CPE.IN6",f"{delay}_p6_d0_path2")
+        create_direct("IM.P07.Y","CPE.IN7",f"{delay}_p7_d0_path2")
+        create_direct("IM.P08.Y","CPE.IN8",f"{delay}_p8_d0_path2")
+        create_direct("IM.P09.Y","CPE.CLK",f"{delay}_p9_d0_path2")
+        create_direct("IM.P10.Y","CPE.EN", f"{delay}_p10_d0_path2")
+        create_direct("IM.P11.Y","CPE.SR", f"{delay}_p11_d0_path2")
 
         for p in range(1,13):
             plane = f"{p:02d}"
             # D6 and D7 are from alternate planes
             alt = f"{alt_plane(0,p):02d}"
-            create_direct(f"IM.P{alt}.Y", f"IM.P{plane}.D6")
+            create_direct(f"IM.P{alt}.Y", f"IM.P{plane}.D6", f"{delay}_p1_d6_path1")
             alt = f"{alt_plane(1,p):02d}"
-            create_direct(f"IM.P{alt}.Y", f"IM.P{plane}.D7")
+            create_direct(f"IM.P{alt}.Y", f"IM.P{plane}.D7", f"{delay}_p1_d7_path1")
 
 
         create_mux("CPE.DOUT1_int",    "CPE.OUT1_int", 2, 0, False, "CPE.C_O1", delay="del_dummy")
