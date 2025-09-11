@@ -110,15 +110,15 @@ def is_ram_l(x,y):
     return x in [33,65,97,129] and y in [1+8,17+8,33+8,49+8,65+8,81+8,97+8,113+8]
 
 def get_full_tile_loc_str(x,y):
-    tile_x = ((x-1)+16) % 8 + 1
-    tile_y = ((y-1)+16) % 8 + 1
-    tile   = ((((x+16-1) // 8)+2) % 4) + 1
+    tile_x = 1 # ((x-1)+16) % 8 + 1
+    tile_y = 1 # ((y-1)+16) % 8 + 1
+    tile   = 1 # ((((x+16-1) // 8)+2) % 4) + 1
 
     return f"t{tile}_x{tile_x}_y{tile_y}"
 
 def get_tile_loc_str(x,y):
-    tile_x = ((x-1)+16) % 8 + 1
-    tile_y = ((y-1)+16) % 8 + 1
+    tile_x = 1 # ((x-1)+16) % 8 + 1
+    tile_y = 1 # ((y-1)+16) % 8 + 1
 
     return f"x{tile_x}_y{tile_y}"
 
@@ -3355,11 +3355,11 @@ def get_endpoints_for_type(type):
 
 def get_mux_connections_for_type(type):
     muxes = []
-    def create_mux(src, dst, bits, value, invert, name = None, visible = True, config = False, delay = ""):
+    def create_mux(src, dst, bits, value, invert, name = None, visible = True, config = False, delay = "del_dummy"):
         name = dst if name is None else name
         muxes.append(MUX(src, dst, name, bits, value, invert, visible, config, delay))
 
-    def create_direct(src,dst, delay = ""):
+    def create_direct(src,dst, delay = "del_dummy"):
         create_mux(src,dst,0,0,False, None, visible=False, delay = delay)
 
     if "CPE" in type:
