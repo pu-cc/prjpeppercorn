@@ -237,6 +237,7 @@ class Connection:
     y : int
     name : str
     delay: str
+    endpoint: bool
 
 @dataclass(eq=True, order=True)
 class TileInfo:
@@ -3358,10 +3359,13 @@ def get_mux_connections_for_type(type):
         name = dst if name is None else name
         muxes.append(MUX(src, dst, name, bits, value, invert, visible, config, delay))
 
+    def create_direct(src,dst, delay = ""):
+        create_mux(src,dst,0,0,False, None, visible=False, delay = delay)
+
     if "CPE" in type:
         # CPE
         for i in range(1,9):
-            create_mux(f"CPE.IN{i}", f"CPE.IN{i}_int", 0, 0, False, None, False)
+            create_direct(f"CPE.IN{i}", f"CPE.IN{i}_int", delay="del_dummy")
         for p in range(1,13):
             plane = f"{p:02d}"
             for i in range(8):
@@ -3373,11 +3377,33 @@ def get_mux_connections_for_type(type):
         for i in range(1,9):
             create_mux(f"CPE.IN{i}_int", "CPE.MUXOUT_int", 3, i-1, False, "CPE.C_SN")
 
+        create_direct("IM.P01.Y","CPE.IN1")
+        create_direct("IM.P02.Y","CPE.IN2")
+        create_direct("IM.P03.Y","CPE.IN3")
+        create_direct("IM.P04.Y","CPE.IN4")
+        create_direct("IM.P05.Y","CPE.IN5")
+        create_direct("IM.P06.Y","CPE.IN6")
+        create_direct("IM.P07.Y","CPE.IN7")
+        create_direct("IM.P08.Y","CPE.IN8")
+        create_direct("IM.P09.Y","CPE.CLK")
+        create_direct("IM.P10.Y","CPE.EN")
+        create_direct("IM.P11.Y","CPE.SR")
+
+        for p in range(1,13):
+            plane = f"{p:02d}"
+            # D6 and D7 are from alternate planes
+            alt = f"{alt_plane(0,p):02d}"
+            create_direct(f"IM.P{alt}.Y", f"IM.P{plane}.D6")
+            alt = f"{alt_plane(1,p):02d}"
+            create_direct(f"IM.P{alt}.Y", f"IM.P{plane}.D7")
+
+
         create_mux("CPE.DOUT1_int",    "CPE.OUT1_int", 2, 0, False, "CPE.C_O1", delay="del_dummy")
         create_mux("CPE.MUXOUT_int",   "CPE.OUT1_int", 2, 1, False, "CPE.C_O1", delay="del_dummy")
         create_mux("CPE.CPOUT1_int",   "CPE.OUT1_int", 2, 2, False, "CPE.C_O1", delay="del_dummy")
         create_mux("CPE.COMBOUT1_int", "CPE.OUT1_int", 2, 3, False, "CPE.C_O1", delay="del_dummy")
-        create_mux("CPE.COMBOUT1_int", "CPE.DIN1_int", 1, 0, False, visible=False, delay="del_dummy")
+
+        create_direct("CPE.COMBOUT1_int", "CPE.DIN1_int", delay="del_dummy")
 
         create_mux("CPE.DOUT2_int",    "CPE.OUT2_int", 2, 0, False, "CPE.C_O2", delay="del_dummy")
         create_mux("CPE.MUXOUT_int",   "CPE.OUT2_int", 2, 1, False, "CPE.C_O2", delay="del_dummy")
@@ -3389,18 +3415,18 @@ def get_mux_connections_for_type(type):
         create_mux("CPE.COMBOUT2_int", "CPE.DIN2_int", 1, 1, False, "CPE.C_2D_IN", delay="del_dummy")
 
         # Virtual connections
-        create_mux("CPE.COMBOUT1_int", "CPE.COMBIN1_int", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("CPE.COMBOUT2_int", "CPE.COMBIN2_int", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("CPE.COMBOUT1_int", "CPE.COMBIN1_int", delay="del_dummy")
+        create_direct("CPE.COMBOUT2_int", "CPE.COMBIN2_int", delay="del_dummy")
 
-        create_mux("CPE.OUT1_int", "CPE.OUT1_IN_int", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("CPE.OUT2_int", "CPE.OUT2_IN_int", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("CPE.COMPOUT_int", "CPE.COMPOUT_IN_int", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("CPE.OUT1_int", "CPE.OUT1_IN_int", delay="del_dummy")
+        create_direct("CPE.OUT2_int", "CPE.OUT2_IN_int", delay="del_dummy")
+        create_direct("CPE.COMPOUT_int", "CPE.COMPOUT_IN_int", delay="del_dummy")
 
-        create_mux("CPE.OUT1_int",    "CPE.OUT1", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("CPE.OUT2_int",    "CPE.OUT2", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("CPE.OUT1_int",    "CPE.OUT1", delay="del_dummy")
+        create_direct("CPE.OUT2_int",    "CPE.OUT2", delay="del_dummy")
 
         # Connecting upper and lower L2T4
-        create_mux("CPE.COMBOUT2_int", "CPE.COMBIN_int", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("CPE.COMBOUT2_int", "CPE.COMBIN_int", delay="del_dummy")
 
     if "SB_BIG" in type:
         # SB_BIG
@@ -3432,6 +3458,8 @@ def get_mux_connections_for_type(type):
                 create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT", 1, 1, True, f"SB_DRIVE.P{plane}.D{i}", delay="del_sb_drv")
                 create_mux(f"SB_DRIVE.P{plane}.D{i}.IN", f"SB_DRIVE.P{plane}.D{i}.OUT_NOINV", 1, 1, False, f"SB_DRIVE.P{plane}.D{i}", delay="del_sb_drv")
 
+                create_direct(f"SB_BIG.P{plane}.Y{i}", f"SB_DRIVE.P{plane}.D{i}.IN",delay="del_dummy")
+
     if "SB_SML" in type:
         # SB_SML
         for p in range(1,13):
@@ -3462,9 +3490,9 @@ def get_mux_connections_for_type(type):
 
     if "GPIO" in type:
         # GPIO
-        create_mux("IOSEL.GPIO_OUT", "GPIO.A",        1, 0, False, visible=False, delay="del_dummy")
-        create_mux("IOSEL.GPIO_EN",  "GPIO.T",        1, 0, False, visible=False, delay="del_dummy")
-        create_mux("GPIO.Y",         "IOSEL.GPIO_IN", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("IOSEL.GPIO_OUT", "GPIO.A",        delay="del_dummy")
+        create_direct("IOSEL.GPIO_EN",  "GPIO.T",        delay="del_dummy")
+        create_direct("GPIO.Y",         "IOSEL.GPIO_IN", delay="del_dummy")
 
     if "IOES" in type:
         # IOES
@@ -3562,32 +3590,32 @@ def get_mux_connections_for_type(type):
             create_mux(f"TES.SIG_SEL{sel}_int", f"TES.MDIE2.P{p}", 1, 1, False, f"TES.SEL_MDIE{p}", delay="del_dummy")
 
     if "PLL" in type:
-        create_mux("PLL1.CLK0",   "GLBOUT.CLK0_1",   1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL2.CLK0",   "GLBOUT.CLK0_2",   1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL3.CLK0",   "GLBOUT.CLK0_3",   1, 0, False, visible=False, delay="del_dummy")
+        create_direct("PLL1.CLK0",   "GLBOUT.CLK0_1", delay="del_dummy")
+        create_direct("PLL2.CLK0",   "GLBOUT.CLK0_2", delay="del_dummy")
+        create_direct("PLL3.CLK0",   "GLBOUT.CLK0_3", delay="del_dummy")
 
-        create_mux("PLL0.CLK90",  "GLBOUT.CLK90_0",  1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL2.CLK90",  "GLBOUT.CLK90_2",  1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL3.CLK90",  "GLBOUT.CLK90_3",  1, 0, False, visible=False, delay="del_dummy")
+        create_direct("PLL0.CLK90",  "GLBOUT.CLK90_0", delay="del_dummy")
+        create_direct("PLL2.CLK90",  "GLBOUT.CLK90_2", delay="del_dummy")
+        create_direct("PLL3.CLK90",  "GLBOUT.CLK90_3", delay="del_dummy")
 
-        create_mux("PLL0.CLK180", "GLBOUT.CLK180_0", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL1.CLK180", "GLBOUT.CLK180_1", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL3.CLK180", "GLBOUT.CLK180_3", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("PLL0.CLK180", "GLBOUT.CLK180_0", delay="del_dummy")
+        create_direct("PLL1.CLK180", "GLBOUT.CLK180_1", delay="del_dummy")
+        create_direct("PLL3.CLK180", "GLBOUT.CLK180_3", delay="del_dummy")
 
-        create_mux("PLL0.CLK270", "GLBOUT.CLK270_0", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL1.CLK270", "GLBOUT.CLK270_1", 1, 0, False, visible=False, delay="del_dummy")
-        create_mux("PLL2.CLK270", "GLBOUT.CLK270_2", 1, 0, False, visible=False, delay="del_dummy")
+        create_direct("PLL0.CLK270", "GLBOUT.CLK270_0", delay="del_dummy")
+        create_direct("PLL1.CLK270", "GLBOUT.CLK270_1", delay="del_dummy")
+        create_direct("PLL2.CLK270", "GLBOUT.CLK270_2", delay="del_dummy")
 
         for i in range(0,4):
-            create_mux(f"CLKIN.CLK_REF{i}",   f"PLL{i}.CLK_REF",        1, 0, False, visible=False, delay="del_dummy")
+            create_direct(f"CLKIN.CLK_REF{i}",   f"PLL{i}.CLK_REF",        delay="del_dummy")
             
-            create_mux(f"PLL{i}.CLK0",        f"GLBOUT.CLK0_{i}",       1, 0, False, visible=False, delay="del_dummy")
-            create_mux(f"PLL{i}.CLK90",       f"GLBOUT.CLK90_{i}",      1, 0, False, visible=False, delay="del_dummy")
-            create_mux(f"PLL{i}.CLK180",      f"GLBOUT.CLK180_{i}",     1, 0, False, visible=False, delay="del_dummy")
-            create_mux(f"PLL{i}.CLK270",      f"GLBOUT.CLK270_{i}",     1, 0, False, visible=False, delay="del_dummy")
-            create_mux(f"PLL{i}.CLK_REF_OUT", f"GLBOUT.CLK_REF_OUT{i}", 1, 0, False, visible=False, delay="del_dummy")
+            create_direct(f"PLL{i}.CLK0",        f"GLBOUT.CLK0_{i}",       delay="del_dummy")
+            create_direct(f"PLL{i}.CLK90",       f"GLBOUT.CLK90_{i}",      delay="del_dummy")
+            create_direct(f"PLL{i}.CLK180",      f"GLBOUT.CLK180_{i}",     delay="del_dummy")
+            create_direct(f"PLL{i}.CLK270",      f"GLBOUT.CLK270_{i}",     delay="del_dummy")
+            create_direct(f"PLL{i}.CLK_REF_OUT", f"GLBOUT.CLK_REF_OUT{i}", delay="del_dummy")
 
-            create_mux(f"GLBOUT.CLK_FB{i}",   f"PLL{i}.CLK_FEEDBACK",   1, 0, False, visible=False, delay="del_dummy")
+            create_direct(f"GLBOUT.CLK_FB{i}",   f"PLL{i}.CLK_FEEDBACK",   delay="del_dummy")
         
             create_mux(f"CLKIN.CLK_REF{i}",   f"GLBOUT.CLK_REF_OUT{i}", 1, 0, False, f"PLL{i}.USR_CLK_OUT", config=True, delay="del_dummy")
             create_mux(f"PLL{i}.USR_CLK_REF", f"GLBOUT.CLK_REF_OUT{i}", 1, 1, False, f"PLL{i}.USR_CLK_OUT", config=True, delay="del_dummy")
@@ -3712,8 +3740,8 @@ class Die:
 
     def create_conn(self, src_x,src_y, src, dst_x, dst_y, dst, delay=""):
         key_val = f"{src_x + self.offset_x}/{src_y + self.offset_y}/{src}"
-        key  = Connection(src_x + self.offset_x, src_y + self.offset_y, src, "")
-        item = Connection(dst_x + self.offset_x, dst_y + self.offset_y, dst, delay)
+        key  = Connection(src_x + self.offset_x, src_y + self.offset_y, src, ""   , False)
+        item = Connection(dst_x + self.offset_x, dst_y + self.offset_y, dst, delay, True)
         if key_val not in self.conn:
             self.conn[key_val] = list()
             self.conn[key_val].append(key)
@@ -3740,18 +3768,6 @@ class Die:
         return list()
 
     def create_cpe(self, x,y):
-        delay = f"im_{get_tile_loc_str(x,y)}"
-        self.create_conn(x,y,"IM.P01.Y", x,y,"CPE.IN1", f"{delay}_p1_d0_path2") # TODO: fix, d0 used only
-        self.create_conn(x,y,"IM.P02.Y", x,y,"CPE.IN2", f"{delay}_p2_d0_path2")
-        self.create_conn(x,y,"IM.P03.Y", x,y,"CPE.IN3", f"{delay}_p3_d0_path2")
-        self.create_conn(x,y,"IM.P04.Y", x,y,"CPE.IN4", f"{delay}_p4_d0_path2")
-        self.create_conn(x,y,"IM.P05.Y", x,y,"CPE.IN5", f"{delay}_p5_d0_path2")
-        self.create_conn(x,y,"IM.P06.Y", x,y,"CPE.IN6", f"{delay}_p6_d0_path2")
-        self.create_conn(x,y,"IM.P07.Y", x,y,"CPE.IN7", f"{delay}_p7_d0_path2")
-        self.create_conn(x,y,"IM.P08.Y", x,y,"CPE.IN8", f"{delay}_p8_d0_path2")
-        self.create_conn(x,y,"IM.P09.Y", x,y,"CPE.CLK", f"{delay}_p9_d0_path2")
-        self.create_conn(x,y,"IM.P10.Y", x,y,"CPE.EN", f"{delay}_p10_d0_path2")
-        self.create_conn(x,y,"IM.P11.Y", x,y,"CPE.SR", f"{delay}_p11_d0_path2")
         if is_cpe(x,y-1):
             self.create_conn(x,y-1,"CPE.COUTY1", x,y,"CPE.CINY1")
             self.create_conn(x,y-1,"CPE.COUTY2", x,y,"CPE.CINY2")
@@ -3778,12 +3794,6 @@ class Die:
                 self.create_conn(x-1,y-1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D4", f"{delay}_d4_path1")
             if is_cpe(x+1,y+1):
                 self.create_conn(x+1,y+1,f"IM.P{plane}.Y", x,y,f"IM.P{plane}.D5", f"{delay}_d5_path1")
-
-            # D6 and D7 are from alternate planes
-            alt = f"{alt_plane(0,p):02d}"
-            self.create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D6", f"{delay}_d6_path1")
-            alt = f"{alt_plane(1,p):02d}"
-            self.create_conn(x,y,f"IM.P{alt}.Y", x,y,f"IM.P{plane}.D7", f"{delay}_d7_path1")
 
     def create_sb(self, x,y):
         x_0,y_0 = base_loc(x,y)
@@ -3834,10 +3844,6 @@ class Die:
                             else:
                                 src = f"SB_DRIVE.P{plane}.D{direction+1}.OUT_NOINV"
                         self.create_conn(sb_x,sb_y, src, x,y,f"{get_sb_type(x,y)}.P{plane}.D{i+2}_{direction+1}", f"{delay}_p{p}_d{direction+1}_s{i+2}")
-
-            if is_sb_big(x,y):
-                for direction in range(4):
-                    self.create_conn(x,y, f"{get_sb_type(x,y)}.P{plane}.Y{direction+1}", x,y,f"SB_DRIVE.P{plane}.D{direction+1}.IN", delay="del_dummy")
 
             # Diagonal inputs
             # X12 and X34 on edges are unconnected
