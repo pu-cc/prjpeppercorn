@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import List, Dict
 from timing import decompress_timing
 
-DATABASE_VERSION = 1.7
+DATABASE_VERSION = 1.8
 
 @dataclass(eq=True, order=True)
 class Pad:
@@ -105,10 +105,10 @@ class Chip:
         die_num = x_die + y_die * self.die_width
         return die.get_tile_info(die_num, x_pos, y_pos)
 
-    def create_conn(self, conn, src_x,src_y, src, dst_x, dst_y, dst, delay=""):
+    def create_conn(self, conn, src_x,src_y, src, dst_x, dst_y, dst, delay="del_dummy"):
         key_val = f"{src_x}/{src_y}/{src}"
-        key  = Connection(src_x, src_y, src, "")
-        item = Connection(dst_x, dst_y, dst, delay)
+        key  = Connection(src_x, src_y, src, "",   False)
+        item = Connection(dst_x, dst_y, dst, delay,True)
         if key_val not in conn:
             conn[key_val] = list()
             conn[key_val].append(key)
@@ -132,11 +132,11 @@ class Chip:
                     sbb_y = -1 + offset_y if x % 2 == 1 else 0 + offset_y
                     sbt_y = 129 if x % 2 == 1 else 130
 
-                    self.create_conn(conn, x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.Y4", x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.D2_4")
+                    self.create_conn(conn, x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.Y4", x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.D2_4_MD")
 
                     if x > 27 and (x != 28 or p > 4):
                         # no connection for 27, and for 28 just 4 signals from lower to upper
-                        self.create_conn(conn, x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.Y2",  x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.D2_2")
+                        self.create_conn(conn, x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.Y2",  x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.D2_2_MD")
         return conn.items()
     
     def get_packages(self):
