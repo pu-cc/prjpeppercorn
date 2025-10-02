@@ -574,6 +574,7 @@ Chip Bitstream::deserialise_chip()
             break;
         case CMD_PATH:
             BITSTREAM_DEBUG("CMD_PATH");
+            tile_iteration.clear();
             if (length != 1)
                 BITSTREAM_FATAL("PATH data must be one byte long", rd.get_offset());
             // Check header CRC
