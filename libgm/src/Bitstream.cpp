@@ -549,6 +549,9 @@ Chip Bitstream::deserialise_chip()
                     iteration = tile_iteration[std::make_pair(x_pos, y_pos)];
                 tile_iteration[std::make_pair(x_pos, y_pos)] = ++iteration;
 
+                if (iteration != 0)
+                    BITSTREAM_DEBUG("iteration " << (iteration + 1));
+
                 // Detection of FF initialization is possible on
                 // last iteration
                 if (iteration == 2) {
