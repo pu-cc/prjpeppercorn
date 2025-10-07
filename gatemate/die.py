@@ -3583,7 +3583,7 @@ def get_mux_connections_for_type(type):
 
         for p in range(1,9):
             create_mux(f"RES.SB_Y1.P{p}", f"RES.MDIE1.P{p}", 1, 0, False, f"RES.SEL_MDIE{p}", delay="del_dummy")
-            sel = (p - 1) // 2 + 1
+            sel = ((p - 1) & 3) + 1
             create_mux(f"RES.SIG_SEL{sel}_int", f"RES.MDIE1.P{p}", 1, 1, False, f"RES.SEL_MDIE{p}", delay="del_dummy")
 
     if "TES" in type:
@@ -3600,7 +3600,7 @@ def get_mux_connections_for_type(type):
 
         for p in range(1,9):
             create_mux(f"TES.SB_Y2.P{p}", f"TES.MDIE2.P{p}", 1, 0, False, f"TES.SEL_MDIE{p}", delay="del_dummy")
-            sel = (p - 1) // 2 + 1
+            sel = ((p - 1) & 3) + 1
             create_mux(f"TES.SIG_SEL{sel}_int", f"TES.MDIE2.P{p}", 1, 1, False, f"TES.SEL_MDIE{p}", delay="del_dummy")
 
     if "PLL" in type:
