@@ -132,11 +132,14 @@ class Chip:
                     sbb_y = -1 + offset_y if x % 2 == 1 else 0 + offset_y
                     sbt_y = 129 if x % 2 == 1 else 130
 
-                    self.create_conn(conn, x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.Y4", x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.D2_4_MD")
+                    self.create_conn(conn, x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.Y4", x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.D2_4_D2D", delay="del_D2D")
 
                     if x > 27 and (x != 28 or p > 4):
                         # no connection for 27, and for 28 just 4 signals from lower to upper
-                        self.create_conn(conn, x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.Y2",  x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.D2_2_MD")
+                        if x > 160:
+                            self.create_conn(conn, x, sbt_y, f"{die.get_sb_type(x,sbt_y)}.P{plane}.Y2",  x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.D2_2_D2D", delay="del_D2D")
+                        else:
+                            self.create_conn(conn, x, 131, f"TES.MDIE2.P{p}",  x, sbb_y, f"{die.get_sb_type(x,sbb_y-offset_y)}.P{plane}.D2_2_D2D", delay="del_D2D")
         return conn.items()
     
     def get_packages(self):
@@ -507,6 +510,8 @@ def get_timings(name):
 
     val["del_CP_clkin"] = convert_delay(timing_data.timing_delays.del_CP_clkin.val)
     val["del_CP_enin"] = convert_delay(timing_data.timing_delays.del_CP_enin.val)
+
+    val["del_D2D"] = Timing(TimingDelay(1000,1000,1000), TimingDelay(1000,1000,1000))
 
     #val["del_preplace"] = convert_delay(timing_data.timing_delays.del_preplace.val)
 

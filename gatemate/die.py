@@ -3227,7 +3227,7 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_BIG.P{plane}.D0_IO", type="SB_BIG_WIRE")
             for i in range(1,5):
                 create_wire(f"SB_BIG.P{plane}.D2_{i}", type="SB_BIG_WIRE")
-                create_wire(f"SB_BIG.P{plane}.D2_{i}_MD", type="SB_BIG_WIRE")
+                create_wire(f"SB_BIG.P{plane}.D2_{i}_D2D", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.D3_{i}", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.D4_{i}", type="SB_BIG_WIRE")
                 create_wire(f"SB_BIG.P{plane}.D5_{i}", type="SB_BIG_WIRE")
@@ -3254,7 +3254,7 @@ def get_endpoints_for_type(type):
             create_wire(f"SB_SML.P{plane}.D0_IO", type="SB_SML_WIRE")
             for i in range(1,5):
                 create_wire(f"SB_SML.P{plane}.D2_{i}", type="SB_SML_WIRE")
-                create_wire(f"SB_SML.P{plane}.D2_{i}_MD", type="SB_SML_WIRE")
+                create_wire(f"SB_SML.P{plane}.D2_{i}_D2D", type="SB_SML_WIRE")
                 create_wire(f"SB_SML.P{plane}.D3_{i}", type="SB_SML_WIRE")
                 create_wire(f"SB_SML.P{plane}.Y{i}", type="SB_SML_WIRE")
                 create_wire(f"SB_SML.P{plane}.Y{i}_int", type="SB_SML_WIRE")
@@ -3468,7 +3468,7 @@ def get_mux_connections_for_type(type):
             create_direct(f"SB_BIG.P{plane}.D0_IO", f"SB_BIG.P{plane}.D0",delay="del_dummy")
             for i in range(1,5):
                 create_direct(f"SB_BIG.P{plane}.D7_{i}_CLK", f"SB_BIG.P{plane}.D7_{i}",delay="del_dummy")
-                create_direct(f"SB_BIG.P{plane}.D2_{i}_MD",  f"SB_BIG.P{plane}.D2_{i}",delay="del_dummy")
+                create_direct(f"SB_BIG.P{plane}.D2_{i}_D2D",  f"SB_BIG.P{plane}.D2_{i}",delay="del_dummy")
 
     if "SB_SML" in type:
         # SB_SML
@@ -3499,7 +3499,7 @@ def get_mux_connections_for_type(type):
             create_mux(f"SB_SML.P{plane}.YDIAG_int", f"SB_SML.P{plane}.YDIAG", 1, 1, True, f"SB_SML.P{plane}.YDIAG_INT", False)
 
             for i in range(1,5):
-                create_direct(f"SB_SML.P{plane}.D2_{i}_MD",  f"SB_SML.P{plane}.D2_{i}",delay="del_dummy")
+                create_direct(f"SB_SML.P{plane}.D2_{i}_D2D",  f"SB_SML.P{plane}.D2_{i}",delay="del_dummy")
             create_direct(f"SB_SML.P{plane}.D0_IO", f"SB_SML.P{plane}.D0",delay="del_dummy")
 
     if "GPIO" in type:
