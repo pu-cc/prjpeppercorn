@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     options.add_options()("verbose,v", "verbose output");
     options.add_options()("crcmode", po::value<std::string>(), "CRC error behaviour (check, ignore, unused)");
     options.add_options()("spimode", po::value<std::string>(), "SPI Mode to use (single, dual, quad)");
+    options.add_options()("reconfig", "enable reconfiguration in bitstream");
     po::positional_options_description pos;
     options.add_options()("input", po::value<std::string>()->required(), "input textual configuration");
     pos.add("input", 1);
@@ -89,7 +90,8 @@ int main(int argc, char *argv[])
         bitopts["spimode"] = vm["spimode"].as<std::string>();
     }
 
-    if (vm.count("background")) {
+    if (vm.count("reconfig")) {
+        bitopts["reconfig"] = "yes";
     }
 
     std::string textcfg((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
