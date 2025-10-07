@@ -992,11 +992,15 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             }
         }
 
-        //  Write change status
-        if (die.is_using_cfg_gpios())
-            wr.write_cmd_chg_status(CFG_DONE);
+        uint8_t cfg_stat = CFG_CPE_RESET;
+        // Only for die 0
+        if (d == 0) {
+            //  Write change status
+            if (die.is_using_cfg_gpios())
+                wr.write_cmd_chg_status(CFG_DONE);
 
-        uint8_t cfg_stat = CFG_DONE | CFG_STOP | CFG_CPE_RESET;
+            cfg_stat |= CFG_STOP | CFG_DONE;
+        }
         // cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
         if (!die.is_serdes_cfg_empty()) {
             cfg_stat |= CFG_SERDES;
