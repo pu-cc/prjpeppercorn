@@ -967,6 +967,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
 
         // Write latch configuration
+        int scrubaddr = 0;
         for (int iteration = 0; iteration < 3; iteration++) {
             for (int y = 0; y < Die::MAX_ROWS; y++) {
                 for (int x = 0; x < Die::MAX_COLS; x++) {
@@ -979,6 +980,8 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
                     // If CPE empty skip other iterations
                     if (iteration != 0 && die.is_cpe_empty(x, y))
                         continue;
+                    if (iteration == 1 && scrubaddr == 0)
+                        scrubaddr = wr.data.size();
                     std::vector<uint8_t> data = std::vector<uint8_t>(die.get_latch_config(x, y));
                     uint8_t ff_init = data.back();
                     data.pop_back();
@@ -1030,15 +1033,20 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             if (die.is_using_cfg_gpios())
                 wr.write_cmd_chg_status(CFG_DONE);
 
-            cfg_stat |= CFG_STOP | CFG_DONE;
+            cfg_stat |= CFG_DONE;
+            if (!options.count("background")) {
+                cfg_stat |= CFG_STOP;
+            }
             if (options.count("reconfig")) {
                 cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
             }
 
-            if (options.count("bootaddr")) {
-                // Enable config clock
-                die_config[Die::STATUS_CFG_START + 2 + 2] |= CFG_PLL_AUTN;
-                die_config[Die::STATUS_CFG_START + 2 + 3] |= CFG_AUTN_CT_I;
+            if (options.count("bootaddr") || options.count("background")) {
+                // Enable autonomous clock if PLL not enabled
+                if (die.is_pll_cfg_empty(0)) {
+                    die_config[Die::STATUS_CFG_START + 2 + 2] |= CFG_PLL_AUTN;
+                    die_config[Die::STATUS_CFG_START + 2 + 3] |= CFG_AUTN_CT_I;
+                }
             }
         }
         if (!die.is_serdes_cfg_empty()) {
@@ -1051,9 +1059,12 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         wr.write_cmd_chg_status(cfg_stat, die_config);
 
         if (d == 0) {
-            if (options.count("bootaddr")) {
+            if (options.count("bootaddr") && !options.count("background")) {
                 uint32_t bootaddr = std::strtoul(options.at("bootaddr").c_str(), nullptr, 0);
                 wr.write_cmd_jump(bootaddr);
+            }
+            if (options.count("background") && !options.count("bootaddr")) {
+                wr.write_cmd_jump(scrubaddr);
             }
         }
     }

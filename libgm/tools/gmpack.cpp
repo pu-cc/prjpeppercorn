@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     options.add_options()("crcmode", po::value<std::string>(), "CRC error behaviour (check, ignore, unused)");
     options.add_options()("spimode", po::value<std::string>(), "SPI Mode to use (single, dual, quad)");
     options.add_options()("reconfig", "enable reconfiguration in bitstream");
+    options.add_options()("background", "enable background reconfiguration in bitstream");
     options.add_options()("bootaddr", po::value<int>(), "boot address for secondary bitstream");
     po::positional_options_description pos;
     options.add_options()("input", po::value<std::string>()->required(), "input textual configuration");
@@ -98,6 +99,10 @@ int main(int argc, char *argv[])
 
     if (vm.count("reconfig")) {
         bitopts["reconfig"] = "yes";
+    }
+
+    if (vm.count("background")) {
+        bitopts["background"] = "yes";
     }
 
     if (vm.count("bootaddr")) {
