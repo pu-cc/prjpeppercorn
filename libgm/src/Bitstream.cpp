@@ -836,6 +836,10 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
         wr.write_cmd_path(0x10);
 
+        if (options.count("reset")) {
+            wr.write_cmd_cfgrst(0x00);
+        }
+
         bool change_crc = false;
         auto crcmode = crc_modes.begin();
         if (options.count("crcmode")) {
