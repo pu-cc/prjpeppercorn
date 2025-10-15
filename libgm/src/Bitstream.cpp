@@ -43,7 +43,7 @@ static constexpr const uint8_t CMD_FRAM = 0xd2;
 static constexpr const uint8_t CMD_SERDES = 0xd7; //
 static constexpr const uint8_t CMD_D2D = 0xd8;    //
 static constexpr const uint8_t CMD_PATH = 0xd9;
-static constexpr const uint8_t CMD_JUMP = 0xda; //
+static constexpr const uint8_t CMD_JUMP = 0xda;
 static constexpr const uint8_t CMD_CHG_STATUS = 0xdb;
 static constexpr const uint8_t CMD_WAIT_PLL = 0xdc; //
 static constexpr const uint8_t CMD_SPLL = 0xdd;
@@ -264,6 +264,17 @@ class BitstreamReadWriter
         write_nops(4);
         write_byte(0x33);
         write_nops(4);
+    }
+
+    void write_cmd_jump(uint32_t addr)
+    {
+        write_header(CMD_JUMP, 4);
+        write_byte(uint8_t(addr & 0xFF));
+        write_byte(uint8_t((addr >>  8UL) & 0xFF));
+        write_byte(uint8_t((addr >> 16UL) & 0xFF));
+        write_byte(uint8_t((addr >> 24UL) & 0xFF));
+        insert_crc16();
+        write_nops(2);
     }
 
     void write_cmd_cfgmode(uint8_t crcmode, std::vector<uint8_t> spimode)
@@ -1005,7 +1016,10 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
 
             cfg_stat |= CFG_STOP | CFG_DONE;
             if (options.count("reconfig")) {
-                cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
+                cfg_stat |= CFG_RECONFIG;
+            }
+            if (options.count("cpeconfig")) {
+                cfg_stat |= CFG_CPE_CFG;
             }
         }
         if (!die.is_serdes_cfg_empty()) {
@@ -1016,6 +1030,13 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
 
         wr.write_cmd_chg_status(cfg_stat, die_config);
+
+        if (d == 0) {
+            if (options.count("bootaddr")) {
+                uint32_t bootaddr = std::strtoul(options.at("bootaddr").c_str(), nullptr, 0);
+                wr.write_cmd_jump(bootaddr);
+            }
+        }
     }
     return Bitstream(wr.get());
 }
