@@ -58,6 +58,22 @@ static constexpr const uint8_t CFG_CPE_RESET = 0x10;
 static constexpr const uint8_t CFG_FILL_RAM = 0x20;
 static constexpr const uint8_t CFG_SERDES = 0x40;
 
+// PLL register A
+static constexpr const uint8_t CFG_PLL_RST_N = 0x01;
+static constexpr const uint8_t CFG_PLL_EN = 0x02;
+static constexpr const uint8_t CFG_PLL_AUTN = 0x04; // only available for PLL0
+static constexpr const uint8_t CFG_SET_SEL = 0x08;
+static constexpr const uint8_t CFG_USR_SET = 0x10;
+static constexpr const uint8_t CFG_USR_CLK_REF = 0x20;
+static constexpr const uint8_t CFG_CLK_OUT_EN = 0x40;
+static constexpr const uint8_t CFG_LOCK_REQ = 0x80;
+
+// PLL register B
+static constexpr const uint8_t CFG_AUTN_CT_I = 0x01; // only available for PLL0
+static constexpr const uint8_t CFG_CLK180_DOUB = 0x08;
+static constexpr const uint8_t CFG_CLK270_DOUB = 0x10;
+static constexpr const uint8_t CFG_USR_CLK_OUT = 0x80;
+
 static const std::vector<std::pair<std::string, uint8_t>> crc_modes = {
         {"check", 0x00},  // Check CRC
         {"ignore", 0x01}, // Ignore added CRC
@@ -1017,6 +1033,12 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             cfg_stat |= CFG_STOP | CFG_DONE;
             if (options.count("reconfig")) {
                 cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
+            }
+
+            if (options.count("bootaddr")) {
+                // Enable config clock
+                die_config[Die::STATUS_CFG_START + 2 + 2] |= CFG_PLL_AUTN;
+                die_config[Die::STATUS_CFG_START + 2 + 3] |= CFG_AUTN_CT_I;
             }
         }
         if (!die.is_serdes_cfg_empty()) {
