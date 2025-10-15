@@ -358,6 +358,26 @@ CMD_SERDES
 CMD_JUMP
 --------
 
+Jump to address in SPI flash.
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Byte
+     - Description
+   * - 0
+     - addr[7:0]
+   * - 1
+     - addr[15:8]
+   * - 2
+     - addr[23:16]
+   * - 3
+     - addr[31:24]
+
+.. warning::
+    This command requires data after payload, and it consists of 2 NOP bytes ``0x00 0x00``.
+
 CMD_CFGMODE
 ------------
 
