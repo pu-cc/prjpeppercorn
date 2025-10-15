@@ -1016,10 +1016,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
 
             cfg_stat |= CFG_STOP | CFG_DONE;
             if (options.count("reconfig")) {
-                cfg_stat |= CFG_RECONFIG;
-            }
-            if (options.count("cpeconfig")) {
-                cfg_stat |= CFG_CPE_CFG;
+                cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
             }
         }
         if (!die.is_serdes_cfg_empty()) {
