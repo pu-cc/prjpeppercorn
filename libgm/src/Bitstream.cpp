@@ -392,11 +392,11 @@ class BitstreamReadWriter
         write_nops(4);
     }
 
-    void write_cmd_chg_status(uint8_t cfg, std::vector<uint8_t> data)
+    void write_cmd_chg_status(uint8_t cfg, uint8_t next_mode, std::vector<uint8_t> data)
     {
         write_header(CMD_CHG_STATUS, 12);
         write_byte(cfg);
-        write_byte(0x00);
+        write_byte(next_mode);
         for (int i = 2; i < 12; i++)
             write_byte(data[Die::STATUS_CFG_START + i]);
         insert_crc16();
@@ -1061,6 +1061,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
 
         uint8_t cfg_stat = CFG_CPE_RESET;
+        uint8_t cfg_mode = 0x1F; // unused mode enforces controller to stop
         // Only for die 0
         if (d == 0) {
             //  Write change status
@@ -1079,6 +1080,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             }
 
             if (options.count("bootaddr") || options.count("background")) {
+                cfg_mode = 0x10; // active spi
                 // Enable autonomous clock if PLL not enabled
                 if (die.is_pll_cfg_empty(0)) {
                     die_config[Die::STATUS_CFG_START + 2 + 2] |= CFG_PLL_AUTN;
@@ -1093,7 +1095,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             wr.insert_crc16();
         }
 
-        wr.write_cmd_chg_status(cfg_stat, die_config);
+        wr.write_cmd_chg_status(cfg_stat, cfg_mode, die_config);
 
         if (d == 0) {
             if (options.count("bootaddr") && !options.count("background")) {
