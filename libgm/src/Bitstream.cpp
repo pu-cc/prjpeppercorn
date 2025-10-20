@@ -1100,6 +1100,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         if (d == 0) {
             if (options.count("bootaddr") && !options.count("background")) {
                 uint32_t bootaddr = std::strtoul(options.at("bootaddr").c_str(), nullptr, 0);
+                wr.write_cmd_cfgrst(0x00);
                 wr.write_cmd_jump(bootaddr);
             }
             if (options.count("background") && !options.count("bootaddr")) {

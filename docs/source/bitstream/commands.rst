@@ -91,7 +91,7 @@ each bit of one byte payload is used to set one of 4 columns.
 
 CMD_CFGRST
 -----------
-Resets all configuration latches to value of a byte from payload.
+Resets all configuration latches to value of a byte from payload, except active SPI controller and configuration PLL.
 
 CMD_ACLCU
 ----------
