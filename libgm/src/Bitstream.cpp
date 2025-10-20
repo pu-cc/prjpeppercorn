@@ -30,7 +30,7 @@ namespace GateMate {
 
 static constexpr const uint8_t CMD_PLL = 0xc1;
 static constexpr const uint8_t CMD_CFGMODE = 0xc2;
-static constexpr const uint8_t CMD_CFGRST = 0xc3; //
+static constexpr const uint8_t CMD_CFGRST = 0xc3;
 static constexpr const uint8_t CMD_FLASH = 0xc5;
 static constexpr const uint8_t CMD_DLXP = 0xc6; //
 static constexpr const uint8_t CMD_DLYP = 0xc7; //
@@ -469,6 +469,8 @@ int Bitstream::determine_size(int *max_die_x, int *max_die_y)
         case CMD_ACLCU:
         case CMD_RXRYS:
         case CMD_D2D:
+        case CMD_CFGRST:
+        case CMD_JUMP:
             // Check header CRC
             check_crc(rd);
             // Read data block
@@ -487,6 +489,8 @@ int Bitstream::determine_size(int *max_die_x, int *max_die_y)
                 rd.skip_bytes(6);
             if (cmd == CMD_CHG_STATUS)
                 rd.skip_bytes(9);
+            if (cmd == CMD_JUMP)
+                rd.skip_bytes(2);
             break;
         case CMD_PATH:
             // Check header CRC
@@ -810,6 +814,36 @@ Chip Bitstream::deserialise_chip()
             check_crc(rd);
             break;
 
+        case CMD_CFGRST:
+            BITSTREAM_DEBUG("CMD_CFGRST");
+            if (length > 1)
+                BITSTREAM_FATAL("CFGRST data longer than expected", rd.get_offset());
+            // Check header CRC
+            check_crc(rd);
+
+            // Read data block
+            rd.get_vector(block, length);
+
+            // Check data CRC
+            check_crc(rd);
+            break;
+        case CMD_JUMP:
+            BITSTREAM_DEBUG("CMD_JUMP");
+            if (length > 4)
+                BITSTREAM_FATAL("JUMP addr longer than expected", rd.get_offset());
+            // Check header CRC
+            check_crc(rd);
+
+            // Read data block
+            rd.get_vector(block, length);
+
+            // Check data CRC
+            check_crc(rd);
+
+            // Skip bytes
+            rd.skip_bytes(2);
+            break;
+
         default:
             BITSTREAM_FATAL("Unhandled command 0x" << std::hex << std::setw(2) << std::setfill('0') << int(cmd),
                             rd.get_offset());
@@ -863,7 +897,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
         wr.write_cmd_path(0x10);
 
-        if (options.count("reset")) {
+        if (options.count("reset") && !options.count("background")) {
             wr.write_cmd_cfgrst(0x00);
         }
 
@@ -1037,8 +1071,11 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             if (!options.count("background")) {
                 cfg_stat |= CFG_STOP;
             }
+            if (options.count("bootaddr")) {
+                cfg_stat |= CFG_RECONFIG;
+            }
             if (options.count("reconfig")) {
-                cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
+                cfg_stat |= CFG_CPE_CFG;
             }
 
             if (options.count("bootaddr") || options.count("background")) {
