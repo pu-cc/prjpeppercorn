@@ -37,9 +37,12 @@ int main(int argc, char *argv[])
     po::options_description options("Allowed options");
     options.add_options()("help,h", "show help");
     options.add_options()("verbose,v", "verbose output");
+    options.add_options()("reset", "reset all configuration latches with CMD_CFGRST");
     options.add_options()("crcmode", po::value<std::string>(), "CRC error behaviour (check, ignore, unused)");
     options.add_options()("spimode", po::value<std::string>(), "SPI Mode to use (single, dual, quad)");
     options.add_options()("reconfig", "enable reconfiguration in bitstream");
+    options.add_options()("background", "enable background reconfiguration in bitstream");
+    options.add_options()("bootaddr", po::value<int>(), "boot address for secondary bitstream");
     po::positional_options_description pos;
     options.add_options()("input", po::value<std::string>()->required(), "input textual configuration");
     pos.add("input", 1);
@@ -82,6 +85,10 @@ int main(int argc, char *argv[])
 
     std::map<std::string, std::string> bitopts;
 
+    if (vm.count("reset")) {
+        bitopts["reset"] = "yes";
+    }
+
     if (vm.count("crcmode")) {
         bitopts["crcmode"] = vm["crcmode"].as<std::string>();
     }
@@ -92,6 +99,14 @@ int main(int argc, char *argv[])
 
     if (vm.count("reconfig")) {
         bitopts["reconfig"] = "yes";
+    }
+
+    if (vm.count("background")) {
+        bitopts["background"] = "yes";
+    }
+
+    if (vm.count("bootaddr")) {
+        bitopts["bootaddr"] = std::to_string(vm["bootaddr"].as<int>());
     }
 
     std::string textcfg((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());

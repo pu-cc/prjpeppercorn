@@ -91,7 +91,7 @@ each bit of one byte payload is used to set one of 4 columns.
 
 CMD_CFGRST
 -----------
-Resets all configuration latches to value of a byte from payload.
+Resets all configuration latches to value of a byte from payload, except active SPI controller and configuration PLL.
 
 CMD_ACLCU
 ----------
@@ -304,29 +304,161 @@ CMD_CHG_STATUS
      - 6..7
      - Unused
    * - 4
-     - 
-     - PLL0 Control Register
+     - 0
+     - PLL0 PLL_RST_N
+   * - 
+     - 1
+     - PLL0 PLL_EN
+   * - 
+     - 2
+     - PLL0 PLL_AUTN
+   * - 
+     - 3
+     - PLL0 SET_SEL
+   * - 
+     - 4
+     - PLL0 USR_SET
+   * - 
+     - 5
+     - PLL0 USR_CLK_REF
+   * - 
+     - 6
+     - PLL0 CLK_OUT_EN
+   * - 
+     - 7
+     - PLL0 LOCK_REQ
    * - 5
-     - 
-     - PLL0 Startup Register
+     - 0..2
+     - PLL0 AUTN_CT_I[2:0], should be 001
+   * - 
+     - 3
+     - PLL0 CLK180_DOUB
+   * - 
+     - 4
+     - PLL0 CLK270_DOUB
+   * - 
+     - 5..6
+     - Unused
+   * - 
+     - 7
+     - PLL0 USR_CLK_OUT
    * - 6
-     - 
-     - PLL1 Control Register
+     - 0
+     - PLL1 PLL_RST_N
+   * - 
+     - 1
+     - PLL1 PLL_EN
+   * - 
+     - 2
+     - Unused
+   * - 
+     - 3
+     - PLL1 SET_SEL
+   * - 
+     - 4
+     - PLL1 USR_SET
+   * - 
+     - 5
+     - PLL1 USR_CLK_REF
+   * - 
+     - 6
+     - PLL1 CLK_OUT_EN
+   * - 
+     - 7
+     - PLL1 LOCK_REQ
    * - 7
-     - 
-     - PLL1 Startup Register
+     - 0..2
+     - Unused
+   * - 
+     - 3
+     - PLL1 CLK180_DOUB
+   * - 
+     - 4
+     - PLL1 CLK270_DOUB
+   * - 
+     - 5..6
+     - Unused
+   * - 
+     - 7
+     - PLL1 USR_CLK_OUT
    * - 8
-     - 
-     - PLL2 Control Register
-   * - 9
-     - 
-     - PLL2 Startup Register
+     - 0
+     - PLL2 PLL_RST_N
+   * - 
+     - 1
+     - PLL2 PLL_EN
+   * - 
+     - 2
+     - Unused
+   * - 
+     - 3
+     - PLL2 SET_SEL
+   * - 
+     - 4
+     - PLL2 USR_SET
+   * - 
+     - 5
+     - PLL2 USR_CLK_REF
+   * - 
+     - 6
+     - PLL2 CLK_OUT_EN
+   * - 
+     - 9
+     - PLL2 LOCK_REQ
+   * - 7
+     - 0..2
+     - Unused
+   * - 
+     - 3
+     - PLL2 CLK180_DOUB
+   * - 
+     - 4
+     - PLL2 CLK270_DOUB
+   * - 
+     - 5..6
+     - Unused
+   * - 
+     - 7
+     - PLL2 USR_CLK_OUT
    * - 10
-     - 
-     - PLL3 Control Register
+     - 0
+     - PLL3 PLL_RST_N
+   * - 
+     - 1
+     - PLL3 PLL_EN
+   * - 
+     - 2
+     - Unused
+   * - 
+     - 3
+     - PLL3 SET_SEL
+   * - 
+     - 4
+     - PLL3 USR_SET
+   * - 
+     - 5
+     - PLL3 USR_CLK_REF
+   * - 
+     - 6
+     - PLL3 CLK_OUT_EN
+   * - 
+     - 9
+     - PLL3 LOCK_REQ
    * - 11
-     - 
-     - PLL3 Startup Register
+     - 0..2
+     - Unused
+   * - 
+     - 3
+     - PLL3 CLK180_DOUB
+   * - 
+     - 4
+     - PLL3 CLK270_DOUB
+   * - 
+     - 5..6
+     - Unused
+   * - 
+     - 7
+     - PLL3 USR_CLK_OUT
 
 .. warning::
     This command have data after payload, and it consists of 9 bytes ``0x00 0x00 0x00 0x00 0x33 0x00 0x00 0x00 0x00`` and
@@ -357,6 +489,26 @@ CMD_SERDES
 
 CMD_JUMP
 --------
+
+Jump to address in SPI flash.
+
+.. list-table::
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Byte
+     - Description
+   * - 0
+     - addr[7:0]
+   * - 1
+     - addr[15:8]
+   * - 2
+     - addr[23:16]
+   * - 3
+     - addr[31:24]
+
+.. warning::
+    This command requires data after payload, and it consists of 2 NOP bytes ``0x00 0x00``.
 
 CMD_CFGMODE
 ------------

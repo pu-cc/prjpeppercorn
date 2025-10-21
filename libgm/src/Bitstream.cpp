@@ -30,7 +30,7 @@ namespace GateMate {
 
 static constexpr const uint8_t CMD_PLL = 0xc1;
 static constexpr const uint8_t CMD_CFGMODE = 0xc2;
-static constexpr const uint8_t CMD_CFGRST = 0xc3; //
+static constexpr const uint8_t CMD_CFGRST = 0xc3;
 static constexpr const uint8_t CMD_FLASH = 0xc5;
 static constexpr const uint8_t CMD_DLXP = 0xc6; //
 static constexpr const uint8_t CMD_DLYP = 0xc7; //
@@ -43,7 +43,7 @@ static constexpr const uint8_t CMD_FRAM = 0xd2;
 static constexpr const uint8_t CMD_SERDES = 0xd7; //
 static constexpr const uint8_t CMD_D2D = 0xd8;    //
 static constexpr const uint8_t CMD_PATH = 0xd9;
-static constexpr const uint8_t CMD_JUMP = 0xda; //
+static constexpr const uint8_t CMD_JUMP = 0xda;
 static constexpr const uint8_t CMD_CHG_STATUS = 0xdb;
 static constexpr const uint8_t CMD_WAIT_PLL = 0xdc; //
 static constexpr const uint8_t CMD_SPLL = 0xdd;
@@ -57,6 +57,22 @@ static constexpr const uint8_t CFG_CPE_CFG = 0x08;
 static constexpr const uint8_t CFG_CPE_RESET = 0x10;
 static constexpr const uint8_t CFG_FILL_RAM = 0x20;
 static constexpr const uint8_t CFG_SERDES = 0x40;
+
+// PLL register A
+static constexpr const uint8_t CFG_PLL_RST_N = 0x01;
+static constexpr const uint8_t CFG_PLL_EN = 0x02;
+static constexpr const uint8_t CFG_PLL_AUTN = 0x04; // only available for PLL0
+static constexpr const uint8_t CFG_SET_SEL = 0x08;
+static constexpr const uint8_t CFG_USR_SET = 0x10;
+static constexpr const uint8_t CFG_USR_CLK_REF = 0x20;
+static constexpr const uint8_t CFG_CLK_OUT_EN = 0x40;
+static constexpr const uint8_t CFG_LOCK_REQ = 0x80;
+
+// PLL register B
+static constexpr const uint8_t CFG_AUTN_CT_I = 0x01; // only available for PLL0
+static constexpr const uint8_t CFG_CLK180_DOUB = 0x08;
+static constexpr const uint8_t CFG_CLK270_DOUB = 0x10;
+static constexpr const uint8_t CFG_USR_CLK_OUT = 0x80;
 
 static const std::vector<std::pair<std::string, uint8_t>> crc_modes = {
         {"check", 0x00},  // Check CRC
@@ -266,6 +282,17 @@ class BitstreamReadWriter
         write_nops(4);
     }
 
+    void write_cmd_jump(uint32_t addr)
+    {
+        write_header(CMD_JUMP, 4);
+        write_byte(uint8_t(addr & 0xFF));
+        write_byte(uint8_t((addr >>  8UL) & 0xFF));
+        write_byte(uint8_t((addr >> 16UL) & 0xFF));
+        write_byte(uint8_t((addr >> 24UL) & 0xFF));
+        insert_crc16();
+        write_nops(2);
+    }
+
     void write_cmd_cfgmode(uint8_t crcmode, std::vector<uint8_t> spimode)
     {
         write_header(CMD_CFGMODE, spimode.size() > 0 ? 6 : 2);
@@ -365,11 +392,11 @@ class BitstreamReadWriter
         write_nops(4);
     }
 
-    void write_cmd_chg_status(uint8_t cfg, std::vector<uint8_t> data)
+    void write_cmd_chg_status(uint8_t cfg, uint8_t next_mode, std::vector<uint8_t> data)
     {
         write_header(CMD_CHG_STATUS, 12);
         write_byte(cfg);
-        write_byte(0x00);
+        write_byte(next_mode);
         for (int i = 2; i < 12; i++)
             write_byte(data[Die::STATUS_CFG_START + i]);
         insert_crc16();
@@ -442,6 +469,8 @@ int Bitstream::determine_size(int *max_die_x, int *max_die_y)
         case CMD_ACLCU:
         case CMD_RXRYS:
         case CMD_D2D:
+        case CMD_CFGRST:
+        case CMD_JUMP:
             // Check header CRC
             check_crc(rd);
             // Read data block
@@ -460,6 +489,8 @@ int Bitstream::determine_size(int *max_die_x, int *max_die_y)
                 rd.skip_bytes(6);
             if (cmd == CMD_CHG_STATUS)
                 rd.skip_bytes(9);
+            if (cmd == CMD_JUMP)
+                rd.skip_bytes(2);
             break;
         case CMD_PATH:
             // Check header CRC
@@ -783,6 +814,36 @@ Chip Bitstream::deserialise_chip()
             check_crc(rd);
             break;
 
+        case CMD_CFGRST:
+            BITSTREAM_DEBUG("CMD_CFGRST");
+            if (length > 1)
+                BITSTREAM_FATAL("CFGRST data longer than expected", rd.get_offset());
+            // Check header CRC
+            check_crc(rd);
+
+            // Read data block
+            rd.get_vector(block, length);
+
+            // Check data CRC
+            check_crc(rd);
+            break;
+        case CMD_JUMP:
+            BITSTREAM_DEBUG("CMD_JUMP");
+            if (length > 4)
+                BITSTREAM_FATAL("JUMP addr longer than expected", rd.get_offset());
+            // Check header CRC
+            check_crc(rd);
+
+            // Read data block
+            rd.get_vector(block, length);
+
+            // Check data CRC
+            check_crc(rd);
+
+            // Skip bytes
+            rd.skip_bytes(2);
+            break;
+
         default:
             BITSTREAM_FATAL("Unhandled command 0x" << std::hex << std::setw(2) << std::setfill('0') << int(cmd),
                             rd.get_offset());
@@ -835,6 +896,10 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             }
         }
         wr.write_cmd_path(0x10);
+
+        if (options.count("reset") && !options.count("background")) {
+            wr.write_cmd_cfgrst(0x00);
+        }
 
         bool change_crc = false;
         auto crcmode = crc_modes.begin();
@@ -936,6 +1001,7 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
 
         // Write latch configuration
+        int scrubaddr = 0;
         for (int iteration = 0; iteration < 3; iteration++) {
             for (int y = 0; y < Die::MAX_ROWS; y++) {
                 for (int x = 0; x < Die::MAX_COLS; x++) {
@@ -948,6 +1014,8 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
                     // If CPE empty skip other iterations
                     if (iteration != 0 && die.is_cpe_empty(x, y))
                         continue;
+                    if (iteration == 1 && scrubaddr == 0)
+                        scrubaddr = wr.data.size();
                     std::vector<uint8_t> data = std::vector<uint8_t>(die.get_latch_config(x, y));
                     uint8_t ff_init = data.back();
                     data.pop_back();
@@ -993,15 +1061,31 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
         }
 
         uint8_t cfg_stat = CFG_CPE_RESET;
+        uint8_t cfg_mode = 0x1F; // unused mode enforces controller to stop
         // Only for die 0
         if (d == 0) {
             //  Write change status
             if (die.is_using_cfg_gpios())
                 wr.write_cmd_chg_status(CFG_DONE);
 
-            cfg_stat |= CFG_STOP | CFG_DONE;
+            cfg_stat |= CFG_DONE;
+            if (!options.count("background")) {
+                cfg_stat |= CFG_STOP;
+            }
+            if (options.count("bootaddr")) {
+                cfg_stat |= CFG_RECONFIG;
+            }
             if (options.count("reconfig")) {
-                cfg_stat |= CFG_RECONFIG | CFG_CPE_CFG;
+                cfg_stat |= CFG_CPE_CFG;
+            }
+
+            if (options.count("bootaddr") || options.count("background")) {
+                cfg_mode = 0x10; // active spi
+                // Enable autonomous clock if PLL not enabled
+                if (die.is_pll_cfg_empty(0)) {
+                    die_config[Die::STATUS_CFG_START + 2 + 2] |= CFG_PLL_AUTN;
+                    die_config[Die::STATUS_CFG_START + 2 + 3] |= CFG_AUTN_CT_I;
+                }
             }
         }
         if (!die.is_serdes_cfg_empty()) {
@@ -1011,7 +1095,18 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
             wr.insert_crc16();
         }
 
-        wr.write_cmd_chg_status(cfg_stat, die_config);
+        wr.write_cmd_chg_status(cfg_stat, cfg_mode, die_config);
+
+        if (d == 0) {
+            if (options.count("bootaddr") && !options.count("background")) {
+                uint32_t bootaddr = std::strtoul(options.at("bootaddr").c_str(), nullptr, 0);
+                wr.write_cmd_cfgrst(0x00);
+                wr.write_cmd_jump(bootaddr);
+            }
+            if (options.count("background") && !options.count("bootaddr")) {
+                wr.write_cmd_jump(scrubaddr);
+            }
+        }
     }
     return Bitstream(wr.get());
 }
