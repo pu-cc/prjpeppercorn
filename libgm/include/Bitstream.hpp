@@ -24,7 +24,6 @@
 #include <iostream>
 #include <memory>
 
-#include <boost/optional.hpp>
 #include <map>
 #include <stdexcept>
 #include <string>

@@ -19,8 +19,6 @@
 
 #include "Bitstream.hpp"
 #include <bitset>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/optional.hpp>
 #include <cstring>
 #include <iostream>
 #include "Chip.hpp"

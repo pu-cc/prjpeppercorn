@@ -20,7 +20,8 @@
 #ifndef LIBGATEMATE_UTIL_HPP
 #define LIBGATEMATE_UTIL_HPP
 
-#include <boost/range/adaptor/reversed.hpp>
+#include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <iomanip>
 #include <sstream>
@@ -50,8 +51,8 @@ inline uint32_t parse_uint32(std::string str) { return uint32_t(strtoul(str.c_st
 inline std::string to_string(const std::vector<bool> &bv)
 {
     std::ostringstream os;
-    for (auto bit : boost::adaptors::reverse(bv))
-        os << (bit ? '1' : '0');
+    for (auto it = bv.rbegin(); it != bv.rend(); ++it)
+        os << (*it ? '1' : '0');
     return os.str();
 }
 
@@ -60,7 +61,8 @@ inline std::istream &operator>>(std::istream &in, std::vector<bool> &bv)
     bv.clear();
     std::string s;
     in >> s;
-    for (auto c : boost::adaptors::reverse(s)) {
+    for (auto it = s.rbegin(); it != s.rend(); ++it) {
+        char c = *it;
         assert((c == '0') || (c == '1'));
         bv.push_back((c == '1'));
     }

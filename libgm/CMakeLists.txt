@@ -8,7 +8,8 @@ option(STATIC_BUILD "Create static build of GateMate tools" ON)
 
 set(PROGRAM_PREFIX "" CACHE STRING "Name prefix for executables")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -bigobj -EHsc")
 else()
@@ -31,7 +32,6 @@ else()
     endif()
 endif()
 if (WASI)
-    set(USE_THREADS OFF)
     add_definitions(
         -DBOOST_EXCEPTION_DISABLE
         -DBOOST_NO_EXCEPTIONS
@@ -40,15 +40,8 @@ if (WASI)
         -DBOOST_NO_CXX11_HDR_MUTEX
         -DBOOST_NO_CXX11_HDR_ATOMIC
     )
-else()
-    set(USE_THREADS ON)
 endif()
-set(boost_libs filesystem program_options system)
-if (USE_THREADS)
-    list(APPEND boost_libs thread)
-else()
-    add_definitions(-DNO_THREADS)
-endif()
+set(boost_libs program_options)
 
 find_package(Boost REQUIRED COMPONENTS ${boost_libs})
 

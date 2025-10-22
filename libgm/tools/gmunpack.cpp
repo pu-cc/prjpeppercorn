@@ -17,9 +17,8 @@
  *
  */
 
-#include <boost/filesystem.hpp>
-#include <boost/optional.hpp>
 #include <boost/program_options.hpp>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
 
     if (vm.count("help")) {
     help:
-        boost::filesystem::path path(argv[0]);
+        std::filesystem::path path(argv[0]);
         std::cerr << "Open Source Tools for GateMate FPGAs Version " << git_describe_str << std::endl;
         std::cerr << "Copyright (C) 2024 The Project Peppercorn Authors" << std::endl;
         std::cerr << std::endl;
