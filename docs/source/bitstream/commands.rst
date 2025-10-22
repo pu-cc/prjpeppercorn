@@ -204,6 +204,9 @@ CMD_SPLL
 
 There are two configuration sets, that could be set for each PLL.
 
+.. warning::
+    Value 0x00 is special case and it is used for writing to all 4 PLLs, same as 0x0F
+
 CMD_WAIT_PLL
 -------------
 

@@ -286,7 +286,7 @@ class BitstreamReadWriter
     {
         write_header(CMD_JUMP, 4);
         write_byte(uint8_t(addr & 0xFF));
-        write_byte(uint8_t((addr >>  8UL) & 0xFF));
+        write_byte(uint8_t((addr >> 8UL) & 0xFF));
         write_byte(uint8_t((addr >> 16UL) & 0xFF));
         write_byte(uint8_t((addr >> 24UL) & 0xFF));
         insert_crc16();
@@ -961,6 +961,10 @@ Bitstream Bitstream::serialise_chip(const Chip &chip, const std::map<std::string
                 size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE;
             if (!die.is_glbout_cfg_empty())
                 size = Die::PLL_CFG_SIZE + Die::CLKIN_CFG_SIZE + Die::GLBOUT_CFG_SIZE;
+            // Since it is not possible to skip writing to PLL configuration
+            // we overwrite B configuration of last PLL with all zeros in this case.
+            // This is needed for reconfigurable bitstreams not to affect PLL of bootloader.
+            wr.write_cmd_spll(0x80);
             wr.write_cmd_pll(0, die_config, size);
         }
 
