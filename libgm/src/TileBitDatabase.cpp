@@ -464,8 +464,8 @@ SerdesBitDatabase::SerdesBitDatabase() : BaseBitDatabase(Die::SERDES_CFG_SIZE * 
     add_word_settings("RX_AFE_VCMSEL", (0x09 << 4) + 9, 3);
     add_word_settings("RX_CDR_CKP", (0x0a << 4) + 0, 8);
     add_word_settings("RX_CDR_CKI", (0x0a << 4) + 8, 8);
-    add_word_settings("RX_CDR_TRANS_TH", (0x0b << 4) + 0, 9);
-    add_word_settings("RX_CDR_LOCK_CFG", (0x0b << 4) + 9, 6);
+    add_word_settings("RX_CDR_LOCK_CFG", (0x0b << 4) + 0, 8);
+    add_word_settings("RX_CDR_TRANS_TH", (0x0b << 4) + 8, 7);
     add_word_settings("RX_CDR_LOCKED", (0x0b << 4) + 15, 1);
     add_word_settings("RX_CDR_FREQ_ACC_VAL", (0x0c << 4) + 0, 15);
     add_word_settings("RX_CDR_PHASE_ACC_VAL", (0x0d << 4) + 0, 16);
