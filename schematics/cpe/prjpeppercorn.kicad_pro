@@ -614,6 +614,10 @@
       "Root"
     ],
     [
+      "cb769740-e0a9-4f3d-b622-ba158089ec4b",
+      "CPE11"
+    ],
+    [
       "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
       "C_FUNCTION=0 or 6"
     ],
@@ -634,8 +638,492 @@
       "C_FUNCTION=5"
     ],
     [
-      "cb769740-e0a9-4f3d-b622-ba158089ec4b",
-      "Cologne Processing Element"
+      "d5387cfb-1ad4-4281-88c6-9c10bdd7e84d",
+      "Big Switch Box"
+    ],
+    [
+      "b55ea9b6-2977-4388-9bbd-cad75504aba9",
+      "Small Switch Box"
+    ],
+    [
+      "15237a69-f566-4902-aed7-ec94257dac5f",
+      "Input Multiplexer"
+    ],
+    [
+      "beb8f9ac-f817-4571-9190-d477fd827e5c",
+      "Output Multiplexer (1,1)"
+    ],
+    [
+      "4ee8840f-c034-4c64-a613-6418dbdce00d",
+      "Output Multiplexer (2,2)"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "5874b725-80d2-456e-aad7-0e7be771e786",
+      "Input Multiplexer1"
+    ],
+    [
+      "3708e668-06fd-4bde-a510-be9c4c483743",
+      "Cologne Processing Element4"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "cbe1029e-5a96-486f-be41-aa502d2843a4",
+      "CPE12"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "a9d9c733-a319-47fe-9511-ffa679100753",
+      "Input Multiplexer2"
+    ],
+    [
+      "ba0b6e53-6d28-4a63-b105-1bae4b7952cf",
+      "Input Multiplexer3"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "8aa34640-bb40-4fe2-bc97-bb16bcd53a98",
+      "Cologne Processing Element5"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "213bc7b9-e128-4444-87f8-9514f96db5d7",
+      "Cologne Processing Element6"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "ba5b86d8-c058-4b4e-97ab-c38cca17e5b2",
+      "Cologne Processing Element7"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "b0039cf5-a560-4402-8cb2-900045e79843",
+      "Input Multiplexer4"
+    ],
+    [
+      "5f80c25b-15f6-43c9-b1ce-146688513aa6",
+      "Input Multiplexer5"
+    ],
+    [
+      "4b653757-b4f2-49b6-8afc-3b9eb400680f",
+      "Input Multiplexer6"
+    ],
+    [
+      "c848837c-3f9c-4cce-a4c7-393e1a0c4966",
+      "Input Multiplexer7"
+    ],
+    [
+      "e18b86f9-3d4f-4546-a878-7b6180effd95",
+      "Small Switch Box1"
+    ],
+    [
+      "7b7168c3-2193-4365-9bd0-9929e7b794de",
+      "Big Switch Box2"
+    ],
+    [
+      "478a0a11-ef47-469e-9c41-0b6d93b14e55",
+      "Big Switch Box3"
+    ],
+    [
+      "9b1ab731-94a3-4118-a2ae-9618fbf2d52b",
+      "Cologne Processing Element8"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "d3f726a8-b35c-41f9-8b51-40750bd789d0",
+      "Cologne Processing Element9"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "10267851-36ea-4cef-a7d1-733014bf44ba",
+      "Cologne Processing Element10"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "3f316f32-190e-4f32-9c15-1cd4f82ec60d",
+      "Cologne Processing Element11"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "eacde244-d6aa-4a0d-9322-f308275f8164",
+      "Cologne Processing Element12"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "e31b35bd-ad23-4fe2-862f-f5d03a701296",
+      "Cologne Processing Element13"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "5bad9d32-c3e8-4160-adf1-aa4f27acbfec",
+      "Cologne Processing Element14"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "303dbe62-25dc-49e5-9ee2-37afeb4d19e7",
+      "Cologne Processing Element15"
+    ],
+    [
+      "2cdae2f1-b557-4e09-a2ce-72fe69c1cde7",
+      "C_FUNCTION=4"
+    ],
+    [
+      "2f1e56f5-88a6-4944-a409-72559104271f",
+      "C_FUNCTION=5"
+    ],
+    [
+      "72ce5b8e-65cd-4ef4-93c6-ada8bc7993bf",
+      "C_FUNCTION=0 or 6"
+    ],
+    [
+      "7c694198-71e0-4b5f-9d71-f88a52a590d9",
+      "C_FUNCTION=2 or 3"
+    ],
+    [
+      "c7e1e454-4a3a-497b-82a6-da398b72cabb",
+      "C_FUNCTION=1 or 7"
+    ],
+    [
+      "26834ae4-da98-4578-9c2e-cd695e873ce7",
+      "Input Multiplexer8"
+    ],
+    [
+      "b57a8071-6a29-42f3-b1fa-46043cf15890",
+      "Input Multiplexer9"
+    ],
+    [
+      "e8161494-e08f-43fe-b092-16e4392b32ce",
+      "Input Multiplexer10"
+    ],
+    [
+      "3c4d503e-07c9-4206-aaeb-e7fbe5d6150b",
+      "Input Multiplexer11"
+    ],
+    [
+      "6da24921-0cf0-4d6d-bab2-aec1250ea677",
+      "Input Multiplexer12"
+    ],
+    [
+      "4a71ba92-793e-49ad-9861-7c41ba263f46",
+      "Input Multiplexer13"
+    ],
+    [
+      "53057a60-0610-4a8e-b816-7199fa30cd79",
+      "Input Multiplexer14"
+    ],
+    [
+      "15666f69-b7ed-4f99-992f-5817e69dcac9",
+      "Input Multiplexer15"
+    ],
+    [
+      "c1eda374-df36-47de-8afc-84fb9a60c6df",
+      "Small Switch Box2"
+    ],
+    [
+      "ee797845-f493-4c07-9e40-1625ab69ba35",
+      "Big Switch Box1"
+    ],
+    [
+      "4c7c13ea-4fd7-43ce-a779-ee5d2f712e47",
+      "Small Switch Box3"
+    ],
+    [
+      "2230e204-608d-4529-b33f-27f2903e32dc",
+      "CPE21"
+    ],
+    [
+      "10712960-9d68-44ab-9263-4d6a1023dbc4",
+      "CPE22"
+    ],
+    [
+      "34831ec2-2eb1-4676-b8e6-3ac5bc5ad32e",
+      "Output Multiplexer (1,1)1"
+    ],
+    [
+      "4dd9b8e4-b3dc-4653-8e4c-10fb774b1e10",
+      "Output Multiplexer (2,2)1"
+    ],
+    [
+      "7f0a652f-db38-48df-b50d-37a3c6c9c68e",
+      "Output Multiplexer (1,1)2"
+    ],
+    [
+      "34307b1c-bb59-4948-a0b5-690c6f35f493",
+      "Output Multiplexer (2,2)2"
+    ],
+    [
+      "a1bd1bf1-363d-423a-8846-17236a10f502",
+      "Output Multiplexer (1,1)3"
+    ],
+    [
+      "3fc18cdd-76bf-4b52-9ef6-a64543f67288",
+      "Output Multiplexer (2,2)3"
     ]
   ],
   "text_variables": {}
