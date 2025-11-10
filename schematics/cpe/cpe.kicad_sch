@@ -18367,7 +18367,7 @@
 		)
 		(uuid "0f722df5-b61c-4d3b-90bf-debc26f0eaec")
 	)
-	(hierarchical_label "PINY1"
+	(hierarchical_label "PINY2"
 		(shape input)
 		(at 165.1 85.09 180)
 		(effects
@@ -19126,7 +19126,7 @@
 		)
 		(uuid "f3996e36-4db0-4a9c-89a5-dd2b42b8289d")
 	)
-	(hierarchical_label "CINY1"
+	(hierarchical_label "CINY2"
 		(shape input)
 		(at 165.1 74.93 180)
 		(effects
