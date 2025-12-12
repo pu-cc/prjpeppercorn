@@ -3604,22 +3604,6 @@ def get_mux_connections_for_type(type):
             create_mux(f"TES.SIG_SEL{sel}_int", f"TES.MDIE2.P{p}", 1, 1, False, f"TES.SEL_MDIE{p}", delay="del_dummy")
 
     if "PLL" in type:
-        create_direct("PLL1.CLK0",   "GLBOUT.CLK0_1", delay="del_dummy")
-        create_direct("PLL2.CLK0",   "GLBOUT.CLK0_2", delay="del_dummy")
-        create_direct("PLL3.CLK0",   "GLBOUT.CLK0_3", delay="del_dummy")
-
-        create_direct("PLL0.CLK90",  "GLBOUT.CLK90_0", delay="del_dummy")
-        create_direct("PLL2.CLK90",  "GLBOUT.CLK90_2", delay="del_dummy")
-        create_direct("PLL3.CLK90",  "GLBOUT.CLK90_3", delay="del_dummy")
-
-        create_direct("PLL0.CLK180", "GLBOUT.CLK180_0", delay="del_dummy")
-        create_direct("PLL1.CLK180", "GLBOUT.CLK180_1", delay="del_dummy")
-        create_direct("PLL3.CLK180", "GLBOUT.CLK180_3", delay="del_dummy")
-
-        create_direct("PLL0.CLK270", "GLBOUT.CLK270_0", delay="del_dummy")
-        create_direct("PLL1.CLK270", "GLBOUT.CLK270_1", delay="del_dummy")
-        create_direct("PLL2.CLK270", "GLBOUT.CLK270_2", delay="del_dummy")
-
         for i in range(0,4):
             create_direct(f"CLKIN.CLK_REF{i}",   f"PLL{i}.CLK_REF",        delay="del_dummy")
             
