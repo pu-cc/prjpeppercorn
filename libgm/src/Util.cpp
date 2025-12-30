@@ -18,6 +18,7 @@
  */
 
 #include "Util.hpp"
+#include <cstring>
 #include <stdarg.h>
 
 namespace GateMate {
@@ -46,7 +47,7 @@ std::string vstringf(const char *fmt, va_list ap)
         va_list apc;
         va_copy(apc, ap);
         str = (char *)realloc(str, sz);
-        rc = vsnprintf(str, sz, fmt, apc);
+        int rc = vsnprintf(str, sz, fmt, apc);
         va_end(apc);
         if (rc >= 0 && rc < sz)
             break;
