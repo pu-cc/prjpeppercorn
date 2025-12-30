@@ -42,7 +42,7 @@ std::string vstringf(const char *fmt, va_list ap)
     char *str = NULL;
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-    int sz = 64 + strlen(fmt), rc;
+    int sz = 64 + strlen(fmt);
     while (1) {
         va_list apc;
         va_copy(apc, ap);
