@@ -5,7 +5,7 @@
 	(uuid "5a7723f7-3f6f-437e-b958-e402b06d3f54")
 	(paper "A1")
 	(title_block
-		(rev "4")
+		(rev "5")
 		(company "YosysHQ")
 	)
 	(lib_symbols)
